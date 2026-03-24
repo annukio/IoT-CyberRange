@@ -1,0 +1,46 @@
+services:
+  # The compromised IT machine
+  corporate_ws:
+    build: ./corporate_ws
+    container_name: corporate_ws
+    networks:
+      - factory_net
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  # The vulnerable OT machine
+  legacy_os:
+    build: ./legacy_os
+    container_name: legacy_os
+    networks:
+      - factory_net
+    cap_add:
+      - NET_ADMIN
+
+  # The unsecured IoT Backend
+  iot_api:
+    build: ./iot_api
+    container_name: iot_api
+    networks:
+      - factory_net
+
+  # The IoT Sensor sending telemetry
+  iot_sensor:
+    build: ./iot_sensor
+    container_name: iot_sensor
+    depends_on:
+      - iot_api
+    networks:
+      - factory_net
+
+  # The exposed Industrial Controller
+  plc:
+    build: ./plc
+    container_name: plc
+    networks:
+      - factory_net
+
+networks:
+  factory_net:
+    driver: bridge
