@@ -1,4 +1,4 @@
 FROM python:3.9-slim
+# Install networking tools for routing, and procps so the student can use 'pkill'
+RUN apt-get update && apt-get install -y iproute2 procps
 WORKDIR /app
-# Start a basic HTTP server on port 80 to act as the unsecured API
-CMD ["python", "-m", "http.server", "80"]

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+    <style>
+        body { display: flex; height: 100vh; margin: 0; font-family: sans-serif; }
+        #sidebar { width: 30%; padding: 20px; background: #f4f4f4; border-right: 1px solid #ccc; }
+        #terminal-container { width: 70%; background: #000; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Challenge 1: Segmentation</h2>
+        <label for="container-select">Active Terminal:</label>
+        <select id="container-select" onchange="switchContainer()">
+            <option value="corporate_ws">Corporate Workstation</option>
+            <option value="firewall">Network Firewall</option>
+        </select>
+        <hr>
+        <p><strong>Goal:</strong> Block Corporate WS access to OT.</p>
+    </div>
+    <div id="terminal-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        let socket; 
+    const term = new Terminal({
+        cursorBlink: true,
+        theme: { background: '#1a1a1a' }
+    });
+    term.open(document.getElementById('terminal-container'));
+
+    term.onData(data => {
+        if (socket && socket.connected) {
+            socket.emit('input', data);
+        }
+    });
+
+    // --- NEW: This is the function your HTML dropdown is looking for ---
+    function switchContainer() {
+        const select = document.getElementById('container-select');
+        const selectedContainer = select.value;
+        console.log("Switching to:", selectedContainer);
+        changeContainer(selectedContainer);
+    }
+
+    function changeContainer(name) {
+        if (socket) {
+            socket.disconnect();
+        }
+
+        term.clear();
+        term.write(`\r\n*** Connecting to ${name}... ***\r\n`);
+        
+        socket = io({ query: { container: name } });
+
+        socket.on('output', data => {
+            term.write(data);
+        });
+
+        socket.on('connect', () => {
+            term.write(`*** Connected to ${name} ***\r\n\r\n`);
+        });
+    }
+
+    // Start with the Workstation
+    changeContainer('corporate_ws');
+    </script>
+</body>
+</html>

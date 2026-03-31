@@ -8,7 +8,10 @@ RUN apt-get update && apt-get install -y \
     iproute2 \
     netcat-traditional \
     nano \
-    curl
+    curl \
+    iptables \
+    kmod && \
+    rm -rf /var/lib/apt/lists/*
 
 # Keep the container running in the background so the student can access it
 CMD ["sleep", "infinity"]

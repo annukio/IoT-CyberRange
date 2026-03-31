@@ -1,5 +1,4 @@
-FROM alpine:latest
-# Install netcat to simulate an open Modbus port
-RUN apk add --no-cache netcat-openbsd
-# Keep port 502 open and listen indefinitely
-CMD ["nc", "-l", "-k", "-p", "502"]
+FROM python:3.9-slim
+# Install the networking tool needed to route traffic to the firewall
+RUN apt-get update && apt-get install -y iproute2
+WORKDIR /app
