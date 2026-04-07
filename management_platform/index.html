@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
   <style>
-    /* ── DESIGN SYSTEM ─────────────────────────────────────── */
+    /* -- DESIGN SYSTEM --------------------------------------- */
     :root {
       --bg:         #0d0f12;
       --surface:    #13161b;
@@ -38,7 +38,7 @@
       overflow: hidden;
     }
 
-    /* ── TOP BAR ────────────────────────────────────────────── */
+    /* -- TOP BAR ---------------------------------------------- */
     .topbar {
       display: flex;
       align-items: center;
@@ -49,45 +49,19 @@
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .topbar-logo {
-      font-family: var(--mono);
-      color: var(--accent);
-      font-size: 13px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
+    .topbar-logo { font-family: var(--mono); color: var(--accent); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
     .topbar-divider { width: 1px; height: 24px; background: var(--border2); }
-    .topbar-scenario {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .topbar-scenario span {
-      color: var(--warn);
-      margin-left: 6px;
-    }
+    .topbar-scenario { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .topbar-scenario span { color: var(--warn); margin-left: 6px; }
     .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-    .status-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 6px var(--accent);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
 
-    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
-    .main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    /* -- MAIN LAYOUT ------------------------------------------- */
+    .main { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── LEFT PANEL: WORKFLOW ────────────────────────────────── */
+    /* -- LEFT PANEL -------------------------------------------- */
     .panel-left {
       width: 300px;
       flex-shrink: 0;
@@ -97,7 +71,6 @@
       border-right: 1px solid var(--border);
       overflow: hidden;
     }
-
     .panel-section-header {
       padding: 12px 16px 10px;
       border-bottom: 1px solid var(--border);
@@ -107,443 +80,126 @@
       text-transform: uppercase;
       color: var(--text-dim);
     }
-
-    /* Network Map */
-    .network-map {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .net-map-svg { width: 100%; }
-
-    /* Workflow Steps */
-    .workflow-steps {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 0;
-    }
+    .workflow-steps { flex: 1; overflow-y: auto; padding: 8px 0; }
     .workflow-steps::-webkit-scrollbar { width: 4px; }
     .workflow-steps::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-left: 2px solid transparent;
-    }
+    .step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; border-left: 2px solid transparent; }
     .step:hover { background: var(--surface2); }
-    .step.active {
-      background: var(--surface2);
-      border-left-color: var(--accent);
-    }
-    .step.done .step-num { background: var(--accent); color: var(--bg); }
+    .step.active { background: var(--surface2); border-left-color: var(--accent); }
+    .step.done .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
     .step.done .step-title { color: var(--text-dim); text-decoration: line-through; }
     .step.locked { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-
-    .step-num {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      border: 1px solid var(--border2);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .step.active .step-num {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 1px; }
+    .step.active .step-num { border-color: var(--accent); color: var(--accent); }
     .step-info { flex: 1; }
-    .step-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-    }
-    .step-sub {
-      font-size: 11px;
-      color: var(--text-dim);
-      margin-top: 2px;
-    }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
-    /* ── CENTER PANEL: CONTENT ───────────────────────────────── */
-    .panel-center {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* -- CENTER PANEL ------------------------------------------ */
+    .panel-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Tab bar */
-    .tab-bar {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      padding: 0 16px;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .tab {
-      padding: 10px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      color: var(--text-dim);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: color 0.15s, border-color 0.15s;
-      text-transform: uppercase;
-    }
+    .tab-bar { display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; gap: 4px; flex-shrink: 0; }
+    .tab { padding: 10px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; text-transform: uppercase; }
     .tab:hover { color: var(--text); }
     .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* Content pane */
-    .content-pane {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      display: none;
-    }
+    .content-pane { flex: 1; overflow-y: auto; padding: 24px; display: none; }
     .content-pane.active { display: block; }
     .content-pane::-webkit-scrollbar { width: 4px; }
     .content-pane::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-    /* Terminal pane */
-    .terminal-pane {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    .terminal-pane { flex: 1; display: none; flex-direction: column; overflow: hidden; }
     .terminal-pane.active { display: flex; }
-
-    .terminal-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 16px;
-      background: var(--surface2);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .terminal-toolbar label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .terminal-toolbar select {
-      background: var(--bg);
-      color: var(--accent);
-      border: 1px solid var(--border2);
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      outline: none;
-      cursor: pointer;
-    }
+    .terminal-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .terminal-toolbar label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .terminal-toolbar select { background: var(--bg); color: var(--accent); border: 1px solid var(--border2); font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
     #terminal-wrap { flex: 1; background: #0d0f12; padding: 8px; overflow: hidden; }
 
-    /* ── THEORY / CONTENT COMPONENTS ────────────────────────── */
-    .task-card {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-left: 3px solid var(--warn);
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-    }
-    .task-card-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--warn);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
+    /* -- CONTENT COMPONENTS ------------------------------------ */
+    .task-card { background: var(--surface2); border: 1px solid var(--border2); border-left: 3px solid var(--warn); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+    .task-card-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--warn); text-transform: uppercase; margin-bottom: 8px; }
     .task-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
     .task-card p { color: var(--text-dim); line-height: 1.6; font-size: 13px; }
 
-    .theory-block {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-    }
-    .theory-block-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
+    .theory-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+    .theory-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
     .theory-block h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
     .theory-block p { color: var(--text-dim); font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
     .theory-block ul { color: var(--text-dim); font-size: 13px; line-height: 1.7; padding-left: 18px; }
     .theory-block li { margin-bottom: 4px; }
 
-    .cmd-block {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      margin: 10px 0;
-      position: relative;
-    }
-    .cmd-block::before {
-      content: '$';
-      color: var(--text-faint);
-      margin-right: 8px;
-    }
+    .cmd-block { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--accent); margin: 10px 0; }
+    .cmd-block::before { content: '$'; color: var(--text-faint); margin-right: 8px; }
 
-    .section-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    /* Form components */
     .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-    .form-input, .form-textarea, .form-select {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 13px;
-      padding: 8px 12px;
-      border-radius: 4px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
-      border-color: var(--accent);
-    }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .form-input, .form-textarea, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: var(--sans); font-size: 13px; padding: 8px 12px; border-radius: 4px; outline: none; transition: border-color 0.15s; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
     .form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
-    .risk-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .risk-cell {
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      padding: 10px 12px;
-    }
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .risk-cell { background: var(--bg); border: 1px solid var(--border2); border-radius: 4px; padding: 10px 12px; }
     .risk-cell-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .risk-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-    }
+    .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: var(--mono); font-size: 11px; font-weight: 700; }
     .risk-high { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-    .risk-med  { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
-    .risk-low  { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .risk-med  { background: rgba(245,158,11,0.15); color: var(--warn);   border: 1px solid rgba(245,158,11,0.3); }
+    .risk-low  { background: rgba(0,229,160,0.1);   color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
 
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      cursor: pointer;
-      border: none;
-      transition: all 0.15s;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg);
-    }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
     .btn-primary:hover { background: #00ffb3; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border2);
-      color: var(--text-dim);
-    }
+    .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); }
     .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* Validation result */
-    .validation-result {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px;
-      font-family: var(--mono);
-      font-size: 12px;
-      margin-top: 16px;
-      display: none;
-    }
+    .validation-result { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; font-family: var(--mono); font-size: 12px; margin-top: 16px; display: none; }
     .validation-result.visible { display: block; }
     .validation-pass { color: var(--accent); }
     .validation-fail { color: var(--danger); }
 
-    /* Progress bar */
     .progress-bar-wrap { background: var(--border); border-radius: 2px; height: 4px; margin-bottom: 20px; }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 0.5s ease;
-    }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
 
     .highlight { color: var(--accent); font-weight: 700; }
-    .warn-text { color: var(--warn); }
-    .danger-text { color: var(--danger); }
-
-    /* Checklist */
     .checklist { list-style: none; padding: 0; }
-    .checklist li {
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-    }
-    .checklist li::before {
-      content: '○';
-      font-family: var(--mono);
-      color: var(--text-faint);
-      flex-shrink: 0;
-    }
+    .checklist li { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .checklist li::before { content: '○'; font-family: var(--mono); color: var(--text-faint); flex-shrink: 0; }
     .checklist li.done::before { content: '✓'; color: var(--accent); }
+
+    /* -- NETWORK MAP TAB -------------------------------------- */
+    @keyframes dk { to { stroke-dashoffset: -48; } }
+    .fo { stroke-dasharray: 10 6; stroke-width: 2; fill: none; stroke: #00e5a0; animation: dk 1.4s linear infinite; }
+    .fb { stroke-dasharray: 5 4;  stroke-width: 2; fill: none; stroke: #ef4444; }
+
+    .scen-tab { padding: 5px 14px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--text-dim); cursor: pointer; border: 1px solid var(--border2); border-radius: 3px; background: transparent; text-transform: uppercase; transition: all 0.15s; }
+    .scen-tab:hover { color: var(--text); border-color: var(--accent-dim); }
+    .scen-tab.act { color: var(--accent); border-color: var(--accent); background: rgba(0,229,160,0.06); }
+
+    .scen-desc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); padding: 8px 12px; background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 3px; margin: 10px 0 16px; line-height: 1.5; transition: border-color 0.3s; }
   </style>
 </head>
 <body>
 
-<!-- ── TOP BAR ───────────────────────────────────────────────────── -->
+<!-- -- TOP BAR ----------------------------------------------------- -->
 <div class="topbar">
   <div class="topbar-logo">ICS Cyber Range</div>
   <div class="topbar-divider"></div>
-  <div class="topbar-scenario">
-    Scenario<span id="scenario-label">S0 — Baseline</span>
-  </div>
+  <div class="topbar-scenario">Scenario<span id="scenario-label">S0 - Baseline</span></div>
   <div class="topbar-right">
     <div class="status-dot"></div>
     <div class="topbar-status" id="topbar-status">Lab environment active</div>
   </div>
 </div>
 
-<!-- ── MAIN LAYOUT ───────────────────────────────────────────────── -->
 <div class="main">
 
-  <!-- LEFT: WORKFLOW SIDEBAR -->
+  <!-- -- LEFT: WORKFLOW SIDEBAR -------------------------------- -->
   <div class="panel-left">
-    <div class="panel-section-header">Network Map</div>
-    <div class="network-map">
-      <svg class="net-map-svg" viewBox="0 0 268 200" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#2f3540"/>
-          </marker>
-          <marker id="arr-danger" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/>
-          </marker>
-          <marker id="arr-blocked" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#00e5a0"/>
-          </marker>
-        </defs>
+    <div class="panel-section-header">Challenge 1 - Network Segmentation</div>
 
-        <!-- Corporate Zone -->
-        <rect x="4" y="4" width="80" height="78" rx="4" fill="#13161b" stroke="#252932" stroke-width="1"/>
-        <text x="44" y="16" text-anchor="middle" font-size="7" fill="#6b7585" font-family="Share Tech Mono">CORPORATE</text>
-        <rect x="10" y="22" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="44" y="34" text-anchor="middle" font-size="8" fill="#d4dae8" font-family="Share Tech Mono">WS .10</text>
-        <rect x="10" y="46" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="44" y="58" text-anchor="middle" font-size="8" fill="#00e5a0" font-family="Share Tech Mono">MGMT .50</text>
-        <rect x="10" y="68" width="68" height="10" rx="2" fill="rgba(0,229,160,0.06)" stroke="rgba(0,229,160,0.15)" stroke-width="1"/>
-        <text x="44" y="76" text-anchor="middle" font-size="6.5" fill="#00a872" font-family="Share Tech Mono">172.20.0.0/24</text>
-
-        <!-- Firewall (center) -->
-        <rect x="100" y="72" width="68" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
-        <text x="134" y="84" text-anchor="middle" font-size="7" fill="#6b7585" font-family="Share Tech Mono">FIREWALL</text>
-        <rect x="108" y="90" width="52" height="16" rx="2" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="134" y="101" text-anchor="middle" font-size="7.5" fill="#d4dae8" font-family="Share Tech Mono">fw .254</text>
-        <rect x="108" y="112" width="52" height="16" rx="2" id="fw-status-box" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
-        <text x="134" y="123" text-anchor="middle" font-size="7" id="fw-status-text" fill="#ef4444" font-family="Share Tech Mono">OPEN</text>
-
-        <!-- IoT Zone -->
-        <rect x="184" y="4" width="80" height="68" rx="4" fill="#13161b" stroke="#252932" stroke-width="1"/>
-        <text x="224" y="16" text-anchor="middle" font-size="7" fill="#6b7585" font-family="Share Tech Mono">IOT ZONE</text>
-        <rect x="190" y="22" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="224" y="34" text-anchor="middle" font-size="8" fill="#d4dae8" font-family="Share Tech Mono">API .10</text>
-        <rect x="190" y="44" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="224" y="56" text-anchor="middle" font-size="8" fill="#d4dae8" font-family="Share Tech Mono">SENSOR .11</text>
-        <rect x="190" y="62" width="68" height="8" rx="2" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
-        <text x="224" y="68" text-anchor="middle" font-size="6.5" fill="#d97706" font-family="Share Tech Mono">172.21.0.0/24</text>
-
-        <!-- OT Zone -->
-        <rect x="184" y="120" width="80" height="76" rx="4" fill="#13161b" stroke="#252932" stroke-width="1"/>
-        <text x="224" y="132" text-anchor="middle" font-size="7" fill="#6b7585" font-family="Share Tech Mono">OT ZONE</text>
-        <rect x="190" y="138" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="224" y="150" text-anchor="middle" font-size="8" fill="#d4dae8" font-family="Share Tech Mono">LEGACY .10</text>
-        <rect x="190" y="160" width="68" height="18" rx="3" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <text x="224" y="172" text-anchor="middle" font-size="8" fill="#d4dae8" font-family="Share Tech Mono">PLC .11</text>
-        <rect x="190" y="180" width="68" height="14" rx="2" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.15)" stroke-width="1"/>
-        <text x="224" y="190" text-anchor="middle" font-size="6.5" fill="#dc2626" font-family="Share Tech Mono">172.22.0.0/24</text>
-
-        <!-- Connections: Corporate → Firewall -->
-        <line id="link-corp-fw" x1="84" y1="95" x2="100" y2="102" stroke="#2f3540" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- Connections: Firewall → IoT -->
-        <line id="link-fw-iot" x1="168" y1="90" x2="184" y2="45" stroke="#2f3540" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- Connections: Firewall → OT -->
-        <line id="link-fw-ot" x1="168" y1="115" x2="184" y2="158" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arr-danger)" id="link-fw-ot"/>
-
-        <!-- X mark on OT link (shown when blocked) -->
-        <text x="175" y="140" font-size="10" fill="#ef4444" id="link-ot-warn" font-family="Share Tech Mono">⚠</text>
-      </svg>
-    </div>
-
-    <div class="panel-section-header">Challenge 1 — Network Segmentation</div>
-
-    <!-- Progress -->
     <div style="padding: 10px 16px 0;">
       <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;" id="progress-label">Progress: 0 / 7</div>
       <div class="progress-bar-wrap">
@@ -551,27 +207,24 @@
       </div>
     </div>
 
-    <div class="workflow-steps" id="workflow-steps">
-      <!-- Steps rendered by JS -->
-    </div>
+    <div class="workflow-steps" id="workflow-steps"></div>
   </div>
 
-  <!-- CENTER: CONTENT + TERMINAL -->
+  <!-- -- CENTER: TABS + CONTENT -------------------------------- -->
   <div class="panel-center">
     <div class="tab-bar">
-      <div class="tab active" onclick="switchTab('guide')">Guide</div>
-      <div class="tab" onclick="switchTab('terminal')">Terminal</div>
-      <div class="tab" onclick="switchTab('theory')">Theory</div>
+      <div class="tab active"  onclick="switchTab('guide')">Guide</div>
+      <div class="tab"         onclick="switchTab('terminal')">Terminal</div>
+      <div class="tab"         onclick="switchTab('theory')">Theory</div>
+      <div class="tab"         onclick="switchTab('network')">Network Map</div>
     </div>
 
-    <!-- GUIDE PANE -->
+    <!-- GUIDE -->
     <div class="content-pane active" id="pane-guide">
-      <div id="step-content">
-        <!-- Rendered by JS -->
-      </div>
+      <div id="step-content"></div>
     </div>
 
-    <!-- TERMINAL PANE -->
+    <!-- TERMINAL -->
     <div class="terminal-pane" id="pane-terminal">
       <div class="terminal-toolbar">
         <label>Active Shell:</label>
@@ -583,24 +236,24 @@
       <div id="terminal-wrap"></div>
     </div>
 
-    <!-- THEORY PANE -->
+    <!-- THEORY -->
     <div class="content-pane" id="pane-theory">
       <div class="section-label">Background Reading</div>
 
       <div class="theory-block">
         <div class="theory-block-label">IT/OT Convergence</div>
         <h4>Why Industrial Networks Are Different</h4>
-        <p>Operational Technology (OT) networks control physical processes — conveyor belts, pressure valves, PLCs. Unlike IT systems, a failure here can cause physical damage or safety incidents. Historically, OT networks were <strong>air-gapped</strong> — completely isolated from corporate IT.</p>
+        <p>Operational Technology (OT) networks control physical processes: conveyor belts, pressure valves, PLCs. Unlike IT systems, a failure here can cause physical damage or safety incidents. Historically, OT networks were <strong>completely isolated from corporate IT</strong> (also called air-gapped).</p>
         <p>As factories modernized (Industry 4.0), IT and OT became interconnected for efficiency. This eliminated the air gap and introduced new attack surfaces without updating security practices.</p>
       </div>
 
       <div class="theory-block">
-        <div class="theory-block-label">NIST SP 800-82 — ICS Security Guide</div>
+        <div class="theory-block-label">NIST SP 800-82 - ICS Security Guide</div>
         <h4>Network Segmentation Recommendations</h4>
         <p>NIST recommends a <span class="highlight">Defense-in-Depth</span> model with clearly defined zones:</p>
         <ul>
           <li>Enterprise Zone (Corporate IT)</li>
-          <li>DMZ — controlled buffer between IT and OT</li>
+          <li>DMZ (Demilitarized Zone) - controlled buffer between IT and OT</li>
           <li>Manufacturing Zone (OT/ICS)</li>
           <li>Field Devices (PLCs, sensors)</li>
         </ul>
@@ -608,33 +261,158 @@
       </div>
 
       <div class="theory-block">
-        <div class="theory-block-label">MITRE ATT&CK for ICS — T0822</div>
+        <div class="theory-block-label">MITRE ATT&amp;CK for ICS - T0822</div>
         <h4>Lateral Movement via Network Pivoting</h4>
-        <p>In a flat network, an attacker who compromises the Corporate WS can pivot directly to OT assets. MITRE documents this under <span class="highlight">T0822 – Exploitation of Remote Services</span> in the ICS matrix.</p>
-        <p>A properly segmented network forces an attacker to cross a controlled boundary — creating detection opportunities and limiting blast radius.</p>
+        <p>In a flat network, an attacker who compromises the Corporate WS can pivot directly to OT assets. MITRE documents this under <span class="highlight">T0822 - Exploitation of Remote Services</span> in the ICS matrix.</p>
+        <p>A properly segmented network forces an attacker to cross a controlled boundary - creating detection opportunities and limiting attack surface.</p>
       </div>
 
       <div class="theory-block">
-        <div class="theory-block-label">iptables Fundamentals</div>
+        <div class="theory-block-label">COMMAND: iptables Fundamentals</div>
         <h4>How Linux Packet Filtering Works</h4>
-        <p>iptables controls packets at the kernel level using chains of rules. For routing between networks, the <span class="highlight">FORWARD</span> chain applies — it processes packets that pass <em>through</em> the host (rather than to/from it).</p>
-        <p>A safe default policy is <code>DROP</code> — block everything, then explicitly allow what is needed:</p>
+        <p>iptables controls packets at the kernel level using chains of rules. For routing between networks, the <span class="highlight">FORWARD</span> chain applies - it processes packets that pass <em>through</em> the host.</p>
+        <p>A safe default policy is <code>DROP</code> - block everything, then explicitly allow what is needed:</p>
         <div class="cmd-block">iptables -P FORWARD DROP</div>
         <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
         <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
-        <p>The <code>ESTABLISHED,RELATED</code> rule allows return traffic for connections that were already permitted — essential for TCP to function correctly.</p>
+        <p>The <code>ESTABLISHED,RELATED</code> rule allows return traffic for connections that were already permitted - essential for TCP to function correctly.</p>
       </div>
     </div>
 
-  </div><!-- /panel-center -->
-</div><!-- /main -->
+    <!-- NETWORK MAP -->
+    <div class="content-pane" id="pane-network">
 
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="scen-tab act" id="ts0" onclick="ss('s0')">s0 - Baseline</button>
+        <button class="scen-tab"     id="ts1" onclick="ss('s1')">s1 - Segmented</button>
+        <button class="scen-tab"     id="ts2" onclick="ss('s2')">s2 - Hardened</button>
+        <button class="scen-tab"     id="ts3" onclick="ss('s3')">s3 - API Auth</button>
+      </div>
+
+      <div class="scen-desc" id="sdesc"></div>
+
+      <svg width="100%" viewBox="0 0 680 470" style="display:block">
+      <defs>
+        <marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Zone: Corporate -->
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="rgba(24,95,165,0.1)"/>
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="28" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#5ba3d9">CORPORATE</text>
+      <text x="28" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.0/24</text>
+
+      <!-- Zone: IoT -->
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="rgba(29,158,117,0.1)"/>
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="none" stroke="#1D9E75" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="480" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#1D9E75">IOT NETWORK</text>
+      <text x="480" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.0/24</text>
+
+      <!-- Zone: OT -->
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="rgba(239,68,68,0.06)"/>
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="none" stroke="#c98020" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="218" y="328" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#f59e0b">OT NETWORK</text>
+      <text x="218" y="342" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.0/24</text>
+
+      <!-- Physical network links -->
+      <path d="M 210 130 L 262 171" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 418 171 L 470 130" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 340 194 L 340 308" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+
+      <!-- Traffic flows (scenario-driven) -->
+      <path d="M 210 130 L 262 171" class="fo" marker-end="url(#ma)"/>
+      <path d="M 418 171 L 470 130" class="fo" marker-end="url(#ma)"/>
+      <path id="f3" d="M 340 194 L 340 308" class="fo" marker-end="url(#ma)"/>
+
+      <!-- Block indicator -->
+      <g id="blk" style="display:none">
+        <circle cx="340" cy="251" r="12" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+        <line x1="334" y1="245" x2="346" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <line x1="346" y1="245" x2="334" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- Firewall -->
+      <rect x="262" y="148" width="156" height="46" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+      <path d="M 282 161 L 292 156 L 292 164 Q 292 172 282 176 Q 272 172 272 164 L 272 156 Z" fill="none" stroke="#6b7585" stroke-width="1" opacity="0.6"/>
+      <text x="302" y="168" style="font-family:var(--mono);font-size:13px;font-weight:600;fill:#d4dae8">Firewall</text>
+      <text x="302" y="183" style="font-family:var(--mono);font-size:11px;fill:#6b7585">.{20,21,22}.254</text>
+
+      <!-- Corp WS -->
+      <rect x="36" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#185FA5" stroke-width="0.5"/>
+      <rect x="47" y="103" width="22" height="14" rx="1.5" fill="none" stroke="#5ba3d9" stroke-width="1"/>
+      <line x1="44" y1="118" x2="70" y2="118" stroke="#5ba3d9" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="80" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Corp WS</text>
+      <text x="80" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.10</text>
+      <text x="80" y="134" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Kali Linux</text>
+
+      <!-- IoT API -->
+      <rect x="488" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <rect x="499" y="101" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.8"/>
+      <rect x="499" y="108" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.55"/>
+      <rect x="499" y="115" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.3"/>
+      <text x="527" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT API</text>
+      <text x="527" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.10</text>
+      <text id="api-st" x="527" y="134" style="font-family:var(--mono);font-size:11px;fill:#f59e0b">No auth</text>
+
+      <!-- IoT Sensor -->
+      <rect x="488" y="157" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <circle cx="504" cy="183" r="4" fill="#1D9E75" opacity="0.8"/>
+      <path d="M 497 176 Q 494 183 497 190" fill="none" stroke="#1D9E75" stroke-width="1.2" opacity="0.5"/>
+      <path d="M 511 176 Q 514 183 511 190" fill="none" stroke="#1D9E75" stroke-width="1.2" opacity="0.5"/>
+      <path d="M 492 172 Q 489 183 492 194" fill="none" stroke="#1D9E75" stroke-width="1" opacity="0.3"/>
+      <path d="M 516 172 Q 519 183 516 194" fill="none" stroke="#1D9E75" stroke-width="1" opacity="0.3"/>
+      <text x="527" y="173" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT Sensor</text>
+      <text x="527" y="187" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.11</text>
+      <text x="527" y="199" style="font-family:var(--mono);font-size:11px;fill:#3d4455">5s poll</text>
+
+      <!-- Legacy OS -->
+      <rect x="226" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <rect x="234" y="365" width="18" height="13" rx="1" fill="none" stroke="#f59e0b" stroke-width="1"/>
+      <rect x="240" y="378" width="6" height="3" rx="0.5" fill="#f59e0b" opacity="0.5"/>
+      <rect x="237" y="381" width="12" height="2" rx="1" fill="#f59e0b" opacity="0.4"/>
+      <text x="263" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Legacy OS</text>
+      <text x="263" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.10</text>
+      <text id="leg-st" x="263" y="398" style="font-family:var(--mono);font-size:11px;fill:#f59e0b">EOL 2023</text>
+
+      <!-- PLC -->
+      <rect x="348" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <rect x="356" y="365" width="18" height="16" rx="2" fill="none" stroke="#f59e0b" stroke-width="1"/>
+      <circle cx="361" cy="370" r="2" fill="#f59e0b" opacity="0.7"/>
+      <circle cx="367" cy="370" r="2" fill="#f59e0b" opacity="0.7"/>
+      <rect x="358" y="375" width="14" height="3" rx="1" fill="#f59e0b" opacity="0.4"/>
+      <text x="385" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">PLC</text>
+      <text x="385" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.11</text>
+      <text x="385" y="398" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Port 502</text>
+
+      </svg>
+
+      <div style="display:flex;gap:20px;font-size:11px;color:#6b7585;margin-top:10px;flex-wrap:wrap;align-items:center;font-family:var(--mono)">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#00e5a0" stroke-width="2" stroke-dasharray="8 5"/></svg>
+          Active traffic
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 4"/></svg>
+          Blocked
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#252932" stroke-width="1" stroke-dasharray="4 3"/></svg>
+          Network link
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
 
-// ── STATE ──────────────────────────────────────────────────────────
+// -- STATE ---------------------------------------------------------
 const state = {
   currentStep: 0,
   completedSteps: new Set(),
@@ -643,35 +421,55 @@ const state = {
 };
 
 const STEPS = [
-  { id: 'task',      title: 'Task Assignment',       sub: 'Read the security brief' },
-  { id: 'recon',     title: 'Reconnaissance',        sub: 'Observe the current state' },
-  { id: 'theory',    title: 'Theory',                sub: 'Understand segmentation' },
-  { id: 'risk',      title: 'Risk Assessment',       sub: 'Document assets & impact' },
-  { id: 'auth',      title: 'Change Authorization',  sub: 'Submit change request' },
-  { id: 'mitigate',  title: 'Apply Fix',             sub: 'Configure the firewall' },
-  { id: 'validate',  title: 'Validation',            sub: 'Confirm the fix works' },
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief'   },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Observe the current state' },
+  { id: 'theory',   title: 'Theory',               sub: 'Understand segmentation'   },
+  { id: 'risk',     title: 'Risk Assessment',      sub: 'Document assets & impact'  },
+  { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request'     },
+  { id: 'mitigate', title: 'Apply Fix',            sub: 'Configure the firewall'    },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm the fix works'     },
 ];
 
-// ── TERMINAL SETUP ────────────────────────────────────────────────
+// -- NETWORK MAP ---------------------------------------------------
+const SC = {
+  s0: { desc: 'Flat network - all devices communicate freely across zones. No firewall rules applied.',  ot:'open',    hard:false, auth:false, col:'#00e5a0', label:'S0 - Baseline'  },
+  s1: { desc: 'Segmentation applied - the firewall blocks all corporate traffic to the OT network.',    ot:'blocked', hard:false, auth:false, col:'#5ba3d9', label:'S1 - Segmented' },
+  s2: { desc: 'Legacy OS hardened - insecure services disabled, host-level firewall rules applied.',    ot:'blocked', hard:true,  auth:false, col:'#f59e0b', label:'S2 - Hardened'  },
+  s3: { desc: 'IoT API secured - token-based authentication required for all API requests.',            ot:'blocked', hard:true,  auth:true,  col:'#a78bfa', label:'S3 - Secured'   },
+};
+
+function ss(s) {
+  const d = SC[s];
+  ['s0','s1','s2','s3'].forEach(x => {
+    document.getElementById('t' + x).classList.toggle('act', x === s);
+  });
+  const desc = document.getElementById('sdesc');
+  desc.textContent = d.desc;
+  desc.style.borderLeftColor = d.col;
+  document.getElementById('f3').className = d.ot === 'open' ? 'fo' : 'fb';
+  document.getElementById('blk').style.display = d.ot === 'blocked' ? '' : 'none';
+  const lst = document.getElementById('leg-st');
+  lst.textContent = d.hard ? 'HARDENED' : 'EOL 2023';
+  lst.style.fill   = d.hard ? '#00e5a0' : '#f59e0b';
+  const ast = document.getElementById('api-st');
+  ast.textContent = d.auth ? 'Auth: token' : 'No auth';
+  ast.style.fill   = d.auth ? '#00e5a0' : '#f59e0b';
+  const lbl = document.getElementById('scenario-label');
+  if (lbl) lbl.textContent = d.label;
+}
+
+ss('s0');
+
+// -- TERMINAL ------------------------------------------------------
 let socket;
 const term = new Terminal({
   cursorBlink: true,
   fontFamily: "'Share Tech Mono', monospace",
   fontSize: 13,
-  theme: {
-    background: '#0d0f12',
-    foreground: '#d4dae8',
-    cursor:     '#00e5a0',
-    green:      '#00e5a0',
-    brightGreen:'#00ffb3',
-  }
+  theme: { background:'#0d0f12', foreground:'#d4dae8', cursor:'#00e5a0', green:'#00e5a0', brightGreen:'#00ffb3' }
 });
-
 term.open(document.getElementById('terminal-wrap'));
-
-term.onData(data => {
-  if (socket && socket.connected) socket.emit('input', data);
-});
+term.onData(data => { if (socket && socket.connected) socket.emit('input', data); });
 
 function switchContainer() {
   const name = document.getElementById('container-select').value;
@@ -684,25 +482,16 @@ function switchContainer() {
 }
 switchContainer();
 
-// ── TABS ──────────────────────────────────────────────────────────
+// -- TABS ----------------------------------------------------------
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
-
-  document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active'));
-
-  if (tab === 'terminal') {
-    document.getElementById('pane-terminal').classList.add('active');
-    term.fit && term.fit();
-  } else if (tab === 'theory') {
-    document.getElementById('pane-theory').classList.add('active');
-  } else {
-    document.getElementById('pane-guide').classList.add('active');
-  }
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
+  const map = { guide:'pane-guide', terminal:'pane-terminal', theory:'pane-theory', network:'pane-network' };
+  document.getElementById(map[tab]).classList.add('active');
 }
 
-// ── WORKFLOW RENDERING ────────────────────────────────────────────
+// -- WORKFLOW ------------------------------------------------------
 function renderSteps() {
   const container = document.getElementById('workflow-steps');
   container.innerHTML = STEPS.map((s, i) => {
@@ -719,7 +508,6 @@ function renderSteps() {
         </div>
       </div>`;
   }).join('');
-
   const done = state.completedSteps.size;
   document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
   document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
@@ -737,220 +525,189 @@ function completeStep(i) {
   if (i + 1 < STEPS.length) state.currentStep = i + 1;
   renderSteps();
   renderStepContent();
-  switchTab2('guide');
-}
-
-function switchTab2(tab) {
+  // Return to Guide tab
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab')[0].classList.add('active');
-  document.querySelectorAll('.content-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('pane-guide').classList.add('active');
 }
 
-// ── STEP CONTENT ──────────────────────────────────────────────────
+// -- STEP CONTENT --------------------------------------------------
 function renderStepContent() {
-  const s = state.currentStep;
-  const el = document.getElementById('step-content');
-  const renders = [
-    renderStep0, renderStep1, renderStep2, renderStep3,
-    renderStep4, renderStep5, renderStep6
-  ];
-  el.innerHTML = renders[s]();
+  const renders = [ renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6 ];
+  document.getElementById('step-content').innerHTML = renders[state.currentStep]();
 }
 
-function renderStep0() {
-  return `
-    <div class="task-card">
-      <div class="task-card-label">📋 Task Assignment — From: Security Operations</div>
-      <h3>Network Segmentation Audit</h3>
-      <p>Our OT network was recently connected to the corporate infrastructure to enable remote monitoring of the production line. A routine audit has flagged that <strong>no segmentation controls</strong> are in place between the corporate zone and the OT/IoT zones.</p>
-      <p style="margin-top:10px;">Your task is to assess the exposure and apply appropriate firewall rules to isolate the OT environment from direct corporate access.</p>
-    </div>
-    <div class="section-label">Objectives</div>
-    <ul class="checklist">
-      <li>Verify that the Corporate WS can currently reach the PLC and Legacy OS</li>
-      <li>Apply iptables rules on the firewall to block cross-zone traffic</li>
-      <li>Confirm the PLC is no longer reachable from the corporate segment</li>
+function renderStep0() { return `
+  <div class="task-card">
+    <div class="task-card-label">📋 Task Assignment - From: Security Operations</div>
+    <h3>Network Segmentation Audit</h3>
+    <p>Our OT network was recently connected to the corporate infrastructure to enable remote monitoring of the production line. A routine audit has flagged that <strong>no segmentation controls</strong> are in place between the corporate zone and the OT/IoT zones.</p>
+    <p style="margin-top:10px;">Your task is to assess the exposure and apply appropriate firewall rules to isolate the OT environment from direct corporate access.</p>
+  </div>
+  <div class="section-label">Objectives</div>
+  <ul class="checklist">
+    <li>Verify that the Corporate WS can currently reach the PLC and Legacy OS</li>
+    <li>Apply iptables rules on the firewall to block cross-zone traffic</li>
+    <li>Confirm the PLC is no longer reachable from the corporate segment</li>
+  </ul>
+  <div style="margin-top:24px;">
+    <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge & Start →</button>
+  </div>`; }
+
+function renderStep1() { return `
+  <div class="section-label">Step 2 - Reconnaissance</div>
+  <div class="theory-block">
+    <div class="theory-block-label">Before you fix it - understand the exposure</div>
+    <h4>Verify the current (insecure) state</h4>
+    <p>Switch to the <strong>Terminal</strong> tab, select the <span class="highlight">Corporate Workstation</span>, and run these commands. Document what you observe.</p>
+  </div>
+  <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Commands to run</div>
+  <div class="cmd-block">ping -c 3 172.22.0.11</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">↳ Try to reach the PLC from the Corporate WS. Can you?</p>
+  <div class="cmd-block">ping -c 3 172.22.0.10</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">↳ Try to reach the Legacy OS. Can you?</p>
+  <div class="cmd-block">curl http://172.21.0.10</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">↳ Try to reach the IoT API. Do you get a response?</p>
+  <div class="form-group">
+    <label class="form-label">What did you observe?</label>
+    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Ping to PLC succeeded with 0% packet loss. Legacy OS responded on port 23 (telnet)..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations →</button>
+  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>`; }
+
+function renderStep2() { return `
+  <div class="section-label">Step 3 - Theory</div>
+  <div class="theory-block">
+    <div class="theory-block-label">Why does this matter?</div>
+    <h4>IT/OT Convergence & the Flat Network Problem</h4>
+    <p>In a <strong>flat network</strong>, every device can communicate with every other device without restriction. Today, with IT and OT on the same infrastructure, a single compromised corporate machine can directly interact with industrial controllers.</p>
+    <ul>
+      <li>NIST SP 800-82 recommends strict <strong>zone-based segmentation</strong></li>
+      <li>MITRE ATT&CK ICS documents lateral movement from IT to OT (T0822)</li>
+      <li>The Purdue Reference Model defines security boundaries between enterprise and control layers</li>
     </ul>
-    <div style="margin-top:24px;">
-      <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge & Start →</button>
-    </div>`;
-}
+  </div>
+  <div class="theory-block">
+    <div class="theory-block-label">The Fix: iptables FORWARD Chain</div>
+    <h4>How the firewall will stop this</h4>
+    <p>The firewall container has <code>ip_forward=1</code> enabled - it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
+    <p>Full theory available in the <strong>Theory</strong> tab. The <strong>Network Map</strong> tab shows the current architecture state.</p>
+  </div>
+  <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue →</button>
+  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Read Theory ↗</button>`; }
 
-function renderStep1() {
-  return `
-    <div class="section-label">Step 2 — Reconnaissance</div>
-    <div class="theory-block">
-      <div class="theory-block-label">Before you fix it — understand the exposure</div>
-      <h4>Verify the current (insecure) state</h4>
-      <p>Switch to the <strong>Terminal</strong> tab, select the <span class="highlight">Corporate Workstation</span>, and run these commands. Document what you observe.</p>
+function renderStep3() { return `
+  <div class="section-label">Step 4 - Risk Assessment</div>
+  <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Before making any changes, document the risk. This mirrors real-world change management where impact must be understood and signed off.</p>
+  <div class="risk-grid">
+    <div class="risk-cell">
+      <div class="risk-cell-label">Asset at Risk</div>
+      <strong>PLC (172.22.0.11)</strong><br>
+      <span style="font-size:11px;color:var(--text-dim)">Controls production line</span>
     </div>
-    <div style="margin-bottom: 8px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Commands to run</div>
-    <div class="cmd-block">ping -c 3 172.22.0.11</div>
-    <p style="font-size:12px; color:var(--text-dim); margin: 4px 0 12px 0;">↳ Try to reach the PLC from the Corporate WS. Can you?</p>
-    <div class="cmd-block">ping -c 3 172.22.0.10</div>
-    <p style="font-size:12px; color:var(--text-dim); margin: 4px 0 12px 0;">↳ Try to reach the Legacy OS. Can you?</p>
-    <div class="cmd-block">curl http://172.21.0.10</div>
-    <p style="font-size:12px; color:var(--text-dim); margin: 4px 0 20px 0;">↳ Try to reach the IoT API. Do you get a response?</p>
+    <div class="risk-cell">
+      <div class="risk-cell-label">Current Exposure</div>
+      <span class="risk-badge risk-high">HIGH</span>
+    </div>
+    <div class="risk-cell">
+      <div class="risk-cell-label">Asset at Risk</div>
+      <strong>Legacy OS (172.22.0.10)</strong><br>
+      <span style="font-size:11px;color:var(--text-dim)">Ubuntu 18.04, EoL</span>
+    </div>
+    <div class="risk-cell">
+      <div class="risk-cell-label">Current Exposure</div>
+      <span class="risk-badge risk-high">HIGH</span>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Describe the threat scenario</label>
+    <textarea class="form-textarea" id="risk-threat" placeholder="e.g. A compromised corporate workstation could pivot directly to the PLC, send unauthorized Modbus commands..."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">What is the potential business impact?</label>
+    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Production line shutdown, physical equipment damage, safety incident..."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Proposed mitigation</label>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Apply iptables FORWARD DROP rules on the firewall to block all traffic from 172.20.0.0/24 to 172.22.0.0/24..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment →</button>`; }
+
+function renderStep4() { return `
+  <div class="section-label">Step 5 - Change Authorization</div>
+  <div class="task-card" style="border-left-color:var(--accent)">
+    <div class="task-card-label" style="color:var(--accent)">📝 Change Request</div>
+    <h3>Firewall Rule Implementation</h3>
+    <p>In operational environments, all changes to production firewall rules require an authorization ticket. Complete this form to simulate the approval workflow.</p>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Change Description</label>
+    <textarea class="form-textarea" id="cr-desc" placeholder="What rules will you apply and on which device?"></textarea>
+  </div>
+  <div class="risk-grid">
     <div class="form-group">
-      <label class="form-label">What did you observe?</label>
-      <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Ping to PLC succeeded with 0% packet loss. Legacy OS responded on port 23 (telnet)..."></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations →</button>
-    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>`;
-}
-
-function renderStep2() {
-  return `
-    <div class="section-label">Step 3 — Theory</div>
-    <div class="theory-block">
-      <div class="theory-block-label">Why does this matter?</div>
-      <h4>IT/OT Convergence & the Flat Network Problem</h4>
-      <p>In a <strong>flat network</strong>, every device can communicate with every other device without restriction. This was acceptable when IT and OT were physically separate. Today, with both on the same infrastructure, a single compromised corporate machine can directly interact with industrial controllers.</p>
-      <ul>
-        <li>NIST SP 800-82 recommends strict <strong>zone-based segmentation</strong></li>
-        <li>MITRE ATT&CK ICS documents lateral movement from IT to OT (T0822)</li>
-        <li>The Purdue Reference Model defines security boundaries between enterprise and control layers</li>
-      </ul>
-    </div>
-    <div class="theory-block">
-      <div class="theory-block-label">The Fix: iptables FORWARD Chain</div>
-      <h4>How the firewall will stop this</h4>
-      <p>The firewall container has <code>ip_forward=1</code> enabled — it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
-      <p>Full theory available in the <strong>Theory</strong> tab.</p>
-    </div>
-    <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue →</button>
-    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Read Theory ↗</button>`;
-}
-
-function renderStep3() {
-  return `
-    <div class="section-label">Step 4 — Risk Assessment</div>
-    <p style="color:var(--text-dim); font-size:13px; margin-bottom:20px;">Before making any changes, document the risk. This mirrors real-world change management where impact must be understood and signed off.</p>
-    <div class="risk-grid">
-      <div class="risk-cell">
-        <div class="risk-cell-label">Asset at Risk</div>
-        <strong>PLC (172.22.0.11)</strong><br>
-        <span style="font-size:11px; color:var(--text-dim)">Controls production line</span>
-      </div>
-      <div class="risk-cell">
-        <div class="risk-cell-label">Current Exposure</div>
-        <span class="risk-badge risk-high">HIGH</span>
-      </div>
-      <div class="risk-cell">
-        <div class="risk-cell-label">Asset at Risk</div>
-        <strong>Legacy OS (172.22.0.10)</strong><br>
-        <span style="font-size:11px; color:var(--text-dim)">Ubuntu 18.04, EoL</span>
-      </div>
-      <div class="risk-cell">
-        <div class="risk-cell-label">Current Exposure</div>
-        <span class="risk-badge risk-high">HIGH</span>
-      </div>
+      <label class="form-label">Expected downtime</label>
+      <select class="form-select" id="cr-downtime">
+        <option value="none">None</option>
+        <option value="brief">Brief (&lt;5 min)</option>
+        <option value="planned">Planned window</option>
+      </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Describe the threat scenario</label>
-      <textarea class="form-textarea" id="risk-threat" placeholder="e.g. A compromised corporate workstation could pivot directly to the PLC, send unauthorized Modbus commands, and disrupt the production process..."></textarea>
+      <label class="form-label">Change Risk Level</label>
+      <select class="form-select" id="cr-risk">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
     </div>
-    <div class="form-group">
-      <label class="form-label">What is the potential business impact?</label>
-      <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Production line shutdown, physical equipment damage, safety incident for personnel..."></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Proposed mitigation</label>
-      <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Apply iptables FORWARD DROP rules on the firewall to block all traffic from 172.20.0.0/24 to 172.22.0.0/24..."></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment →</button>`;
-}
+  </div>
+  <div class="form-group">
+    <label class="form-label">Rollback plan</label>
+    <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Run 'iptables -F FORWARD' to flush all rules and restore open state..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval →</button>`; }
 
-function renderStep4() {
-  return `
-    <div class="section-label">Step 5 — Change Authorization</div>
-    <div class="task-card" style="border-left-color: var(--accent)">
-      <div class="task-card-label" style="color:var(--accent)">📝 Change Request</div>
-      <h3>Firewall Rule Implementation</h3>
-      <p>In operational environments, all changes to production firewall rules require an authorization ticket. Complete this form to simulate the approval workflow.</p>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Change Description</label>
-      <textarea class="form-textarea" id="cr-desc" placeholder="What rules will you apply and on which device?"></textarea>
-    </div>
-    <div class="risk-grid">
-      <div class="form-group">
-        <label class="form-label">Expected downtime</label>
-        <select class="form-select" id="cr-downtime">
-          <option value="none">None</option>
-          <option value="brief">Brief (&lt;5 min)</option>
-          <option value="planned">Planned window</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Change Risk Level</label>
-        <select class="form-select" id="cr-risk">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="high">High</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Rollback plan</label>
-      <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Run 'iptables -F FORWARD' to flush all rules and restore open state..."></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval →</button>`;
-}
+function renderStep5() { return `
+  <div class="section-label">Step 6 - Apply the Fix</div>
+  <div class="theory-block">
+    <div class="theory-block-label">Technical Mitigation</div>
+    <h4>Configure the Firewall Container</h4>
+    <p>Switch to the <strong>Terminal</strong> tab and select the <span class="highlight">Firewall</span> container. Apply these iptables rules in order:</p>
+  </div>
+  <div style="margin-bottom:6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">1. Set default FORWARD policy to DROP</div>
+  <div class="cmd-block">iptables -P FORWARD DROP</div>
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">2. Allow established/related traffic</div>
+  <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">3. Block Corporate → OT (both directions)</div>
+  <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
+  <div class="cmd-block">iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP</div>
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">4. Verify your rules</div>
+  <div class="cmd-block">iptables -L FORWARD -v --line-numbers</div>
+  <div style="margin-top:20px;">
+    <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied - Continue to Validation →</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>
+  </div>`; }
 
-function renderStep5() {
-  return `
-    <div class="section-label">Step 6 — Apply the Fix</div>
-    <div class="theory-block">
-      <div class="theory-block-label">Technical Mitigation</div>
-      <h4>Configure the Firewall Container</h4>
-      <p>Switch to the <strong>Terminal</strong> tab and select the <span class="highlight">Firewall</span> container. Apply these iptables rules in order:</p>
-    </div>
+function renderStep6() { return `
+  <div class="section-label">Step 7 - Validation</div>
+  <div class="theory-block">
+    <div class="theory-block-label">Confirm the segmentation works</div>
+    <h4>Automated Validation Check</h4>
+    <p>The system will check your pasted iptables output for DROP rules targeting the OT zone. If the fix is valid, the <strong>Network Map</strong> will update to s1.</p>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Evidence - paste iptables output here</label>
+    <textarea class="form-textarea" id="evidence-rules" placeholder="Paste the output of: iptables -L FORWARD -v --line-numbers"></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn btn-primary" onclick="runValidation()">▶ Run Validation Check</button>
+    <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal ↗</button>
+  </div>
+  <div class="validation-result" id="validation-result"></div>`; }
 
-    <div style="margin-bottom: 6px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">1. Set default FORWARD policy to DROP</div>
-    <div class="cmd-block">iptables -P FORWARD DROP</div>
-
-    <div style="margin: 12px 0 6px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">2. Allow established/related traffic (TCP return traffic)</div>
-    <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
-
-    <div style="margin: 12px 0 6px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">3. Block Corporate → OT (both directions)</div>
-    <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
-    <div class="cmd-block">iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP</div>
-
-    <div style="margin: 12px 0 6px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">4. Verify your rules</div>
-    <div class="cmd-block">iptables -L FORWARD -v --line-numbers</div>
-
-    <div style="margin-top: 20px;">
-      <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied — Continue to Validation →</button>
-      <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>
-    </div>`;
-}
-
-function renderStep6() {
-  return `
-    <div class="section-label">Step 7 — Validation</div>
-    <div class="theory-block">
-      <div class="theory-block-label">Confirm the segmentation works</div>
-      <h4>Automated Validation Check</h4>
-      <p>The system will attempt a ping from the <strong>Corporate WS</strong> to the <strong>PLC</strong>. For the fix to be valid, this ping must fail (100% packet loss).</p>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Evidence — paste iptables output here</label>
-      <textarea class="form-textarea" id="evidence-rules" placeholder="Paste the output of: iptables -L FORWARD -v --line-numbers"></textarea>
-    </div>
-
-    <div style="display:flex; gap:10px; margin-top:4px;">
-      <button class="btn btn-primary" onclick="runValidation()">▶ Run Validation Check</button>
-      <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal ↗</button>
-    </div>
-
-    <div class="validation-result" id="validation-result"></div>`;
-}
-
-// ── ACTIONS ───────────────────────────────────────────────────────
+// -- ACTIONS -------------------------------------------------------
 function saveAndNext(fieldId, stateKey, stepIndex) {
   const val = document.getElementById(fieldId)?.value?.trim();
   if (!val) { alert('Please fill in the field before continuing.'); return; }
@@ -959,26 +716,20 @@ function saveAndNext(fieldId, stateKey, stepIndex) {
 }
 
 function saveRiskAndNext() {
-  const threat = document.getElementById('risk-threat')?.value?.trim();
-  const impact = document.getElementById('risk-impact')?.value?.trim();
+  const threat     = document.getElementById('risk-threat')?.value?.trim();
+  const impact     = document.getElementById('risk-impact')?.value?.trim();
   const mitigation = document.getElementById('risk-mitigation')?.value?.trim();
-  if (!threat || !impact || !mitigation) {
-    alert('Please complete all risk assessment fields.'); return;
-  }
+  if (!threat || !impact || !mitigation) { alert('Please complete all risk assessment fields.'); return; }
   state.formData.risk = { threat, impact, mitigation };
   completeStep(3);
 }
 
 function runValidation() {
   const evidence = document.getElementById('evidence-rules')?.value?.trim();
-  const result = document.getElementById('validation-result');
+  const result   = document.getElementById('validation-result');
   result.classList.add('visible');
 
-  // Heuristic check on pasted evidence
-  const hasDropRule = evidence && (
-    evidence.toLowerCase().includes('drop') &&
-    evidence.includes('172.22')
-  );
+  const hasDropRule = evidence && evidence.toLowerCase().includes('drop') && evidence.includes('172.22');
 
   if (hasDropRule) {
     result.innerHTML = `
@@ -986,10 +737,10 @@ function runValidation() {
         ✓ VALIDATION PASSED<br><br>
         DROP rules detected for OT zone (172.22.0.0/24).<br>
         The Corporate WS can no longer reach the PLC or Legacy OS.<br><br>
-        <span style="color:var(--text-dim)">Next: Challenge 2 — Legacy OS Hardening will be unlocked.</span>
+        <span style="color:var(--text-dim)">Network Map updated to S1. Challenge 2 - Legacy OS Hardening will be unlocked next.</span>
       </div>`;
     state.validationPassed = true;
-    updateMap('s1');
+    ss('s1');
     setTimeout(() => completeStep(6), 2000);
   } else {
     result.innerHTML = `
@@ -1003,24 +754,14 @@ function runValidation() {
   }
 }
 
-// ── NETWORK MAP UPDATE ────────────────────────────────────────────
-function updateMap(scenario) {
-  const linkOT = document.getElementById('link-fw-ot');
-  const warn = document.getElementById('link-ot-warn');
-  const fwBox = document.getElementById('fw-status-box');
-  const fwText = document.getElementById('fw-status-text');
-
-  if (scenario === 's1') {
-    if (linkOT) { linkOT.setAttribute('stroke', '#00e5a0'); linkOT.setAttribute('stroke-dasharray', 'none'); }
-    if (warn) { warn.textContent = '✓'; warn.setAttribute('fill', '#00e5a0'); }
-    if (fwBox) { fwBox.setAttribute('fill', 'rgba(0,229,160,0.1)'); fwBox.setAttribute('stroke', 'rgba(0,229,160,0.3)'); }
-    if (fwText) { fwText.textContent = 'ACTIVE'; fwText.setAttribute('fill', '#00e5a0'); }
-  }
-}
-
-// ── INIT ──────────────────────────────────────────────────────────
+// -- INIT ----------------------------------------------------------
 renderSteps();
 renderStepContent();
+
+fetch('/api/scenario')
+  .then(r => r.json())
+  .then(d => { if (d.scenario) ss(d.scenario); })
+  .catch(() => {});
 
 </script>
 </body>

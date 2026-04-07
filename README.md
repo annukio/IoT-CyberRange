@@ -9,9 +9,10 @@ chmod +x launch.sh
 chmod +x switch-scenario.sh
 ```
 
-2. build containers:
+2. build container for the first challenge:
   ```bash
-      docker compose -up -d --build
+      cd scenarios/s0/ 
+      docker compose up -d --build
   ```
 3. Access http://localhost:3000
 4. Play with the terminals!

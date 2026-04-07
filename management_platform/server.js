@@ -4,28 +4,65 @@ const { Server } = require('socket.io');
 const pty = require('node-pty');
 const path = require('path');
 const { exec } = require('child_process');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Track the current scenario in memory
-// In the future this could be persisted to a file ?
-let currentScenario = 's0';
-
 app.use(express.json());
 
-// STATIC ROUTES
+// PROGRESS PERSISTENCE
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+const PROGRESS_FILE = path.join(__dirname, 'progress.json');
+
+function loadProgress() {
+    try {
+        return JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'));
+    } catch {
+        return {};
+    }
+}
+
+function saveProgress(data) {
+    fs.writeFileSync(PROGRESS_FILE, JSON.stringify(data, null, 2));
+}
+
+function deepMerge(target, source) {
+    const result = { ...target };
+    for (const key of Object.keys(source)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+            result[key] = deepMerge(target[key] || {}, source[key]);
+        } else {
+            result[key] = source[key];
+        }
+    }
+    return result;
+}
+
+app.get('/api/progress', (req, res) => {
+    res.json(loadProgress());
+});
+
+app.post('/api/progress', (req, res) => {
+    try {
+        const incoming = req.body;
+        const current = loadProgress();
+        const merged = deepMerge(current, incoming);
+        saveProgress(merged);
+        res.json({ success: true, progress: merged });
+    } catch (err) {
+        console.error('[ERROR] Failed to save progress:', err);
+        res.status(500).json({ success: false, error: 'Failed to save progress' });
+    }
 });
 
 // SCENARIO MANAGEMENT
-function advanceScenario(targetScenario, callback) {
-    // launch.sh lives two levels up: management_platform/ -> iot-cyber-range/
-    const scriptPath = path.join(__dirname, '../../launch.sh');
 
+let currentScenario = 's0';
+
+function advanceScenario(targetScenario, callback) {
+    const scriptPath = path.join(__dirname, '../../launch.sh');
     exec(`${scriptPath} ${targetScenario}`, (error, stdout, stderr) => {
         if (error) {
             console.error(`[ERROR] Failed to advance to ${targetScenario}:`, stderr);
@@ -37,22 +74,19 @@ function advanceScenario(targetScenario, callback) {
     });
 }
 
-// GET /api/scenario — lets the frontend know which scenario is active
 app.get('/api/scenario', (req, res) => {
     res.json({ scenario: currentScenario });
 });
 
-// VALIDATION ENDPOINTS (one per challenge)
+// VALIDATION ENDPOINTS
 
-// Challenge 1: Confirm Corporate WS cannot reach OT (ping to PLC must fail)
 app.post('/api/validate/challenge1', (req, res) => {
     exec(
         'docker exec corporate_ws ping -c 3 -W 1 172.22.0.11',
         (error, stdout, stderr) => {
-            const blocked = error !== null; // ping failing means the rule is working
-
+            const blocked = error !== null;
             if (blocked) {
-                console.log('[✓] Challenge 1 validated — OT is unreachable from Corporate WS');
+                console.log('[✓] Challenge 1 validated — OT unreachable from Corporate WS');
                 advanceScenario('s1', (advErr) => {
                     if (advErr) {
                         return res.status(500).json({
@@ -62,32 +96,37 @@ app.post('/api/validate/challenge1', (req, res) => {
                     }
                     res.json({
                         success: true,
-                        message: 'OT is unreachable from Corporate WS. Network segmentation confirmed.',
+                        message: 'OT is unreachable from Corp WS. Network segmentation confirmed.',
                         nextScenario: 's1',
                     });
                 });
             } else {
-                console.log('[✗] Challenge 1 failed — OT is still reachable');
                 res.json({
                     success: false,
-                    message: 'Corporate WS can still reach the PLC. Check your iptables rules on the firewall.',
+                    message: 'Corp WS can still reach the PLC. Check your iptables FORWARD rules on the firewall.',
                 });
             }
         }
     );
 });
 
-// Placeholder for Challenge 2 - Legacy OS hardening
 app.post('/api/validate/challenge2', (req, res) => {
     res.status(501).json({ message: 'Challenge 2 validation not yet implemented.' });
 });
 
-// Placeholder for Challenge 3 - IoT API auth
 app.post('/api/validate/challenge3', (req, res) => {
     res.status(501).json({ message: 'Challenge 3 validation not yet implemented.' });
 });
 
+// STATIC ROUTES
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+
 // TERMINAL
+
 io.on('connection', (socket) => {
     const target = socket.handshake.query.container || 'corporate_ws';
     console.log(`[DEBUG] Attempting to connect to: ${target}`);
@@ -121,6 +160,7 @@ io.on('connection', (socket) => {
         shell.kill();
     });
 });
+
 
 
 server.listen(3000, '0.0.0.0', () => {
