@@ -10,6 +10,7 @@ services:
 
   firewall:
     build: ../../firewall
+    platform: linux/amd64
     container_name: firewall
     cap_add:
       - NET_ADMIN
@@ -38,6 +39,7 @@ services:
 
   corporate_ws:
     build: ../../corporate_ws
+    platform: linux/amd64
     container_name: corporate_ws
     cap_add:
       - NET_ADMIN
@@ -49,6 +51,7 @@ services:
 
   iot_api:
     build: ../../iot_api
+    platform: linux/amd64
     container_name: iot_api
     cap_add:
       - NET_ADMIN
@@ -59,6 +62,7 @@ services:
 
   iot_sensor:
     build: ../../iot_sensor
+    platform: linux/amd64
     container_name: iot_sensor
     depends_on:
       - iot_api
@@ -68,6 +72,7 @@ services:
 
   legacy_os:
     build: ../../legacy_os
+    platform: linux/amd64
     container_name: legacy_os
     cap_add:
       - NET_ADMIN
@@ -78,6 +83,7 @@ services:
 
   plc:
     build: ../../plc
+    platform: linux/amd64
     container_name: plc
     cap_add:
       - NET_ADMIN
@@ -88,6 +94,7 @@ services:
 
   management_app:
     build: ../../management_platform
+    platform: linux/amd64
     container_name: management_app
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
