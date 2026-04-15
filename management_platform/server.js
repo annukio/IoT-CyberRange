@@ -58,10 +58,17 @@ app.post('/api/progress', (req, res) => {
 });
 
 // SCENARIO MANAGEMENT
-// currentScenario is initialised from the SCENARIO env var set in docker-compose,
-// so starting s1 containers directly gives the s1 UI without any browser action.
+// Priority: SCENARIO env var (set in docker-compose) > saved progress.json > 's0'
+// This means starting s1 containers forces s1, but otherwise the student resumes
+// wherever they left off last session.
 
-let currentScenario = process.env.SCENARIO || 's0';
+function getInitialScenario() {
+    if (process.env.SCENARIO) return process.env.SCENARIO;
+    const saved = loadProgress().scenario;
+    return saved || 's0';
+}
+
+let currentScenario = getInitialScenario();
 console.log(`[*] Starting with scenario: ${currentScenario}`);
 
 // advanceScenario applies the required changes to the running containers via
@@ -99,6 +106,8 @@ function advanceScenario(targetScenario, callback) {
     run(cmds, (err) => {
         if (err) return callback(err);
         currentScenario = targetScenario;
+        const current = loadProgress();
+        saveProgress({ ...current, scenario: targetScenario });
         console.log(`[*] Advanced to ${targetScenario}`);
         // Tell all browsers to reload — they will pick up the new scenario HTML.
         io.emit('scenarioChanged', { scenario: targetScenario });
@@ -159,9 +168,10 @@ app.post('/api/validate/challenge2', (req, res) => {
             const telnetActive = stdout.includes(':23');
             if (!telnetActive) {
                 console.log('[✓] Challenge 2 validated — telnet no longer listening on legacy_os');
-                // Mark scenario as s2 in memory but do not redirect
-                // (index-s2.html is not yet implemented).
+                // Mark scenario as s2 in memory and persist it.
                 currentScenario = 's2';
+                const cur2 = loadProgress();
+                saveProgress({ ...cur2, scenario: 's2' });
                 res.json({
                     success: true,
                     message: 'Telnet service is disabled. Legacy OS exposure reduced. Challenge 2 complete.',

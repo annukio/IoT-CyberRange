@@ -570,6 +570,66 @@
 const ctrlSocket = io({ query: { container: 'control' } });
 ctrlSocket.on('scenarioChanged', () => { window.location.href = '/'; });
 
+// -- PROGRESS PERSISTENCE ------------------------------------------
+const CHALLENGE_KEY = 's1';
+
+async function loadProgressFromServer() {
+  try {
+    const r = await fetch('/api/progress');
+    const data = await r.json();
+    const saved = data[CHALLENGE_KEY];
+    if (!saved) return;
+    state.currentStep = saved.currentStep || 0;
+    state.completedSteps = new Set(saved.completedSteps || []);
+    state.formData = saved.formData || {};
+    state.validationPassed = saved.validationPassed || false;
+  } catch (e) {
+    console.warn('Could not load progress:', e);
+  }
+}
+
+async function saveProgressToServer() {
+  try {
+    const payload = {
+      [CHALLENGE_KEY]: {
+        currentStep: state.currentStep,
+        completedSteps: [...state.completedSteps],
+        formData: state.formData,
+        validationPassed: state.validationPassed,
+      }
+    };
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.warn('Could not save progress:', e);
+  }
+}
+
+function restoreCurrentStepFields() {
+  const fd = state.formData;
+  const step = state.currentStep;
+  if (step === 1 && fd.reconNotes) {
+    const el = document.getElementById('recon-notes');
+    if (el) el.value = fd.reconNotes;
+  } else if (step === 3 && fd.risk) {
+    const t = document.getElementById('risk-threat');
+    const i = document.getElementById('risk-impact');
+    const m = document.getElementById('risk-mitigation');
+    if (t) t.value = fd.risk.threat || '';
+    if (i) i.value = fd.risk.impact || '';
+    if (m) m.value = fd.risk.mitigation || '';
+  } else if (step === 4 && fd.crDesc) {
+    const el = document.getElementById('cr-desc');
+    if (el) el.value = fd.crDesc;
+  } else if (step === 6 && fd.evidence) {
+    const el = document.getElementById('evidence-services');
+    if (el) el.value = fd.evidence;
+  }
+}
+
 // -- STATE ---------------------------------------------------------
 const state = {
   currentStep: 0,
@@ -656,24 +716,22 @@ function goToStep(i) {
   renderStepContent();
 }
 
+function renderStepContent() {
+  const renders = [ renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6 ];
+  document.getElementById('step-content').innerHTML = renders[state.currentStep]();
+  restoreCurrentStepFields();
+}
+
 function completeStep(i) {
   state.completedSteps.add(i);
   if (i + 1 < STEPS.length) state.currentStep = i + 1;
+  saveProgressToServer();
   renderSteps();
   renderStepContent();
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab')[0].classList.add('active');
   document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('pane-guide').classList.add('active');
-}
-
-// -- STEP CONTENT --------------------------------------------------
-function renderStepContent() {
-  const renders = [
-    renderStep0, renderStep1, renderStep2, renderStep3,
-    renderStep4, renderStep5, renderStep6,
-  ];
-  document.getElementById('step-content').innerHTML = renders[state.currentStep]();
 }
 
 function renderStep0() { return `
@@ -885,6 +943,11 @@ function saveRiskAndNext() {
 }
 
 async function runValidation() {
+  const evidenceEl = document.getElementById('evidence-services');
+  if (evidenceEl && evidenceEl.value.trim()) {
+    state.formData.evidence = evidenceEl.value.trim();
+    saveProgressToServer();
+  }
   const result = document.getElementById('validation-result');
   result.classList.add('visible');
   result.innerHTML = `<span style="color:var(--text-dim)">Checking port 23 on legacy_os... (this may take a few seconds)</span>`;
@@ -919,8 +982,10 @@ async function runValidation() {
 }
 
 // -- INIT ----------------------------------------------------------
-renderSteps();
-renderStepContent();
+loadProgressFromServer().then(() => {
+  renderSteps();
+  renderStepContent();
+});
 
 </script>
 </body>
