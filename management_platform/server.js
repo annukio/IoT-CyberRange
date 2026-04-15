@@ -58,18 +58,50 @@ app.post('/api/progress', (req, res) => {
 });
 
 // SCENARIO MANAGEMENT
+// currentScenario is initialised from the SCENARIO env var set in docker-compose,
+// so starting s1 containers directly gives the s1 UI without any browser action.
 
-let currentScenario = 's0';
+let currentScenario = process.env.SCENARIO || 's0';
+console.log(`[*] Starting with scenario: ${currentScenario}`);
 
+// advanceScenario applies the required changes to the running containers via
+// docker exec (no full restart needed) and tells every connected browser to reload.
 function advanceScenario(targetScenario, callback) {
-    const scriptPath = path.join(__dirname, '../../launch.sh');
-    exec(`${scriptPath} ${targetScenario}`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`[ERROR] Failed to advance to ${targetScenario}:`, stderr);
-            return callback(error);
-        }
+    let cmds = [];
+
+    if (targetScenario === 's1') {
+        // Apply network-segmentation firewall rules on the existing firewall container.
+        cmds = [
+            'docker exec firewall iptables -P FORWARD DROP',
+            'docker exec firewall iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT',
+            'docker exec firewall iptables -A FORWARD -s 172.20.0.0/24 -d 172.21.0.10 -p tcp --dport 80 -j ACCEPT',
+            'docker exec firewall iptables -A FORWARD -s 172.21.0.0/24 -d 172.22.0.0/24 -j DROP',
+            'docker exec firewall iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP',
+            'docker exec firewall iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP',
+        ];
+    } else if (targetScenario === 's2') {
+        // s2 hardening is applied manually by the student; nothing to auto-apply here.
+        cmds = [];
+    } else {
+        return callback(new Error(`Unknown target scenario: ${targetScenario}`));
+    }
+
+    const run = (remaining, done) => {
+        if (remaining.length === 0) return done(null);
+        exec(remaining[0], (err) => {
+            if (err) {
+                console.warn(`[WARN] Command failed (continuing): ${remaining[0]} — ${err.message}`);
+            }
+            run(remaining.slice(1), done);
+        });
+    };
+
+    run(cmds, (err) => {
+        if (err) return callback(err);
         currentScenario = targetScenario;
         console.log(`[*] Advanced to ${targetScenario}`);
+        // Tell all browsers to reload — they will pick up the new scenario HTML.
+        io.emit('scenarioChanged', { scenario: targetScenario });
         callback(null);
     });
 }
@@ -80,10 +112,12 @@ app.get('/api/scenario', (req, res) => {
 
 // VALIDATION ENDPOINTS
 
+// Challenge 1: Network Segmentation (s0 → s1)
+// Verifies that the Corporate WS cannot reach the PLC.
 app.post('/api/validate/challenge1', (req, res) => {
     exec(
         'docker exec corporate_ws ping -c 3 -W 1 172.22.0.11',
-        (error, stdout, stderr) => {
+        (error) => {
             const blocked = error !== null;
             if (blocked) {
                 console.log('[✓] Challenge 1 validated — OT unreachable from Corporate WS');
@@ -91,12 +125,12 @@ app.post('/api/validate/challenge1', (req, res) => {
                     if (advErr) {
                         return res.status(500).json({
                             success: false,
-                            message: 'Validation passed but failed to advance scenario.',
+                            message: 'Validation passed but could not advance scenario. Check Docker connectivity.',
                         });
                     }
                     res.json({
                         success: true,
-                        message: 'OT is unreachable from Corp WS. Network segmentation confirmed.',
+                        message: 'OT zone is unreachable from Corp WS. Network segmentation confirmed.',
                         nextScenario: 's1',
                     });
                 });
@@ -110,8 +144,37 @@ app.post('/api/validate/challenge1', (req, res) => {
     );
 });
 
+// Challenge 2: Legacy OT System Protection (s1 → s2)
+// Verifies that telnet (port 23) is no longer listening on the Legacy OS.
 app.post('/api/validate/challenge2', (req, res) => {
-    res.status(501).json({ message: 'Challenge 2 validation not yet implemented.' });
+    exec(
+        'docker exec legacy_os ss -tlnp',
+        (error, stdout) => {
+            if (error) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Could not reach the legacy_os container. Is it running?',
+                });
+            }
+            const telnetActive = stdout.includes(':23');
+            if (!telnetActive) {
+                console.log('[✓] Challenge 2 validated — telnet no longer listening on legacy_os');
+                // Mark scenario as s2 in memory but do not redirect
+                // (index-s2.html is not yet implemented).
+                currentScenario = 's2';
+                res.json({
+                    success: true,
+                    message: 'Telnet service is disabled. Legacy OS exposure reduced. Challenge 2 complete.',
+                    nextScenario: 's2',
+                });
+            } else {
+                res.json({
+                    success: false,
+                    message: 'Telnet (port 23) is still listening. Run: service openbsd-inetd stop',
+                });
+            }
+        }
+    );
 });
 
 app.post('/api/validate/challenge3', (req, res) => {
@@ -119,18 +182,35 @@ app.post('/api/validate/challenge3', (req, res) => {
 });
 
 // STATIC ROUTES
-
+// Serve scenario-specific HTML so the UI matches the active challenge.
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const htmlFile = `index-${currentScenario}.html`;
+    const htmlPath = path.join(__dirname, htmlFile);
+    if (fs.existsSync(htmlPath)) {
+        res.sendFile(htmlPath);
+    } else {
+        // Fallback to s0 if the target scenario HTML has not been created yet.
+        res.sendFile(path.join(__dirname, 'index-s0.html'));
+    }
 });
+
+// Keep legacy /index.html accessible just in case.
+app.use(express.static(__dirname));
 
 
 // TERMINAL
+// Control connections (container === 'control') stay open without spawning a shell;
+// they are used exclusively for server-to-client events (e.g. scenarioChanged).
 
 io.on('connection', (socket) => {
-    const target = socket.handshake.query.container || 'corporate_ws';
-    console.log(`[DEBUG] Attempting to connect to: ${target}`);
+    const target = socket.handshake.query.container;
 
+    if (!target || target === 'control') {
+        // Control channel — no shell, just keep the socket alive for broadcasts.
+        return;
+    }
+
+    console.log(`[DEBUG] Attempting to connect to: ${target}`);
     let shell;
     try {
         shell = pty.spawn('docker', ['exec', '-it', target, 'bash'], {

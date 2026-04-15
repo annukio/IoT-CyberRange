@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ICS/IoT Cyber Range</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+  <style>
+    :root {
+      --bg:         #0d0f12;
+      --surface:    #13161b;
+      --surface2:   #1a1e26;
+      --border:     #252932;
+      --border2:    #2f3540;
+      --accent:     #00e5a0;
+      --accent-dim: #00a872;
+      --warn:       #f59e0b;
+      --danger:     #ef4444;
+      --text:       #d4dae8;
+      --text-dim:   #a2aaba;
+      --text-faint: #6b7585;
+      --mono:       'Share Tech Mono', monospace;
+      --sans:       'Barlow', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 48px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .topbar-logo { font-family: var(--mono); color: var(--accent); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    .topbar-divider { width: 1px; height: 24px; background: var(--border2); }
+    .topbar-scenario { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .topbar-scenario span { color: var(--accent); margin-left: 6px; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .topbar-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); letter-spacing: 1px; }
+
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    .panel-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--border); overflow: hidden; }
+    .panel-section-header { padding: 12px 16px 10px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
+    .workflow-steps { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .workflow-steps::-webkit-scrollbar { width: 4px; }
+    .workflow-steps::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; border-left: 2px solid transparent; }
+    .step:hover { background: var(--surface2); }
+    .step.active { background: var(--surface2); border-left-color: var(--accent); }
+    .step.done .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .step.done .step-title { color: var(--text-dim); text-decoration: line-through; }
+    .step.locked { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 1px; }
+    .step.active .step-num { border-color: var(--accent); color: var(--accent); }
+    .step-info { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .panel-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .tab-bar { display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; gap: 4px; flex-shrink: 0; }
+    .tab { padding: 10px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; text-transform: uppercase; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .content-pane { flex: 1; overflow-y: auto; padding: 24px; display: none; }
+    .content-pane.active { display: block; }
+    .content-pane::-webkit-scrollbar { width: 4px; }
+    .content-pane::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .terminal-pane { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+    .terminal-pane.active { display: flex; }
+    .terminal-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .terminal-toolbar label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .terminal-toolbar select { background: var(--bg); color: var(--accent); border: 1px solid var(--border2); font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
+    #terminal-wrap { flex: 1; background: #0d0f12; padding: 8px; overflow: hidden; }
+
+    .task-card { background: var(--surface2); border: 1px solid var(--border2); border-left: 3px solid var(--warn); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+    .task-card-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--warn); text-transform: uppercase; margin-bottom: 8px; }
+    .task-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .task-card p { color: var(--text-dim); line-height: 1.6; font-size: 13px; }
+
+    .theory-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+    .theory-block summary { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; list-style: none; user-select: none; transition: background 0.15s; }
+    .theory-block summary::-webkit-details-marker { display: none; }
+    .theory-block summary:hover { background: rgba(255,255,255,0.03); }
+    .theory-block[open] summary { border-bottom: 1px solid var(--border); }
+    .theory-summary-left { display: flex; flex-direction: column; gap: 3px; }
+    .theory-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+    .theory-block-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .theory-arrow { font-size: 11px; color: var(--text-faint); transition: transform 0.2s ease; flex-shrink: 0; margin-left: 12px; }
+    .theory-block[open] .theory-arrow { transform: rotate(180deg); color: var(--accent); }
+    .theory-body { padding: 16px 18px; }
+    .theory-body h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+    .theory-body h4:first-child { margin-top: 0; }
+    .theory-body p { color: var(--text-dim); font-size: 13px; line-height: 1.75; margin-bottom: 10px; }
+    .theory-body p:last-child { margin-bottom: 0; }
+    .theory-body ul, .theory-body ol { color: var(--text-dim); font-size: 13px; line-height: 1.75; padding-left: 18px; margin-bottom: 10px; }
+    .theory-body li { margin-bottom: 4px; }
+    .theory-body strong { color: var(--text); font-weight: 600; }
+    .theory-body code { font-family: var(--mono); font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--accent); }
+
+    .cmd-block { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--accent); margin: 8px 0; position: relative; }
+    .cmd-block::before { content: '$'; color: var(--text-faint); margin-right: 8px; }
+    .cmd-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 4px; }
+    .cmd-label:first-child { margin-top: 0; }
+
+    .theory-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0; }
+    .theory-table th { background: var(--bg); color: var(--text-dim); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border2); }
+    .theory-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-dim); line-height: 1.5; }
+    .theory-table tr:last-child td { border-bottom: none; }
+    .theory-table td:first-child { font-family: var(--mono); color: var(--warn); font-size: 11px; }
+    .theory-table td:nth-child(2) { color: var(--text); font-weight: 600; font-size: 12px; }
+
+    .cite-ref { font-family: var(--mono); font-size: 10px; color: var(--text-faint); vertical-align: super; margin-left: 1px; }
+    .bib-list { list-style: none; padding: 0; }
+    .bib-list li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    .bib-list li:last-child { border-bottom: none; }
+    .bib-num { font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 24px; }
+    .bib-url { font-family: var(--mono); font-size: 11px; color: var(--accent-dim); word-break: break-all; display: block; margin-top: 2px; }
+
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .form-input, .form-textarea, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: var(--sans); font-size: 13px; padding: 8px 12px; border-radius: 4px; outline: none; transition: border-color 0.15s; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .risk-cell { background: var(--bg); border: 1px solid var(--border2); border-radius: 4px; padding: 10px 12px; }
+    .risk-cell-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: var(--mono); font-size: 11px; font-weight: 700; }
+    .risk-high { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+    .risk-med  { background: rgba(245,158,11,0.15); color: var(--warn);   border: 1px solid rgba(245,158,11,0.3); }
+    .risk-low  { background: rgba(0,229,160,0.1);   color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background: #00ffb3; }
+    .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .validation-result { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; font-family: var(--mono); font-size: 12px; margin-top: 16px; display: none; }
+    .validation-result.visible { display: block; }
+    .validation-pass { color: var(--accent); }
+    .validation-fail { color: var(--danger); }
+
+    .progress-bar-wrap { background: var(--border); border-radius: 2px; height: 4px; margin-bottom: 20px; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+
+    .highlight { color: var(--accent); font-weight: 700; }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .checklist li::before { content: '○'; font-family: var(--mono); color: var(--text-faint); flex-shrink: 0; }
+    .checklist li.done::before { content: '✓'; color: var(--accent); }
+
+    /* Completion banner */
+    .complete-banner { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); border-radius: 6px; padding: 20px 24px; text-align: center; }
+    .complete-banner h2 { color: var(--accent); font-size: 18px; margin-bottom: 8px; }
+    .complete-banner p { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
+
+    /* Network map */
+    @keyframes dk { to { stroke-dashoffset: -48; } }
+    .fo  { stroke-dasharray: 10 6; stroke-width: 2; fill: none; stroke: #00e5a0; animation: dk 1.4s linear infinite; }
+    .fb  { stroke-dasharray: 5 4;  stroke-width: 2; fill: none; stroke: #ef4444; }
+    .scen-desc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); padding: 8px 12px; background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 3px; margin: 0 0 16px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">ICS Cyber Range</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-scenario">Scenario<span id="scenario-label">S1 - Segmented</span></div>
+  <div class="topbar-right">
+    <div class="topbar-badge">&#10003; Challenge 1 Complete</div>
+    <div class="status-dot"></div>
+    <div class="topbar-status">Lab environment active</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="panel-left">
+    <div class="panel-section-header">Challenge 2 - Legacy OT Protection</div>
+    <div style="padding: 10px 16px 0;">
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;" id="progress-label">Progress: 0 / 7</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="workflow-steps" id="workflow-steps"></div>
+  </div>
+
+  <div class="panel-center">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('guide')">Guide</div>
+      <div class="tab"        onclick="switchTab('terminal')">Terminal</div>
+      <div class="tab"        onclick="switchTab('theory')">Theory</div>
+      <div class="tab"        onclick="switchTab('network')">Network Map</div>
+    </div>
+
+    <!-- GUIDE -->
+    <div class="content-pane active" id="pane-guide">
+      <div id="step-content"></div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal-pane" id="pane-terminal">
+      <div class="terminal-toolbar">
+        <label>Active Shell:</label>
+        <select id="container-select" onchange="switchContainer()">
+          <option value="legacy_os">Legacy OS (172.22.0.10)</option>
+          <option value="corporate_ws">Corporate Workstation (172.20.0.10)</option>
+          <option value="firewall">Firewall (routing node)</option>
+        </select>
+      </div>
+      <div id="terminal-wrap"></div>
+    </div>
+
+    <!-- THEORY -->
+    <div class="content-pane" id="pane-theory">
+
+      <div class="section-label">Challenge 2 - Background Reading</div>
+
+      <!-- SECTION 1 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 1 &mdash; EOL Systems</span>
+            <span class="theory-block-title">End-of-Life Operating Systems in OT Environments</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Does "End of Life" Mean?</h4>
+          <p>An operating system reaches <strong>End of Life (EoL)</strong> when the vendor stops releasing security patches and updates. From that point forward, any newly discovered vulnerability in the OS will never be officially fixed. Ubuntu 18.04 LTS reached end of life in April 2023.<span class="cite-ref">[1]</span></p>
+          <p>In a standard IT environment, the response to an EoL system is to upgrade it. In OT environments, this is often not possible:</p>
+          <ul>
+            <li>Industrial software may only be certified to run on a specific OS version.</li>
+            <li>Hardware vendors may not support newer OS versions on older field devices.</li>
+            <li>Upgrading requires extensive testing to ensure operational continuity, which is expensive and disruptive.</li>
+            <li>Some systems are embedded and cannot be modified at all without replacing the hardware.</li>
+          </ul>
+          <p>The result is that EoL systems remain in production for years or decades beyond their support window. NIST SP 800-82 Rev 3 explicitly acknowledges this constraint and recommends <strong>compensating controls</strong> as the practical alternative to patching.<span class="cite-ref">[1]</span></p>
+
+          <h4>The Risk of an Unpatched OT System</h4>
+          <p>Known vulnerabilities for an EoL OS accumulate over time and are publicly documented in the <strong>Common Vulnerabilities and Exposures (CVE)</strong> database. Attackers use this database to find reliable exploit code for systems they have identified through network scanning. An EoL system is effectively a system with a permanently growing list of known, unmitigated attack paths.</p>
+          <p>When an EoL system is also running insecure services (like telnet or SMBv1), the attack surface is compounded: not only is the OS vulnerable, but the services themselves provide additional direct entry points.</p>
+
+          <h4>Compensating Controls</h4>
+          <p>A <strong>compensating control</strong> is a security measure that reduces risk when the primary control (patching) cannot be applied. For EoL OT systems, typical compensating controls include:<span class="cite-ref">[1]</span></p>
+          <ul>
+            <li><strong>Network isolation:</strong> Restrict which devices can reach the legacy system (already applied in Challenge 1).</li>
+            <li><strong>Service hardening:</strong> Disable all services that are not required for operations.</li>
+            <li><strong>Host-based firewall:</strong> Apply iptables INPUT rules on the legacy host itself to limit inbound connections.</li>
+            <li><strong>Monitoring:</strong> Log all access attempts and alert on anomalous connections.</li>
+          </ul>
+        </div>
+      </details>
+
+      <!-- SECTION 2 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 2 &mdash; CVE-2017-0144 / SMBv1</span>
+            <span class="theory-block-title">SMBv1 and the EternalBlue Vulnerability</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Is SMBv1?</h4>
+          <p>Server Message Block version 1 (SMBv1) is a network file-sharing protocol first implemented in 1983. It was designed for small, isolated networks and lacks modern security features: no message signing by default, no encryption, and several design-level weaknesses. All modern operating systems have deprecated or removed SMBv1, but legacy systems may still enable it.<span class="cite-ref">[2]</span></p>
+
+          <h4>CVE-2017-0144 — EternalBlue</h4>
+          <p>CVE-2017-0144, known as <strong>EternalBlue</strong>, is a critical remote code execution vulnerability in the SMBv1 implementation. It was originally developed by the NSA, leaked by the Shadow Brokers group in April 2017, and subsequently weaponized in two of the most damaging cyberattacks in history:<span class="cite-ref">[2][3]</span></p>
+          <ul>
+            <li><strong>WannaCry (May 2017):</strong> A ransomware worm that used EternalBlue to spread autonomously across networks, infecting over 200,000 systems in 150 countries. It caused an estimated $4–8 billion in damages and severely impacted the UK National Health Service.</li>
+            <li><strong>NotPetya (June 2017):</strong> A destructive wiper disguised as ransomware that used EternalBlue for lateral movement. It caused over $10 billion in damages and is considered one of the most costly cyberattacks ever recorded.</li>
+          </ul>
+          <p>Both attacks demonstrated that a single unpatched SMBv1 system on a network can allow an attacker (or automated worm) to compromise every other vulnerable system on the same segment — classic lateral movement with no authentication required.</p>
+
+          <h4>Mitigation</h4>
+          <p>Disabling SMBv1 eliminates exposure to EternalBlue and related exploits. In Samba on Linux, this is achieved by setting a minimum protocol version:</p>
+          <div class="cmd-block">echo "min protocol = SMB2" &gt;&gt; /etc/samba/smb.conf</div>
+          <p>This forces all SMB connections to use version 2 or higher, which does not have the EternalBlue vulnerability.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 3 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 3 &mdash; Insecure Protocols</span>
+            <span class="theory-block-title">Why Telnet Is Dangerous in an OT Environment</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Telnet and Cleartext Transmission</h4>
+          <p>Telnet (TCP port 23) is a protocol from 1969 that provides a remote command-line interface. Every character typed in a telnet session — including usernames, passwords, and commands — is transmitted as <strong>unencrypted plaintext</strong> across the network. Any device on the same network segment that can capture traffic (via a network tap, port mirroring, or ARP spoofing) can read all telnet credentials and commands in real time.<span class="cite-ref">[4]</span></p>
+          <p>In MITRE ATT&amp;CK for ICS, this maps to technique <strong>T1040 (Network Sniffing)</strong>: adversaries capture network traffic to obtain credentials or observe control commands sent between systems.<span class="cite-ref">[3]</span></p>
+
+          <h4>Why This Is Especially Risky in OT</h4>
+          <p>In an OT network, telnet credentials captured from a maintenance connection to a legacy system can be reused to:</p>
+          <ul>
+            <li>Access the system as a legitimate user, bypassing all network-level access controls.</li>
+            <li>Issue commands that change process parameters or stop running services.</li>
+            <li>Create persistence by adding new accounts or modifying startup configurations.</li>
+          </ul>
+          <p>The secure replacement for telnet is <strong>SSH (Secure Shell)</strong>, which encrypts the entire session including credentials. However, for legacy OT systems that cannot run SSH, the only compensating control is to ensure telnet is not exposed at all — by disabling the service and enforcing strict network access controls.</p>
+
+          <h4>Disabling Telnet</h4>
+          <p>Telnet on Ubuntu 18.04 is managed by <code>openbsd-inetd</code>, the internet super-server daemon:</p>
+          <div class="cmd-block">service openbsd-inetd stop</div>
+          <p>After stopping the service, verify that port 23 is no longer listening:</p>
+          <div class="cmd-block">ss -tlnp | grep :23</div>
+          <p>An empty result confirms the service is down.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 4 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 4 &mdash; Technical Reference</span>
+            <span class="theory-block-title">Host-Based Firewalling: iptables INPUT Chain</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Host-Based vs. Network-Based Firewall</h4>
+          <p>In Challenge 1, you applied firewall rules on the <em>network router</em> (the FORWARD chain). This controls traffic that <em>passes through</em> the router between zones. A <strong>host-based firewall</strong> is different: it controls traffic that is <em>destined for or originating from the host itself</em>. It is applied on the individual machine, not the router.<span class="cite-ref">[1]</span></p>
+          <p>Defense-in-depth means both are active simultaneously. Even if an attacker bypasses the network firewall (for example, by compromising another device already inside the OT zone), the host-based firewall provides a second layer of protection.</p>
+
+          <h4>The INPUT Chain</h4>
+          <p>The iptables <code>INPUT</code> chain processes packets destined for the local machine. To restrict who can connect to the legacy OS:</p>
+          <div class="cmd-label">Allow traffic from within the OT zone (PLC can still communicate)</div>
+          <div class="cmd-block">iptables -A INPUT -s 172.22.0.0/24 -j ACCEPT</div>
+          <div class="cmd-label">Allow established return traffic</div>
+          <div class="cmd-block">iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</div>
+          <div class="cmd-label">Always allow loopback traffic</div>
+          <div class="cmd-block">iptables -A INPUT -i lo -j ACCEPT</div>
+          <div class="cmd-label">Drop everything else (default deny)</div>
+          <div class="cmd-block">iptables -P INPUT DROP</div>
+
+          <h4>Important: Rule Order</h4>
+          <p>The ACCEPT rules must be added <em>before</em> setting the default policy to DROP — otherwise the iptables command that adds the ACCEPT rules itself may be blocked. Always verify the final state:</p>
+          <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
+
+          <h4>Verifying the Effect</h4>
+          <p>After applying host-based firewall rules, check that intra-OT communication still works (PLC to Legacy OS), while connections from other zones are dropped. This validates that the compensating control does not break legitimate operational traffic.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 5 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 5 &mdash; NIST SP 800-82</span>
+            <span class="theory-block-title">Compensating Controls Framework</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>When Patching Is Not Possible</h4>
+          <p>NIST SP 800-82 Rev 3 dedicates a section to the challenge of legacy and unsupported systems in ICS. The guidance acknowledges that patching is not always feasible and outlines a compensating control strategy:<span class="cite-ref">[1]</span></p>
+          <ul>
+            <li><strong>Isolate:</strong> Apply network segmentation to limit the blast radius if the system is compromised (done in Challenge 1).</li>
+            <li><strong>Harden:</strong> Disable all services not required for operations. Reduce the attack surface to only what is necessary.</li>
+            <li><strong>Monitor:</strong> Log all access to legacy systems and alert on anomalies. Compensating controls rely heavily on detection when prevention is incomplete.</li>
+            <li><strong>Document:</strong> Record the unmitigated vulnerabilities, the compensating controls in place, and the residual risk. This is an auditable risk acceptance decision.</li>
+          </ul>
+
+          <h4>Risk Assessment for This Challenge</h4>
+          <p>For the legacy OS in this lab, the risk assessment should consider:<span class="cite-ref">[5]</span></p>
+          <table class="theory-table">
+            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Asset</td><td>Legacy OS (172.22.0.10) — Ubuntu 18.04 EoL</td></tr>
+              <tr><td>Issue</td><td>End-of-life OS, running telnet (port 23) and Samba with SMBv1</td></tr>
+              <tr><td>CVE</td><td>CVE-2017-0144 (EternalBlue / SMBv1)</td></tr>
+              <tr><td>Impact</td><td>Remote code execution, lateral movement within OT zone</td></tr>
+              <tr><td>Likelihood</td><td>High — public exploit code available</td></tr>
+              <tr><td>Mitigation</td><td>Disable telnet, enforce SMB2 minimum, apply host-based firewall</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- SECTION 6 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 6 &mdash; Validation</span>
+            <span class="theory-block-title">Confirming the Hardening Worked</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Verify Services Are Stopped</h4>
+          <p>After disabling telnet, confirm port 23 is no longer listening on the legacy OS:</p>
+          <div class="cmd-block">ss -tlnp</div>
+          <p>Port 23 should not appear in the output. An empty result for <code>grep :23</code> confirms success.</p>
+
+          <h4>Verify Samba Configuration</h4>
+          <div class="cmd-block">grep "min protocol" /etc/samba/smb.conf</div>
+          <p>The output should show <code>min protocol = SMB2</code> or higher.</p>
+
+          <h4>Verify Host-Based Firewall</h4>
+          <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
+          <p>Confirm that ACCEPT rules for the OT zone and loopback are present, and the default policy is DROP.</p>
+
+          <h4>Confirm Intra-OT Traffic Still Works</h4>
+          <p>From the PLC container, the legacy OS should still be reachable (they are in the same OT zone). This verifies that the compensating controls do not break legitimate operational communication.</p>
+        </div>
+      </details>
+
+      <!-- BIBLIOGRAPHY -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Interested in learning more?</span>
+            <span class="theory-block-title">References and sources used</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <ul class="bib-list">
+            <li><span class="bib-num">[1]</span><span>Ross, R. et al. (2023). <em>Guide to Industrial Control Systems (ICS) Security</em> (NIST SP 800-82 Rev 3). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-82r3" target="_blank">https://doi.org/10.6028/NIST.SP.800-82r3</a></span></li>
+            <li><span class="bib-num">[2]</span><span>Microsoft. (2017). <em>Microsoft Security Bulletin MS17-010 — Critical: Vulnerability in Windows SMB Server</em>. Microsoft Corporation.<br><a class="bib-url" href="https://docs.microsoft.com/en-us/security-updates/securitybulletins/2017/ms17-010" target="_blank">https://docs.microsoft.com/security-updates/ms17-010</a></span></li>
+            <li><span class="bib-num">[3]</span><span>MITRE Corporation. (2024). <em>MITRE ATT&CK for ICS</em>. Techniques: T1040 (Network Sniffing), T0812 (Default Credentials).<br><a class="bib-url" href="https://attack.mitre.org/matrices/ics/" target="_blank">https://attack.mitre.org/matrices/ics/</a></span></li>
+            <li><span class="bib-num">[4]</span><span>Postel, J. &amp; Reynolds, J. (1983). <em>TELNET Protocol Specification</em> (RFC 854). IETF.<br><a class="bib-url" href="https://datatracker.ietf.org/doc/html/rfc854" target="_blank">https://datatracker.ietf.org/doc/html/rfc854</a></span></li>
+            <li><span class="bib-num">[5]</span><span>NIST. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST SP 800-30 Rev 1). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-30r1" target="_blank">https://doi.org/10.6028/NIST.SP.800-30r1</a></span></li>
+          </ul>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- NETWORK MAP -->
+    <div class="content-pane" id="pane-network">
+
+      <div class="scen-desc" id="sdesc"></div>
+
+      <svg width="100%" viewBox="0 0 680 470" style="display:block">
+      <defs>
+        <marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Zone: Corporate -->
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="rgba(24,95,165,0.1)"/>
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="28" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#5ba3d9">CORPORATE</text>
+      <text x="28" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.0/24</text>
+
+      <!-- Zone: IoT -->
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="rgba(29,158,117,0.1)"/>
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="none" stroke="#1D9E75" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="480" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#1D9E75">IOT SEGMENT</text>
+      <text x="480" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.0/24</text>
+
+      <!-- Zone: OT — highlighted, this is the focus of challenge 2 -->
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="rgba(239,68,68,0.09)"/>
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="none" stroke="#ef4444" stroke-width="1" stroke-dasharray="6 3"/>
+      <text x="218" y="328" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#f59e0b">OT SEGMENT</text>
+      <text x="218" y="342" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.0/24</text>
+
+      <!-- Physical network links -->
+      <path d="M 210 130 L 262 171" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 418 171 L 470 130" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 340 194 L 340 308" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+
+      <!-- Corporate→Firewall flow (allowed, http only) -->
+      <path d="M 210 130 L 262 171" class="fo" marker-end="url(#ma)"/>
+      <!-- IoT↔Firewall flow (allowed) -->
+      <path d="M 418 171 L 470 130" class="fo" marker-end="url(#ma)"/>
+      <!-- Firewall→OT: BLOCKED from challenge 1 -->
+      <path id="f3" d="M 340 194 L 340 308" class="fb" marker-end="url(#ma)"/>
+
+      <!-- Block indicator between Corporate and OT -->
+      <g id="blk">
+        <circle cx="340" cy="251" r="12" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+        <line x1="334" y1="245" x2="346" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <line x1="346" y1="245" x2="334" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <!-- "http only" label on corp→IoT path -->
+      <text x="320" y="148" style="font-family:var(--mono);font-size:9px;fill:#00e5a0;font-style:italic">http only</text>
+
+      <!-- "Defined" label on firewall policy -->
+      <text x="303" y="195" style="font-family:var(--mono);font-size:9px;fill:#5ba3d9">Defined &#9658;</text>
+      <text x="303" y="207" style="font-family:var(--mono);font-size:9px;fill:#5ba3d9">Defined &#9668;</text>
+
+      <!-- Firewall -->
+      <rect x="262" y="148" width="156" height="46" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+      <path d="M 282 161 L 292 156 L 292 164 Q 292 172 282 176 Q 272 172 272 164 L 272 156 Z" fill="none" stroke="#5ba3d9" stroke-width="1.2"/>
+      <text x="302" y="168" style="font-family:var(--mono);font-size:13px;font-weight:600;fill:#d4dae8">Firewall</text>
+      <text x="302" y="183" style="font-family:var(--mono);font-size:11px;fill:#5ba3d9">Segmented</text>
+
+      <!-- Corp WS -->
+      <rect x="36" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#185FA5" stroke-width="0.5"/>
+      <rect x="47" y="103" width="22" height="14" rx="1.5" fill="none" stroke="#5ba3d9" stroke-width="1"/>
+      <line x1="44" y1="118" x2="70" y2="118" stroke="#5ba3d9" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="80" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Corp WS</text>
+      <text x="80" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.10</text>
+      <text x="80" y="134" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Kali Linux</text>
+
+      <!-- IoT API -->
+      <rect x="488" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="527" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT API</text>
+      <text x="527" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.10</text>
+      <text x="527" y="134" style="font-family:var(--mono);font-size:11px;fill:#f59e0b">No auth</text>
+
+      <!-- IoT Sensor -->
+      <rect x="488" y="157" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="527" y="173" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT Sensor</text>
+      <text x="527" y="187" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.11</text>
+      <text x="527" y="199" style="font-family:var(--mono);font-size:11px;fill:#3d4455">5s poll</text>
+
+      <!-- Legacy OS — highlighted as the challenge target -->
+      <rect x="226" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#ef4444" stroke-width="1.5"/>
+      <!-- Warning icon -->
+      <text x="232" y="372" style="font-family:var(--mono);font-size:14px;fill:#ef4444">&#9888;</text>
+      <text x="252" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Legacy OS</text>
+      <text x="252" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.10</text>
+      <text id="leg-st" x="252" y="398" style="font-family:var(--mono);font-size:11px;fill:#ef4444">EOL / Target</text>
+
+      <!-- PLC -->
+      <rect x="348" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <text x="385" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">PLC</text>
+      <text x="385" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.11</text>
+      <text x="385" y="398" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Port 502</text>
+
+      <!-- Intra-OT link: limited communication -->
+      <path d="M 332 381 L 348 381" fill="none" stroke="#f59e0b" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <text x="296" y="398" style="font-family:var(--mono);font-size:8px;fill:#f59e0b;font-style:italic">limited comm</text>
+
+      </svg>
+
+      <div style="display:flex;gap:20px;font-size:11px;color:#6b7585;margin-top:10px;flex-wrap:wrap;align-items:center;font-family:var(--mono)">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#00e5a0" stroke-width="2" stroke-dasharray="8 5"/></svg>
+          Active traffic
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 4"/></svg>
+          Blocked
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#ef4444" stroke-width="1.5"/></svg>
+          Challenge target
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+
+// -- CONTROL SOCKET ------------------------------------------------
+const ctrlSocket = io({ query: { container: 'control' } });
+ctrlSocket.on('scenarioChanged', () => { window.location.href = '/'; });
+
+// -- STATE ---------------------------------------------------------
+const state = {
+  currentStep: 0,
+  completedSteps: new Set(),
+  formData: {},
+  validationPassed: false,
+};
+
+const STEPS = [
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief'     },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Enumerate running services'  },
+  { id: 'theory',   title: 'Theory',               sub: 'Understand legacy OS risks'  },
+  { id: 'risk',     title: 'Risk Assessment',      sub: 'Document assets & CVEs'      },
+  { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request'       },
+  { id: 'mitigate', title: 'Apply Fix',            sub: 'Harden the legacy system'    },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm services disabled'   },
+];
+
+// -- NETWORK MAP ---------------------------------------------------
+// s1 state is shown statically — OT is blocked from corporate.
+const sdesc = document.getElementById('sdesc');
+if (sdesc) {
+  sdesc.textContent = 'S1 — Network segmentation active. OT zone is isolated from Corporate. Challenge: harden the Legacy OS inside the OT segment.';
+  sdesc.style.borderLeftColor = '#5ba3d9';
+}
+
+// -- TERMINAL ------------------------------------------------------
+let socket;
+const term = new Terminal({
+  cursorBlink: true,
+  fontFamily: "'Share Tech Mono', monospace",
+  fontSize: 13,
+  theme: { background:'#0d0f12', foreground:'#d4dae8', cursor:'#00e5a0', green:'#00e5a0', brightGreen:'#00ffb3' }
+});
+term.open(document.getElementById('terminal-wrap'));
+term.onData(data => { if (socket && socket.connected) socket.emit('input', data); });
+
+function switchContainer() {
+  const name = document.getElementById('container-select').value;
+  if (socket) socket.disconnect();
+  term.clear();
+  term.write(`\r\n\x1b[33m[Connecting to ${name}...]\x1b[0m\r\n`);
+  socket = io({ query: { container: name } });
+  socket.on('output', d => term.write(d));
+  socket.on('connect', () => term.write(`\x1b[32m[Connected]\x1b[0m\r\n\r\n`));
+}
+switchContainer();
+
+// -- TABS ----------------------------------------------------------
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
+  const map = { guide:'pane-guide', terminal:'pane-terminal', theory:'pane-theory', network:'pane-network' };
+  document.getElementById(map[tab]).classList.add('active');
+}
+
+// -- WORKFLOW ------------------------------------------------------
+function renderSteps() {
+  const container = document.getElementById('workflow-steps');
+  container.innerHTML = STEPS.map((s, i) => {
+    let cls = '';
+    if (state.completedSteps.has(i)) cls = 'done';
+    else if (i === state.currentStep) cls = 'active';
+    else if (i > state.currentStep) cls = 'locked';
+    return `
+      <div class="step ${cls}" onclick="goToStep(${i})">
+        <div class="step-num">${state.completedSteps.has(i) ? '&#10003;' : i+1}</div>
+        <div class="step-info">
+          <div class="step-title">${s.title}</div>
+          <div class="step-sub">${s.sub}</div>
+        </div>
+      </div>`;
+  }).join('');
+  const done = state.completedSteps.size;
+  document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
+  document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
+}
+
+function goToStep(i) {
+  if (i > state.currentStep) return;
+  state.currentStep = i;
+  renderSteps();
+  renderStepContent();
+}
+
+function completeStep(i) {
+  state.completedSteps.add(i);
+  if (i + 1 < STEPS.length) state.currentStep = i + 1;
+  renderSteps();
+  renderStepContent();
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab')[0].classList.add('active');
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-guide').classList.add('active');
+}
+
+// -- STEP CONTENT --------------------------------------------------
+function renderStepContent() {
+  const renders = [
+    renderStep0, renderStep1, renderStep2, renderStep3,
+    renderStep4, renderStep5, renderStep6,
+  ];
+  document.getElementById('step-content').innerHTML = renders[state.currentStep]();
+}
+
+function renderStep0() { return `
+  <div class="task-card">
+    <div class="task-card-label">&#128203; Task Assignment — From: Security Operations</div>
+    <h3>Legacy OT System Hardening</h3>
+    <p>Network segmentation is now in place. However, a follow-up audit has identified a high-risk asset inside the OT zone: the <strong>Legacy OS</strong> (172.22.0.10) is running Ubuntu 18.04 — an end-of-life system that has not received security patches since April 2023.</p>
+    <p style="margin-top:10px;">The system is currently running <strong>telnet</strong> (port 23) and <strong>Samba with SMBv1 enabled</strong>. Both services are known to carry critical vulnerabilities (CVE-2017-0144). Since patching is not possible, implement compensating controls to reduce the attack surface.</p>
+  </div>
+  <div class="section-label">Expected Outcomes</div>
+  <ul class="checklist">
+    <li>Telnet service (port 23) disabled</li>
+    <li>SMBv1 disabled — minimum protocol set to SMB2</li>
+    <li>Host-based iptables INPUT rules applied on legacy_os</li>
+    <li>PLC can still communicate with Legacy OS (intra-OT traffic unaffected)</li>
+  </ul>
+  <div style="margin-top:24px;">
+    <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge &amp; Start &#8594;</button>
+  </div>`; }
+
+function renderStep1() { return `
+  <div class="section-label">Step 2 — Reconnaissance</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Before you fix it — map the attack surface</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Enumerate running services on Legacy OS</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab, select <span class="highlight">Legacy OS</span>, and run these commands.</p>
+    </div>
+  </div>
+  <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">On Legacy OS (172.22.0.10)</div>
+  <div class="cmd-block">ss -tlnp</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">&#8627; Which ports are listening? Look for :23 (telnet) and :445 (Samba).</p>
+  <div class="cmd-block">ps aux | grep inetd</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">&#8627; Is the telnet super-server (openbsd-inetd) running?</p>
+  <div class="cmd-block">grep -i "min protocol" /etc/samba/smb.conf || echo "SMBv1 not restricted"</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">&#8627; Is SMBv1 already restricted in the Samba configuration?</p>
+  <div class="form-group">
+    <label class="form-label">What services are running? What is the current exposure?</label>
+    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Port 23 (telnet) is open — openbsd-inetd is running. Port 445 shows Samba. smb.conf has no min protocol setting, so SMBv1 is enabled by default..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
+  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
+
+function renderStep2() { return `
+  <div class="section-label">Step 3 — Theory</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Why does this matter?</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">EoL Systems, SMBv1 and Cleartext Protocols</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Ubuntu 18.04 reached end of life in April 2023 — it no longer receives security patches. The running services compound the risk:</p>
+      <ul style="color:var(--text-dim);font-size:13px;line-height:1.7;padding-left:18px;margin-top:6px;">
+        <li><strong>Telnet (port 23)</strong> — transmits credentials and commands in cleartext. Any device on the network can capture them.</li>
+        <li><strong>SMBv1</strong> — vulnerable to CVE-2017-0144 (EternalBlue), which enabled WannaCry and NotPetya. Public exploit code is available.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;margin-top:12px;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">The Fix: Service Hardening + Host-Based Firewall</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Compensating controls when patching is not possible</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">NIST SP 800-82 recommends <strong>service hardening</strong> (disable what you do not need) and a <strong>host-based firewall</strong> as compensating controls for legacy systems that cannot be patched. These reduce the attack surface without requiring OS changes.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:6px;">Full theory is in the <strong>Theory</strong> tab. The <strong>Network Map</strong> shows the OT segment where the legacy OS lives.</p>
+    </div>
+  </div>
+  <div style="margin-top:20px;">
+    <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue &#8594;</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Read Theory &#8599;</button>
+  </div>`; }
+
+function renderStep3() { return `
+  <div class="section-label">Step 4 — Risk Assessment</div>
+  <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Document the specific risk posed by the legacy OS before making any changes. Identify the CVEs, assess the impact, and record your proposed mitigations.</p>
+  <div class="risk-grid">
+    <div class="risk-cell">
+      <div class="risk-cell-label">Asset at Risk</div>
+      <strong>Legacy OS (172.22.0.10)</strong><br>
+      <span style="font-size:11px;color:var(--text-dim)">Ubuntu 18.04 EoL, OT zone</span>
+    </div>
+    <div class="risk-cell">
+      <div class="risk-cell-label">Current Exposure</div>
+      <span class="risk-badge risk-high">HIGH</span>
+    </div>
+    <div class="risk-cell">
+      <div class="risk-cell-label">Known CVE</div>
+      <strong>CVE-2017-0144</strong><br>
+      <span style="font-size:11px;color:var(--text-dim)">EternalBlue — SMBv1 RCE</span>
+    </div>
+    <div class="risk-cell">
+      <div class="risk-cell-label">CVSS Score</div>
+      <span class="risk-badge risk-high">9.8 CRITICAL</span>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Describe the threat scenario</label>
+    <textarea class="form-textarea" id="risk-threat" placeholder="e.g. An attacker already inside the OT zone (or pivoting via a misconfigured conduit) could exploit EternalBlue on the legacy OS, gain remote code execution, and move laterally to the PLC..."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Business impact if exploited</label>
+    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Compromise of the legacy OS could give an attacker a persistent foothold in the OT zone, from which they could issue commands to the PLC, disrupt production, or cause equipment damage..."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Proposed mitigations</label>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. 1) Disable telnet (stop openbsd-inetd). 2) Set min protocol = SMB2 in smb.conf to disable SMBv1. 3) Apply iptables INPUT rules to restrict inbound connections to OT zone only..."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
+
+function renderStep4() { return `
+  <div class="section-label">Step 5 — Change Authorization</div>
+  <div class="task-card" style="border-left-color:var(--accent)">
+    <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
+    <h3>Security Hardening — Legacy OS</h3>
+    <p>All changes to OT systems require a formal authorization ticket. Document what you will do, the expected impact on operations, and your rollback plan.</p>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Change Description</label>
+    <textarea class="form-textarea" id="cr-desc" placeholder="e.g. Disable telnet service (openbsd-inetd), set Samba minimum protocol to SMB2, apply iptables INPUT DROP policy on legacy_os..."></textarea>
+  </div>
+  <div class="risk-grid">
+    <div class="form-group">
+      <label class="form-label">Expected impact on operations</label>
+      <select class="form-select" id="cr-downtime">
+        <option value="none">None — PLC communication unaffected</option>
+        <option value="brief">Brief service disruption (&lt;5 min)</option>
+        <option value="planned">Requires planned maintenance window</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Change Risk Level</label>
+      <select class="form-select" id="cr-risk">
+        <option value="low" selected>Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Rollback plan</label>
+    <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Re-enable inetd: 'service openbsd-inetd start'. Remove SMB min protocol line from smb.conf and restart smbd. Flush iptables: 'iptables -F INPUT && iptables -P INPUT ACCEPT'"></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
+
+function renderStep5() { return `
+  <div class="section-label">Step 6 — Apply the Fix</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Technical Mitigation</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Harden the Legacy OS Container</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab and select the <span class="highlight">Legacy OS</span> container. Apply these changes in order.</p>
+    </div>
+  </div>
+
+  <div style="margin:16px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">1. Disable the telnet service</div>
+  <div class="cmd-block">service openbsd-inetd stop</div>
+  <div style="margin:4px 0 12px;font-size:12px;color:var(--text-dim)">&#8627; Verify: <code style="font-family:var(--mono);font-size:12px;color:var(--accent)">ss -tlnp | grep :23</code> — should return nothing.</div>
+
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">2. Disable SMBv1 in Samba</div>
+  <div class="cmd-block">echo "min protocol = SMB2" &gt;&gt; /etc/samba/smb.conf</div>
+  <div class="cmd-block">service smbd restart</div>
+  <div style="margin:4px 0 12px;font-size:12px;color:var(--text-dim)">&#8627; Verify: <code style="font-family:var(--mono);font-size:12px;color:var(--accent)">grep "min protocol" /etc/samba/smb.conf</code></div>
+
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">3. Apply host-based iptables rules</div>
+  <div class="cmd-block">iptables -A INPUT -i lo -j ACCEPT</div>
+  <div class="cmd-block">iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</div>
+  <div class="cmd-block">iptables -A INPUT -s 172.22.0.0/24 -j ACCEPT</div>
+  <div class="cmd-block">iptables -P INPUT DROP</div>
+
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">4. Verify the result</div>
+  <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
+
+  <div style="margin-top:20px;">
+    <button class="btn btn-primary" onclick="completeStep(5)">Changes Applied — Continue to Validation &#8594;</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
+  </div>`; }
+
+function renderStep6() { return `
+  <div class="section-label">Step 7 — Validation</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Automated service check</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Confirm Telnet Is Disabled</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">The system will check whether port 23 is still listening on the Legacy OS. A passing result means the telnet service was successfully stopped.</p>
+    </div>
+  </div>
+  <div class="form-group" style="margin-top:16px;">
+    <label class="form-label">Evidence — paste output of ss -tlnp from Legacy OS</label>
+    <textarea class="form-textarea" id="evidence-services" placeholder="Paste the output of: ss -tlnp&#10;Expected: port 23 should NOT appear."></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
+    <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
+  </div>
+  <div class="validation-result" id="validation-result"></div>`; }
+
+// -- ACTIONS -------------------------------------------------------
+function saveAndNext(fieldId, stateKey, stepIndex) {
+  const val = document.getElementById(fieldId)?.value?.trim();
+  if (!val) { alert('Please fill in the field before continuing.'); return; }
+  state.formData[stateKey] = val;
+  completeStep(stepIndex);
+}
+
+function saveRiskAndNext() {
+  const threat     = document.getElementById('risk-threat')?.value?.trim();
+  const impact     = document.getElementById('risk-impact')?.value?.trim();
+  const mitigation = document.getElementById('risk-mitigation')?.value?.trim();
+  if (!threat || !impact || !mitigation) { alert('Please complete all risk assessment fields.'); return; }
+  state.formData.risk = { threat, impact, mitigation };
+  completeStep(3);
+}
+
+async function runValidation() {
+  const result = document.getElementById('validation-result');
+  result.classList.add('visible');
+  result.innerHTML = `<span style="color:var(--text-dim)">Checking port 23 on legacy_os... (this may take a few seconds)</span>`;
+
+  try {
+    const r = await fetch('/api/validate/challenge2', { method: 'POST' });
+    const data = await r.json();
+    if (data.success) {
+      result.innerHTML = `
+        <div class="validation-pass">
+          &#10003; VALIDATION PASSED<br><br>
+          Telnet (port 23) is no longer listening on the Legacy OS.<br>
+          Legacy system exposure reduced.<br><br>
+          <span style="color:var(--text-dim)">Challenge 2 complete. Well done!</span>
+        </div>`;
+      state.validationPassed = true;
+      // Update the Legacy OS label in the network map to show HARDENED
+      const legSt = document.getElementById('leg-st');
+      if (legSt) { legSt.textContent = 'HARDENED'; legSt.style.fill = '#00e5a0'; }
+      setTimeout(() => completeStep(6), 2000);
+    } else {
+      result.innerHTML = `
+        <div class="validation-fail">
+          &#10007; VALIDATION FAILED<br><br>
+          ${data.message}<br><br>
+          Make sure you ran <span style="color:var(--accent)">service openbsd-inetd stop</span> on the <strong>Legacy OS</strong> container.
+        </div>`;
+    }
+  } catch (e) {
+    result.innerHTML = `<div class="validation-fail">&#10007; Could not reach the server. Is the management container running?</div>`;
+  }
+}
+
+// -- INIT ----------------------------------------------------------
+renderSteps();
+renderStepContent();
+
+</script>
+</body>
+</html>
