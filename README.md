@@ -11,12 +11,10 @@ chmod +x switch-scenario.sh
 
 2. build container for the first challenge:
   ```bash
-      cd scenarios/s0/ 
-      docker compose up -d --build
+     ./launch.sh
   ```
 3. Access http://localhost:3000
 4. Play with the terminals!
 
-Current state: scenario 0 only
-First challenge: Apply network segmentation
+Current state: scenario 0 and 1 should be launched accordingly.
 
