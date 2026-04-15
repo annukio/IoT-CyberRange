@@ -19,8 +19,8 @@
       --warn:       #f59e0b;
       --danger:     #ef4444;
       --text:       #d4dae8;
-      --text-dim:   #6b7585;
-      --text-faint: #3d4455;
+      --text-dim:   #a2aaba;
+      --text-faint: #6b7585;
       --mono:       'Share Tech Mono', monospace;
       --sans:       'Barlow', sans-serif;
     }
@@ -122,16 +122,154 @@
     .task-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
     .task-card p { color: var(--text-dim); line-height: 1.6; font-size: 13px; }
 
-    .theory-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
-    .theory-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
-    .theory-block h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-    .theory-block p { color: var(--text-dim); font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
-    .theory-block ul { color: var(--text-dim); font-size: 13px; line-height: 1.7; padding-left: 18px; }
-    .theory-block li { margin-bottom: 4px; }
+    /* -- COLLAPSIBLE THEORY BLOCKS ----------------------------- */
+    .theory-block {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .theory-block summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .theory-block summary::-webkit-details-marker { display: none; }
+    .theory-block summary:hover { background: rgba(255,255,255,0.03); }
+    .theory-block[open] summary { border-bottom: 1px solid var(--border); }
 
-    .cmd-block { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--accent); margin: 10px 0; }
+    .theory-summary-left { display: flex; flex-direction: column; gap: 3px; }
+    .theory-block-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .theory-block-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .theory-arrow {
+      font-size: 11px;
+      color: var(--text-faint);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .theory-block[open] .theory-arrow { transform: rotate(180deg); color: var(--accent); }
+
+    .theory-body { padding: 16px 18px; }
+    .theory-body h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+    .theory-body h4:first-child { margin-top: 0; }
+    .theory-body p { color: var(--text-dim); font-size: 13px; line-height: 1.75; margin-bottom: 10px; }
+    .theory-body p:last-child { margin-bottom: 0; }
+    .theory-body ul, .theory-body ol { color: var(--text-dim); font-size: 13px; line-height: 1.75; padding-left: 18px; margin-bottom: 10px; }
+    .theory-body li { margin-bottom: 4px; }
+    .theory-body strong { color: var(--text); font-weight: 600; }
+    .theory-body code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--accent);
+    }
+
+    .cmd-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      margin: 8px 0;
+      position: relative;
+    }
     .cmd-block::before { content: '$'; color: var(--text-faint); margin-right: 8px; }
 
+    .cmd-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 14px 0 4px;
+    }
+    .cmd-label:first-child { margin-top: 0; }
+
+    .theory-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 10px 0;
+    }
+    .theory-table th {
+      background: var(--bg);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border2);
+    }
+    .theory-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .theory-table tr:last-child td { border-bottom: none; }
+    .theory-table td:first-child { font-family: var(--mono); color: var(--warn); font-size: 11px; }
+    .theory-table td:nth-child(2) { color: var(--text); font-weight: 600; font-size: 12px; }
+
+    .cite-ref {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-faint);
+      vertical-align: super;
+      margin-left: 1px;
+    }
+
+    .bib-list { list-style: none; padding: 0; }
+    .bib-list li {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .bib-list li:last-child { border-bottom: none; }
+    .bib-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      flex-shrink: 0;
+      min-width: 24px;
+    }
+    .bib-url {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent-dim);
+      word-break: break-all;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* -- GUIDE COMPONENTS -------------------------------------- */
     .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
@@ -183,7 +321,7 @@
 </head>
 <body>
 
-<!-- -- TOP BAR ----------------------------------------------------- -->
+<!---- TOP BAR ----------------------------------------------------- -->
 <div class="topbar">
   <div class="topbar-logo">ICS Cyber Range</div>
   <div class="topbar-divider"></div>
@@ -196,7 +334,7 @@
 
 <div class="main">
 
-  <!-- -- LEFT: WORKFLOW SIDEBAR -------------------------------- -->
+  <!---- LEFT: WORKFLOW SIDEBAR -------------------------------- -->
   <div class="panel-left">
     <div class="panel-section-header">Challenge 1 - Network Segmentation</div>
 
@@ -210,7 +348,7 @@
     <div class="workflow-steps" id="workflow-steps"></div>
   </div>
 
-  <!-- -- CENTER: TABS + CONTENT -------------------------------- -->
+  <!---- CENTER: TABS + CONTENT -------------------------------- -->
   <div class="panel-center">
     <div class="tab-bar">
       <div class="tab active"  onclick="switchTab('guide')">Guide</div>
@@ -238,45 +376,283 @@
 
     <!-- THEORY -->
     <div class="content-pane" id="pane-theory">
-      <div class="section-label">Background Reading</div>
 
-      <div class="theory-block">
-        <div class="theory-block-label">IT/OT Convergence</div>
-        <h4>Why Industrial Networks Are Different</h4>
-        <p>Operational Technology (OT) networks control physical processes: conveyor belts, pressure valves, PLCs. Unlike IT systems, a failure here can cause physical damage or safety incidents. Historically, OT networks were <strong>completely isolated from corporate IT</strong> (also called air-gapped).</p>
-        <p>As factories modernized (Industry 4.0), IT and OT became interconnected for efficiency. This eliminated the air gap and introduced new attack surfaces without updating security practices.</p>
-      </div>
+      <div class="section-label">Challenge 1 - Background Reading</div>
 
-      <div class="theory-block">
-        <div class="theory-block-label">NIST SP 800-82 - ICS Security Guide</div>
-        <h4>Network Segmentation Recommendations</h4>
-        <p>NIST recommends a <span class="highlight">Defense-in-Depth</span> model with clearly defined zones:</p>
-        <ul>
-          <li>Enterprise Zone (Corporate IT)</li>
-          <li>DMZ (Demilitarized Zone) - controlled buffer between IT and OT</li>
-          <li>Manufacturing Zone (OT/ICS)</li>
-          <li>Field Devices (PLCs, sensors)</li>
-        </ul>
-        <p>Traffic between zones should be <strong>explicitly allowed</strong> by policy, with all other traffic blocked by default. This is the Allowlist model.</p>
-      </div>
+      <!-- SECTION 1 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 1 &mdash; IT/OT Convergence</span>
+            <span class="theory-block-title">IT/OT Convergence and the Flat Network Problem</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Are IT and OT Networks?</h4>
+          <p>Information Technology (IT) refers to the systems used to process, store, and transmit data: servers, workstations, databases, and corporate applications. Operational Technology (OT) refers to hardware and software that monitors or controls physical equipment and processes: Programmable Logic Controllers (PLCs), sensors, Human-Machine Interfaces (HMIs), and Supervisory Control and Data Acquisition (SCADA) systems.<span class="cite-ref">[1]</span></p>
+          <p>Historically, OT networks were physically isolated from corporate IT networks, a configuration known as an <strong>air gap</strong>. This isolation was the primary security boundary. Because OT systems were never designed to be connected to external networks, they lack many of the security features present in modern IT systems: authentication, encryption, and patch management are often absent or minimal.<span class="cite-ref">[1]</span></p>
 
-      <div class="theory-block">
-        <div class="theory-block-label">MITRE ATT&amp;CK for ICS - T0822</div>
-        <h4>Lateral Movement via Network Pivoting</h4>
-        <p>In a flat network, an attacker who compromises the Corporate WS can pivot directly to OT assets. MITRE documents this under <span class="highlight">T0822 - Exploitation of Remote Services</span> in the ICS matrix.</p>
-        <p>A properly segmented network forces an attacker to cross a controlled boundary - creating detection opportunities and limiting attack surface.</p>
-      </div>
+          <h4>Industry 4.0 and the End of the Air Gap</h4>
+          <p>As industrial environments modernized under the concept of Industry 4.0, organizations began connecting OT systems to corporate IT networks to enable remote monitoring, data analytics, and centralized management. This eliminated the air gap and introduced IT-level network exposure to OT devices that were never designed to handle it.<span class="cite-ref">[2]</span></p>
+          <p>In a <strong>flat network</strong>, all devices across all zones share the same network segment and can communicate with each other without restriction. A corporate workstation and a PLC controlling a production line have the same level of network access. This means that if any device on the network is compromised, an attacker can move freely to any other device, including critical industrial controllers.</p>
 
-      <div class="theory-block">
-        <div class="theory-block-label">COMMAND: iptables Fundamentals</div>
-        <h4>How Linux Packet Filtering Works</h4>
-        <p>iptables controls packets at the kernel level using chains of rules. For routing between networks, the <span class="highlight">FORWARD</span> chain applies - it processes packets that pass <em>through</em> the host.</p>
-        <p>A safe default policy is <code>DROP</code> - block everything, then explicitly allow what is needed:</p>
-        <div class="cmd-block">iptables -P FORWARD DROP</div>
-        <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
-        <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
-        <p>The <code>ESTABLISHED,RELATED</code> rule allows return traffic for connections that were already permitted - essential for TCP to function correctly.</p>
-      </div>
+          <h4>Why This Is a Security Problem</h4>
+          <p>NIST Special Publication 800-82 describes ICS security as distinct from conventional IT security for several key reasons:<span class="cite-ref">[1]</span></p>
+          <ul>
+            <li><strong>Safety consequences:</strong> A failure in an OT system can cause physical damage, equipment destruction, or safety incidents affecting personnel.</li>
+            <li><strong>Availability requirements:</strong> OT systems often must operate continuously (24/7). Downtime for patching or rebooting is frequently not acceptable.</li>
+            <li><strong>Legacy systems:</strong> Many OT components run end-of-life operating systems (such as Ubuntu 18.04 LTS, which reached end of life in April 2023) and cannot be updated without replacing expensive hardware.</li>
+            <li><strong>Long lifecycles:</strong> Industrial equipment has operational lifespans of 20 to 30 years, far exceeding typical IT refresh cycles.</li>
+          </ul>
+          <p>These characteristics mean that the standard IT security approach of regular patching and frequent updates cannot be directly applied to OT environments. Network segmentation becomes the primary compensating control.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 2 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 2 &mdash; NIST SP 800-82 / IEC 62443</span>
+            <span class="theory-block-title">Network Segmentation: Concepts and Models</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Is Network Segmentation?</h4>
+          <p>Network segmentation is the practice of dividing a network into distinct zones and controlling the traffic that flows between them. Each zone groups devices that share a similar function, trust level, and security requirement. Traffic between zones is controlled by a firewall or similar enforcement point, and by default, all cross-zone traffic is denied unless explicitly permitted.<span class="cite-ref">[1]</span></p>
+          <p>The goal is to limit the blast radius of a security incident: if an attacker compromises a device in one zone, segmentation prevents them from freely reaching devices in other zones.</p>
+
+          <h4>The Purdue Reference Model</h4>
+          <p>The Purdue Reference Model defines a hierarchical architecture with five levels. It is referenced in NIST SP 800-82 as the standard framework for understanding the boundaries between enterprise and control layers.<span class="cite-ref">[1][3]</span></p>
+          <table class="theory-table">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Zone Name</th>
+                <th>Examples</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>L4</td><td>Enterprise Zone</td><td>Corporate IT, ERP, email</td></tr>
+              <tr><td>L3</td><td>Manufacturing Operations Zone</td><td>Historians, MES, supervisory servers</td></tr>
+              <tr><td>L2</td><td>Supervisory Control Zone</td><td>HMIs, SCADA servers, engineering workstations</td></tr>
+              <tr><td>L1</td><td>Basic Control Zone</td><td>PLCs, RTUs, DCS controllers</td></tr>
+              <tr><td>L0</td><td>Field Devices Zone</td><td>Sensors, actuators, valves</td></tr>
+            </tbody>
+          </table>
+          <p>The most critical boundary is between Level 3 and Level 4: this is where IT and OT meet, and it is where a DMZ (Demilitarized Zone) should be placed to mediate all traffic.</p>
+
+          <h4>Defense-in-Depth</h4>
+          <p>NIST SP 800-82 recommends a <strong>Defense-in-Depth</strong> approach for ICS networks.<span class="cite-ref">[1]</span> This means applying multiple layers of security controls so that the failure of one layer does not expose critical assets. In the context of network segmentation:</p>
+          <ul>
+            <li>The first layer is the perimeter firewall between the corporate network and the DMZ.</li>
+            <li>The second layer is the firewall between the DMZ and the OT network.</li>
+            <li>Additional layers include host-based firewalls on OT devices, intrusion detection systems, and strict access controls.</li>
+          </ul>
+          <p>Each boundary forces an attacker to defeat an additional control, and each crossing creates an opportunity for detection.</p>
+
+          <h4>Zone and Conduit Model (IEC 62443)</h4>
+          <p>The IEC 62443 standard introduces the concept of <strong>zones</strong> and <strong>conduits</strong>.<span class="cite-ref">[2]</span></p>
+          <ul>
+            <li>A <strong>zone</strong> is a group of assets that share the same security requirements and trust level.</li>
+            <li>A <strong>conduit</strong> is the communication channel between two zones, including all the controls that govern what traffic is allowed to pass.</li>
+          </ul>
+          <p>Every conduit must be explicitly designed, and all traffic not defined in the conduit policy must be denied by default. This is the <strong>allowlist model</strong>: block everything, then permit only what is required for operations.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 3 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 3 &mdash; MITRE ATT&CK for ICS</span>
+            <span class="theory-block-title">Threat Landscape: How Attackers Move from IT to OT</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Lateral Movement and Network Pivoting</h4>
+          <p>MITRE ATT&CK for ICS documents tactics and techniques used by threat actors against industrial control systems. Technique <strong>T0886 (Remote Services)</strong> describes how adversaries use legitimate remote services to move through a network after gaining initial access.<span class="cite-ref">[4]</span></p>
+          <p>In a flat network, an attacker who gains access to a corporate workstation (through a phishing email or a compromised credential) can immediately reach OT assets using standard network scanning tools. No additional exploitation is needed: the network itself provides unrestricted access.</p>
+          <p>With segmentation in place, the attacker must cross a firewall boundary. This requires either exploiting a permitted conduit, compromising a device inside the OT zone directly, or finding a misconfigured rule. Each step takes more time, generates more detectable network activity, and requires more sophisticated capabilities.</p>
+
+          <h4>Real-World Examples</h4>
+          <p>The <strong>2015 Ukraine Power Grid</strong> attack demonstrated this attack path. Attackers compromised corporate IT systems using spear phishing, then moved laterally through the network and reached ICS components used to control substation breakers, causing power outages affecting approximately 225,000 customers. NIST SP 800-82 cites this incident as a key motivator for enforcing strict IT/OT segmentation.<span class="cite-ref">[1]</span></p>
+          <p>The <strong>Triton/TRISIS malware</strong> (2017) targeted Safety Instrumented Systems (SIS) in an oil and gas facility. The attackers had been present in the IT network for an extended period before pivoting to the OT network and reaching the SIS controllers. The absence of robust segmentation between IT and OT layers was a contributing factor.<span class="cite-ref">[4]</span></p>
+
+          <h4>Protocol-Level Risk: Modbus</h4>
+          <p>PLCs commonly use the <strong>Modbus protocol</strong> on TCP port 502. Modbus was designed in 1979 for serial communication in isolated environments and has no built-in authentication, no encryption, and no authorization mechanism.<span class="cite-ref">[1]</span></p>
+          <p>Any device on the network that can reach port 502 of a PLC can send it commands, including commands to stop a process, change setpoints, or disable safety functions. This is why blocking unauthorized network access to OT devices is critical even before any application-layer security is considered.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 4 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 4 &mdash; Technical Reference</span>
+            <span class="theory-block-title">Firewall Configuration: iptables on Linux</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Is iptables?</h4>
+          <p>iptables is a Linux kernel-level packet filtering framework. It evaluates network packets against a set of rules and decides whether to accept, drop, or forward each packet. It is the standard tool for configuring firewall rules on Linux systems acting as routers or gateways.<span class="cite-ref">[5]</span></p>
+          <p>Rules are organized into tables, and within each table into chains. For traffic that passes through a Linux host acting as a router (from one network interface to another), the relevant chain is <code>FORWARD</code>.</p>
+
+          <h4>Chains and Default Policies</h4>
+          <p>Each chain has a default policy: the action taken when no rule matches a packet.</p>
+          <ul>
+            <li><strong>ACCEPT</strong> by default: all packets are allowed unless a rule blocks them (blocklist model). This is insecure as a default for a segmentation firewall.</li>
+            <li><strong>DROP</strong> by default: all packets are silently discarded unless a rule allows them (allowlist model). This is the secure default for ICS network boundaries.</li>
+          </ul>
+          <p>Setting the default policy to DROP establishes the allowlist model:</p>
+          <div class="cmd-block">iptables -P FORWARD DROP</div>
+          <p>After this command, only packets that match an explicit ACCEPT rule will be forwarded. All other traffic is silently dropped.</p>
+
+          <h4>Stateful Packet Inspection</h4>
+          <p>iptables supports stateful inspection through the connection tracking module (<code>conntrack</code>). A stateful rule can distinguish between:</p>
+          <ul>
+            <li><strong>NEW:</strong> A packet starting a new connection.</li>
+            <li><strong>ESTABLISHED:</strong> A packet belonging to a connection that was already accepted.</li>
+            <li><strong>RELATED:</strong> A packet related to an existing connection (for example, an ICMP error response).</li>
+          </ul>
+          <p>The following rule is required for TCP to work correctly after a DROP default policy, because it allows the return traffic for connections that were already established:</p>
+          <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
+          <p>Without this rule, only the outbound packets of a permitted connection would be forwarded; the server's replies would be dropped, breaking TCP.</p>
+
+          <h4>Applying Segmentation Rules (Step by Step)</h4>
+          <div class="cmd-label">1. Set the default FORWARD policy to DROP</div>
+          <div class="cmd-block">iptables -P FORWARD DROP</div>
+          <div class="cmd-label">2. Allow return traffic for established connections</div>
+          <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
+          <div class="cmd-label">3. Block traffic between the Corporate zone and the OT zone (both directions)</div>
+          <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
+          <div class="cmd-block">iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP</div>
+          <div class="cmd-label">4. Verify the applied rules</div>
+          <div class="cmd-block">iptables -L FORWARD -v --line-numbers</div>
+          <p>The <code>-v</code> flag shows packet and byte counters (useful for confirming that rules are matching traffic). The <code>--line-numbers</code> flag shows the rule number, which is needed if a rule must be deleted or reordered.</p>
+
+          <h4>Rule Order Matters</h4>
+          <p>iptables evaluates rules in order from top to bottom and stops at the first matching rule. If a broad ACCEPT rule appears before a specific DROP rule, the DROP rule will never be reached. Always verify the order with <code>iptables -L FORWARD --line-numbers</code> after making changes.</p>
+
+          <h4>Rollback</h4>
+          <p>To remove all rules from the FORWARD chain and return to an open state, run:</p>
+          <div class="cmd-block">iptables -F FORWARD</div>
+          <p>This flushes all rules from the chain. The default policy set with <code>-P</code> remains in effect, so if it was set to DROP, the chain will still drop everything until the policy is also reset.</p>
+        </div>
+      </details>
+
+      <!-- SECTION 5 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 5 &mdash; NIST SP 800-30</span>
+            <span class="theory-block-title">Risk Assessment in an OT Context</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Why Risk Assessment Matters Before Making Changes</h4>
+          <p>Before applying any change to a production network, particularly an OT network, a formal risk assessment must be conducted. This serves two purposes: it ensures that the impact of the change is understood before it is applied, and it creates an auditable record that the change was authorized based on documented reasoning.<span class="cite-ref">[1][6]</span></p>
+          <p>A risk assessment for a firewall change in an OT environment must consider both the risk of not making the change (the current exposure) and the risk of making the change (potential disruption to operational processes that depend on network connectivity).</p>
+
+          <h4>Risk Components</h4>
+          <p>A standard risk assessment considers three components:<span class="cite-ref">[6]</span></p>
+          <ul>
+            <li><strong>Threat:</strong> Who or what could exploit the vulnerability? In this lab, a threat could be an attacker who has compromised a corporate workstation and is attempting to reach the OT zone.</li>
+            <li><strong>Vulnerability:</strong> What weakness exists that the threat could exploit? The absence of network segmentation means any device on the corporate network can reach the PLC and Legacy OS without restriction.</li>
+            <li><strong>Impact:</strong> What would the consequence be if the vulnerability were exploited? For OT assets, impact categories include production downtime, equipment damage, safety incidents, and regulatory consequences.</li>
+          </ul>
+          <p>Risk is a function of likelihood (how probable is it that the threat exploits the vulnerability?) and impact (how severe are the consequences?). High-exposure OT assets with no access controls and known protocol weaknesses represent a high-likelihood, high-impact scenario.</p>
+
+          <h4>Change Management</h4>
+          <p>In operational environments, firewall rule changes are classified as changes to production systems and require formal authorization before implementation. A change request typically documents:</p>
+          <ul>
+            <li>A description of the change and the specific rules to be applied.</li>
+            <li>The business justification (the risk being mitigated).</li>
+            <li>The expected impact on operations, including any temporary downtime.</li>
+            <li>A rollback plan: the exact steps to undo the change if something goes wrong.</li>
+            <li>Approval from a responsible authority before the change is made.</li>
+          </ul>
+        </div>
+      </details>
+
+      <!-- SECTION 6 -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 6 &mdash; Validation</span>
+            <span class="theory-block-title">Confirming the Fix Works</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Testing Connectivity After Segmentation</h4>
+          <p>After applying firewall rules, it is essential to verify that they work as intended. This involves both positive testing (blocked traffic is actually blocked) and negative testing (permitted traffic still works).</p>
+          <div class="cmd-label">Test that the PLC is no longer reachable from the Corporate zone</div>
+          <div class="cmd-block">ping -c 3 172.22.0.11</div>
+          <p>If segmentation is working correctly, this should produce 100% packet loss or a "Destination Host Unreachable" message.</p>
+          <div class="cmd-label">Test that general connectivity is unaffected</div>
+          <div class="cmd-block">ping -c 3 8.8.8.8</div>
+          <p>This confirms that the FORWARD rules are not inadvertently blocking traffic that should be allowed.</p>
+
+          <h4>Reading iptables Output</h4>
+          <p>The output of <code>iptables -L FORWARD -v --line-numbers</code> has the following structure:</p>
+          <div class="cmd-block" style="white-space:pre;font-size:11px;padding:12px 14px;">Chain FORWARD (policy DROP)
+num   pkts bytes target  prot  source            destination
+1       45  3780 ACCEPT  all   anywhere          anywhere    state RELATED,ESTABLISHED
+2        0     0 DROP    all   172.20.0.0/24     172.22.0.0/24
+3        0     0 DROP    all   172.22.0.0/24     172.20.0.0/24</div>
+          <ul>
+            <li><strong>policy DROP:</strong> The default action when no rule matches.</li>
+            <li><strong>pkts/bytes:</strong> Counters showing how much traffic each rule has matched. A value of 0 for a DROP rule before testing means no traffic has yet attempted to cross that boundary.</li>
+            <li><strong>target:</strong> The action taken (ACCEPT or DROP).</li>
+            <li><strong>source/destination:</strong> The network ranges the rule applies to.</li>
+          </ul>
+        </div>
+      </details>
+
+      <!-- BIBLIOGRAPHY -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Interested in learning more?</span>
+            <span class="theory-block-title">These are the references and sources used</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <ul class="bib-list">
+            <li>
+              <span class="bib-num">[1]</span>
+              <span>Ross, R., Pillitteri, V., Dempsey, K., Riddle, M., Guissanie, G. (Eds.). (2023). <em>Guide to Industrial Control Systems (ICS) Security</em> (NIST Special Publication 800-82, Revision 3). National Institute of Standards and Technology.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-82r3" target="_blank">https://doi.org/10.6028/NIST.SP.800-82r3</a></span>
+            </li>
+            <li>
+              <span class="bib-num">[2]</span>
+              <span>International Society of Automation / IEC. (2018). <em>Security for Industrial Automation and Control Systems - Part 1-1: Terminology, Concepts and Models</em> (ISA/IEC 62443-1-1). ISA.<br><a class="bib-url" href="https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards" target="_blank">https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards</a></span>
+            </li>
+            <li>
+              <span class="bib-num">[3]</span>
+              <span>Williams, T.J. (1994). The Purdue Enterprise Reference Architecture and Methodology. <em>IFAC Proceedings Volumes, 27</em>(2), 265-274. Adapted for ICS security contexts in NIST SP 800-82 and ISA-99 (IEC 62443) standards.</span>
+            </li>
+            <li>
+              <span class="bib-num">[4]</span>
+              <span>MITRE Corporation. (2024). <em>MITRE ATT&amp;CK for ICS</em>. Techniques referenced: T0886 (Remote Services).<br><a class="bib-url" href="https://attack.mitre.org/matrices/ics/" target="_blank">https://attack.mitre.org/matrices/ics/</a></span>
+            </li>
+            <li>
+              <span class="bib-num">[5]</span>
+              <span>Netfilter Core Team. (2024). <em>iptables - administration tool for IPv4 packet filtering and NAT</em>. The Netfilter Project.<br><a class="bib-url" href="https://netfilter.org/projects/iptables/" target="_blank">https://netfilter.org/projects/iptables/</a></span>
+            </li>
+            <li>
+              <span class="bib-num">[6]</span>
+              <span>National Institute of Standards and Technology. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST Special Publication 800-30, Revision 1). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-30r1" target="_blank">https://doi.org/10.6028/NIST.SP.800-30r1</a></span>
+            </li>
+          </ul>
+        </div>
+      </details>
+
     </div>
 
     <!-- NETWORK MAP -->
@@ -501,7 +877,7 @@ function renderSteps() {
     else if (i > state.currentStep) cls = 'locked';
     return `
       <div class="step ${cls}" onclick="goToStep(${i})">
-        <div class="step-num">${state.completedSteps.has(i) ? '✓' : i+1}</div>
+        <div class="step-num">${state.completedSteps.has(i) ? '&#10003;' : i+1}</div>
         <div class="step-info">
           <div class="step-title">${s.title}</div>
           <div class="step-sub">${s.sub}</div>
@@ -525,7 +901,6 @@ function completeStep(i) {
   if (i + 1 < STEPS.length) state.currentStep = i + 1;
   renderSteps();
   renderStepContent();
-  // Return to Guide tab
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab')[0].classList.add('active');
   document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
@@ -540,7 +915,7 @@ function renderStepContent() {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">📋 Task Assignment - From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment - From: Security Operations</div>
     <h3>Network Segmentation Audit</h3>
     <p>Our OT network was recently connected to the corporate infrastructure to enable remote monitoring of the production line. A routine audit has flagged that <strong>no segmentation controls</strong> are in place between the corporate zone and the OT/IoT zones.</p>
     <p style="margin-top:10px;">Your task is to assess the exposure and apply appropriate firewall rules to isolate the OT environment from direct corporate access.</p>
@@ -552,50 +927,58 @@ function renderStep0() { return `
     <li>Confirm the PLC is no longer reachable from the corporate segment</li>
   </ul>
   <div style="margin-top:24px;">
-    <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge & Start →</button>
+    <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge &amp; Start &#8594;</button>
   </div>`; }
 
 function renderStep1() { return `
   <div class="section-label">Step 2 - Reconnaissance</div>
-  <div class="theory-block">
-    <div class="theory-block-label">Before you fix it - understand the exposure</div>
-    <h4>Verify the current (insecure) state</h4>
-    <p>Switch to the <strong>Terminal</strong> tab, select the <span class="highlight">Corporate Workstation</span>, and run these commands. Document what you observe.</p>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Before you fix it - understand the exposure</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Verify the current (insecure) state</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab, select the <span class="highlight">Corporate Workstation</span>, and run these commands. Document what you observe.</p>
+    </div>
   </div>
   <div style="margin-bottom:8px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">Commands to run</div>
   <div class="cmd-block">ping -c 3 172.22.0.11</div>
-  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">↳ Try to reach the PLC from the Corporate WS. Can you?</p>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">&#8627; Try to reach the PLC from the Corporate WS. Can you?</p>
   <div class="cmd-block">ping -c 3 172.22.0.10</div>
-  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">↳ Try to reach the Legacy OS. Can you?</p>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px">&#8627; Try to reach the Legacy OS. Can you?</p>
   <div class="cmd-block">curl http://172.21.0.10</div>
-  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">↳ Try to reach the IoT API. Do you get a response?</p>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">&#8627; Try to reach the IoT API. Do you get a response?</p>
   <div class="form-group">
     <label class="form-label">What did you observe?</label>
     <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Ping to PLC succeeded with 0% packet loss. Legacy OS responded on port 23 (telnet)..."></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations →</button>
-  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>`; }
+  <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
+  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
   <div class="section-label">Step 3 - Theory</div>
-  <div class="theory-block">
-    <div class="theory-block-label">Why does this matter?</div>
-    <h4>IT/OT Convergence & the Flat Network Problem</h4>
-    <p>In a <strong>flat network</strong>, every device can communicate with every other device without restriction. Today, with IT and OT on the same infrastructure, a single compromised corporate machine can directly interact with industrial controllers.</p>
-    <ul>
-      <li>NIST SP 800-82 recommends strict <strong>zone-based segmentation</strong></li>
-      <li>MITRE ATT&CK ICS documents lateral movement from IT to OT (T0822)</li>
-      <li>The Purdue Reference Model defines security boundaries between enterprise and control layers</li>
-    </ul>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Why does this matter?</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">IT/OT Convergence &amp; the Flat Network Problem</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">In a <strong>flat network</strong>, every device can communicate with every other device without restriction. Today, with IT and OT on the same infrastructure, a single compromised corporate machine can directly interact with industrial controllers.</p>
+      <ul style="color:var(--text-dim);font-size:13px;line-height:1.7;padding-left:18px;margin-top:6px;">
+        <li>NIST SP 800-82 recommends strict <strong>zone-based segmentation</strong></li>
+        <li>MITRE ATT&amp;CK ICS documents lateral movement from IT to OT (T0886)</li>
+        <li>The Purdue Reference Model defines security boundaries between enterprise and control layers</li>
+      </ul>
+    </div>
   </div>
-  <div class="theory-block">
-    <div class="theory-block-label">The Fix: iptables FORWARD Chain</div>
-    <h4>How the firewall will stop this</h4>
-    <p>The firewall container has <code>ip_forward=1</code> enabled - it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
-    <p>Full theory available in the <strong>Theory</strong> tab. The <strong>Network Map</strong> tab shows the current architecture state.</p>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;margin-top:12px;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">The Fix: iptables FORWARD Chain</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">How the firewall will stop this</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">The firewall container has <code style="font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--accent);">ip_forward=1</code> enabled - it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:6px;">Full theory is available in the <strong>Theory</strong> tab. The <strong>Network Map</strong> tab shows the current architecture state.</p>
+    </div>
   </div>
-  <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue →</button>
-  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Read Theory ↗</button>`; }
+  <div style="margin-top:20px;">
+    <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue &#8594;</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Read Theory &#8599;</button>
+  </div>`; }
 
 function renderStep3() { return `
   <div class="section-label">Step 4 - Risk Assessment</div>
@@ -632,12 +1015,12 @@ function renderStep3() { return `
     <label class="form-label">Proposed mitigation</label>
     <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Apply iptables FORWARD DROP rules on the firewall to block all traffic from 172.20.0.0/24 to 172.22.0.0/24..."></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment →</button>`; }
+  <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
   <div class="section-label">Step 5 - Change Authorization</div>
   <div class="task-card" style="border-left-color:var(--accent)">
-    <div class="task-card-label" style="color:var(--accent)">📝 Change Request</div>
+    <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
     <h3>Firewall Rule Implementation</h3>
     <p>In operational environments, all changes to production firewall rules require an authorization ticket. Complete this form to simulate the approval workflow.</p>
   </div>
@@ -667,43 +1050,47 @@ function renderStep4() { return `
     <label class="form-label">Rollback plan</label>
     <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Run 'iptables -F FORWARD' to flush all rules and restore open state..."></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval →</button>`; }
+  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
   <div class="section-label">Step 6 - Apply the Fix</div>
-  <div class="theory-block">
-    <div class="theory-block-label">Technical Mitigation</div>
-    <h4>Configure the Firewall Container</h4>
-    <p>Switch to the <strong>Terminal</strong> tab and select the <span class="highlight">Firewall</span> container. Apply these iptables rules in order:</p>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Technical Mitigation</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Configure the Firewall Container</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab and select the <span class="highlight">Firewall</span> container. Apply these iptables rules in order:</p>
+    </div>
   </div>
-  <div style="margin-bottom:6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">1. Set default FORWARD policy to DROP</div>
+  <div style="margin:16px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">1. Set default FORWARD policy to DROP</div>
   <div class="cmd-block">iptables -P FORWARD DROP</div>
   <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">2. Allow established/related traffic</div>
   <div class="cmd-block">iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT</div>
-  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">3. Block Corporate → OT (both directions)</div>
+  <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">3. Block Corporate to OT (both directions)</div>
   <div class="cmd-block">iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP</div>
   <div class="cmd-block">iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP</div>
   <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">4. Verify your rules</div>
   <div class="cmd-block">iptables -L FORWARD -v --line-numbers</div>
   <div style="margin-top:20px;">
-    <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied - Continue to Validation →</button>
-    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal ↗</button>
+    <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied - Continue to Validation &#8594;</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>`; }
 
 function renderStep6() { return `
   <div class="section-label">Step 7 - Validation</div>
-  <div class="theory-block">
-    <div class="theory-block-label">Confirm the segmentation works</div>
-    <h4>Automated Validation Check</h4>
-    <p>The system will check your pasted iptables output for DROP rules targeting the OT zone. If the fix is valid, the <strong>Network Map</strong> will update to s1.</p>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Confirm the segmentation works</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Automated Validation Check</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">The system will check your pasted iptables output for DROP rules targeting the OT zone. If the fix is valid, the <strong>Network Map</strong> will update to s1.</p>
+    </div>
   </div>
-  <div class="form-group">
+  <div class="form-group" style="margin-top:16px;">
     <label class="form-label">Evidence - paste iptables output here</label>
     <textarea class="form-textarea" id="evidence-rules" placeholder="Paste the output of: iptables -L FORWARD -v --line-numbers"></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
-    <button class="btn btn-primary" onclick="runValidation()">▶ Run Validation Check</button>
-    <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal ↗</button>
+    <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
+    <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>
   <div class="validation-result" id="validation-result"></div>`; }
 
@@ -734,7 +1121,7 @@ function runValidation() {
   if (hasDropRule) {
     result.innerHTML = `
       <div class="validation-pass">
-        ✓ VALIDATION PASSED<br><br>
+        &#10003; VALIDATION PASSED<br><br>
         DROP rules detected for OT zone (172.22.0.0/24).<br>
         The Corporate WS can no longer reach the PLC or Legacy OS.<br><br>
         <span style="color:var(--text-dim)">Network Map updated to S1. Challenge 2 - Legacy OS Hardening will be unlocked next.</span>
@@ -745,7 +1132,7 @@ function runValidation() {
   } else {
     result.innerHTML = `
       <div class="validation-fail">
-        ✗ VALIDATION FAILED<br><br>
+        &#10007; VALIDATION FAILED<br><br>
         Could not detect DROP rules for 172.22.0.0/24 in your evidence.<br>
         Please paste the full output of:<br>
         <span style="color:var(--accent)">iptables -L FORWARD -v --line-numbers</span><br><br>
