@@ -4,19 +4,18 @@ How to launch this lab (wip):
 2. Make the scripts executable:
 ```bash
 chmod +x launch.sh
-```
-```bash
 chmod +x switch-scenario.sh
 ```
 
 2. build container for the first challenge:
   ```bash
-      cd scenarios/s0/ 
-      docker compose up -d --build
+      ./launch s0
   ```
 3. Access http://localhost:3000
 4. Play with the terminals!
 
-Current state: scenario 0 only
-First challenge: Apply network segmentation
+To stop running the containers use:
 
+ ```bash
+      ./launch down
+  ```
