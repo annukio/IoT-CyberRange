@@ -219,6 +219,9 @@
           <option value="firewall">Firewall (routing node)</option>
         </select>
       </div>
+      <div style="padding:5px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-faint);">
+        &#9432; To copy text from the terminal, use <strong style="color:var(--text-dim)">right-click - Copy</strong>. Ctrl+Shift+C opens the browser debug console.
+      </div>
       <div id="terminal-wrap"></div>
     </div>
 
@@ -420,23 +423,66 @@
         </div>
       </details>
 
-      <!-- BIBLIOGRAPHY -->
+      <!-- COMMAND REFERENCE -->
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Interested in learning more?</span>
-            <span class="theory-block-title">References and sources used</span>
+            <span class="theory-block-label">Command Reference</span>
+            <span class="theory-block-title">Linux commands used in Reconnaissance and Apply Fix</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
         </summary>
         <div class="theory-body">
-          <ul class="bib-list">
-            <li><span class="bib-num">[1]</span><span>Ross, R. et al. (2023). <em>Guide to Industrial Control Systems (ICS) Security</em> (NIST SP 800-82 Rev 3). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-82r3" target="_blank">https://doi.org/10.6028/NIST.SP.800-82r3</a></span></li>
-            <li><span class="bib-num">[2]</span><span>Microsoft. (2017). <em>Microsoft Security Bulletin MS17-010 — Critical: Vulnerability in Windows SMB Server</em>. Microsoft Corporation.<br><a class="bib-url" href="https://docs.microsoft.com/en-us/security-updates/securitybulletins/2017/ms17-010" target="_blank">https://docs.microsoft.com/security-updates/ms17-010</a></span></li>
-            <li><span class="bib-num">[3]</span><span>MITRE Corporation. (2024). <em>MITRE ATT&CK for ICS</em>. Techniques: T1040 (Network Sniffing), T0812 (Default Credentials).<br><a class="bib-url" href="https://attack.mitre.org/matrices/ics/" target="_blank">https://attack.mitre.org/matrices/ics/</a></span></li>
-            <li><span class="bib-num">[4]</span><span>Postel, J. &amp; Reynolds, J. (1983). <em>TELNET Protocol Specification</em> (RFC 854). IETF.<br><a class="bib-url" href="https://datatracker.ietf.org/doc/html/rfc854" target="_blank">https://datatracker.ietf.org/doc/html/rfc854</a></span></li>
-            <li><span class="bib-num">[5]</span><span>NIST. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST SP 800-30 Rev 1). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-30r1" target="_blank">https://doi.org/10.6028/NIST.SP.800-30r1</a></span></li>
+          <h4><code>ss -tlnp</code> - Socket Statistics</h4>
+          <p>Lists all active listening sockets on the system. Each flag narrows the output:</p>
+          <ul>
+            <li><code>-t</code> - show TCP sockets only (ignores UDP)</li>
+            <li><code>-l</code> - show only listening sockets (not established connections)</li>
+            <li><code>-n</code> - show port numbers instead of service names (e.g. <code>:23</code> instead of <code>:telnet</code>)</li>
+            <li><code>-p</code> - show which process is using each socket (name and PID)</li>
           </ul>
+          <p>A line containing <code>:23</code> means a process is listening on port 23 (Telnet). No such line means Telnet is not active.</p>
+
+          <h4><code>ps aux</code> - Process Status</h4>
+          <p>Lists all running processes on the system. Useful for confirming a service is or is not running after stopping it:</p>
+          <ul>
+            <li><code>a</code> - show processes from all users, not just the current one</li>
+            <li><code>u</code> - user-oriented format, showing username, PID, CPU and memory usage</li>
+            <li><code>x</code> - include processes not attached to a terminal (background daemons)</li>
+          </ul>
+
+          <h4><code>grep</code> - Filter Output</h4>
+          <p>Searches for a pattern in text. Typically used in combination with other commands via a pipe (<code>|</code>):</p>
+          <ul>
+            <li><code>ss -tlnp | grep ":23"</code> - check if Telnet port is listening</li>
+            <li><code>ps aux | grep "inetd"</code> - check if the inetd daemon is running</li>
+            <li><code>grep -i "pattern"</code> - case-insensitive match</li>
+          </ul>
+          <p>If <code>grep</code> returns no output, the pattern was not found - which is the expected result after disabling the services.</p>
+        </div>
+      </details>
+
+      <!-- ROLLBACK -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Rollback Plan</span>
+            <span class="theory-block-title">How to revert the changes if something goes wrong</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>When would you roll back?</h4>
+          <p>If disabling the services causes an unexpected issue - for example, a legitimate process depends on inetd, or the operational workflow requires SMB - you can re-enable them immediately from the Legacy OS terminal without restarting any containers.</p>
+          <h4>Rollback commands - run on Legacy OS</h4>
+          <p>Re-enable Telnet (inetd):</p>
+          <div class="cmd-block">/etc/init.d/openbsd-inetd start</div>
+          <p>Re-enable SMB (Samba):</p>
+          <div class="cmd-block">/etc/init.d/smbd start</div>
+          <p>Verify both are running again:</p>
+          <div class="cmd-block">ss -tlnp</div>
+          <h4>Change management and rollback</h4>
+          <p>In a real environment, the rollback plan must be documented in the change request before the change is approved. The approving authority needs to know that if the fix causes disruption, there is a tested procedure to restore the previous state quickly. In this lab, the change request form (Step 5) asks you to include this information.</p>
         </div>
       </details>
 
@@ -540,7 +586,7 @@
 
       <!-- Intra-OT link: limited communication -->
       <path d="M 332 381 L 348 381" fill="none" stroke="#f59e0b" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
-      <text x="296" y="398" style="font-family:var(--mono);font-size:8px;fill:#f59e0b;font-style:italic">limited comm</text>
+      <text x="340" y="374" text-anchor="middle" style="font-family:var(--mono);font-size:8px;fill:#f59e0b;font-style:italic">limited</text>
 
       </svg>
 
@@ -964,13 +1010,11 @@ async function runValidation() {
           &#10003; VALIDATION PASSED<br><br>
           Telnet (port 23) is no longer listening on the Legacy OS.<br>
           Legacy system exposure reduced.<br><br>
-          <span style="color:var(--text-dim)">Challenge 2 complete. Well done!</span>
+          <span style="color:var(--text-dim)">Challenge 2 complete. Loading Challenge 3...</span>
         </div>`;
       state.validationPassed = true;
-      // Update the Legacy OS label in the network map to show HARDENED
-      const legSt = document.getElementById('leg-st');
-      if (legSt) { legSt.textContent = 'HARDENED'; legSt.style.fill = '#00e5a0'; }
-      setTimeout(() => completeStep(6), 2000);
+      saveProgressToServer();
+      setTimeout(() => { window.location.href = '/'; }, 2500);
     } else {
       result.innerHTML = `
         <div class="validation-fail">

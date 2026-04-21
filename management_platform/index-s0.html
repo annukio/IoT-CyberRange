@@ -369,6 +369,9 @@
           <option value="firewall">Firewall (routing node)</option>
         </select>
       </div>
+      <div style="padding:5px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-faint);">
+        &#9432; To copy text from the terminal, use <strong style="color:var(--text-dim)">right-click - Copy</strong>. Ctrl+Shift+C opens the browser debug console.
+      </div>
       <div id="terminal-wrap"></div>
     </div>
 
@@ -560,24 +563,27 @@ num   pkts bytes target  prot  source            destination
         </div>
       </details>
 
-      <!-- BIBLIOGRAPHY -->
+      <!-- ROLLBACK -->
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Interested in learning more?</span>
-            <span class="theory-block-title">References and sources used</span>
+            <span class="theory-block-label">Rollback Plan</span>
+            <span class="theory-block-title">How to revert the firewall rules if something goes wrong</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
         </summary>
         <div class="theory-body">
-          <ul class="bib-list">
-            <li><span class="bib-num">[1]</span><span>Ross, R. et al. (2023). <em>Guide to Industrial Control Systems (ICS) Security</em> (NIST SP 800-82 Rev 3). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-82r3" target="_blank">https://doi.org/10.6028/NIST.SP.800-82r3</a></span></li>
-            <li><span class="bib-num">[2]</span><span>ISA/IEC. (2018). <em>Security for Industrial Automation and Control Systems</em> (ISA/IEC 62443-1-1). ISA.<br><a class="bib-url" href="https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards" target="_blank">https://www.isa.org/iec-62443</a></span></li>
-            <li><span class="bib-num">[3]</span><span>Williams, T.J. (1994). The Purdue Enterprise Reference Architecture and Methodology. <em>IFAC Proceedings Volumes, 27</em>(2), 265–274.</span></li>
-            <li><span class="bib-num">[4]</span><span>MITRE Corporation. (2024). <em>MITRE ATT&CK for ICS</em>. T0886 (Remote Services).<br><a class="bib-url" href="https://attack.mitre.org/matrices/ics/" target="_blank">https://attack.mitre.org/matrices/ics/</a></span></li>
-            <li><span class="bib-num">[5]</span><span>Netfilter Core Team. (2024). <em>iptables — administration tool for IPv4 packet filtering</em>.<br><a class="bib-url" href="https://netfilter.org/projects/iptables/" target="_blank">https://netfilter.org/projects/iptables/</a></span></li>
-            <li><span class="bib-num">[6]</span><span>NIST. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST SP 800-30 Rev 1). NIST.<br><a class="bib-url" href="https://doi.org/10.6028/NIST.SP.800-30r1" target="_blank">https://doi.org/10.6028/NIST.SP.800-30r1</a></span></li>
-          </ul>
+          <h4>When would you roll back?</h4>
+          <p>If the new FORWARD rules accidentally block traffic that is required for operations - for example, a monitoring system that legitimately needs to reach the OT network - you can flush the rules and restore open forwarding in seconds, without restarting any containers.</p>
+          <h4>Rollback commands - run on the Firewall</h4>
+          <p>Flush all custom FORWARD rules:</p>
+          <div class="cmd-block">iptables -F FORWARD</div>
+          <p>Set the FORWARD policy back to ACCEPT (allow everything again):</p>
+          <div class="cmd-block">iptables -P FORWARD ACCEPT</div>
+          <p>Verify the chain is now open:</p>
+          <div class="cmd-block">iptables -L FORWARD -v</div>
+          <h4>Why document rollback before the change?</h4>
+          <p>In a real operational environment, a change request must include a rollback plan before it is approved. The approving authority needs confidence that if the change causes disruption, there is a tested and fast procedure to restore the previous state. The Change Authorization step in this lab mirrors that requirement.</p>
         </div>
       </details>
 
@@ -783,13 +789,13 @@ const state = {
 };
 
 const STEPS = [
-  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',   icon: 'management' },
-  { id: 'recon',    title: 'Reconnaissance',       sub: 'Observe the current state', icon: 'technical'  },
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',   icon: 'theory'     },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Observe the current state', icon: 'management' },
   { id: 'theory',   title: 'Theory',               sub: 'Understand segmentation',   icon: 'theory'     },
   { id: 'risk',     title: 'Risk Assessment',      sub: 'Document assets & impact',  icon: 'management' },
   { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request',     icon: 'management' },
   { id: 'mitigate', title: 'Apply Fix',            sub: 'Configure the firewall',    icon: 'technical'  },
-  { id: 'validate', title: 'Validation',           sub: 'Confirm the fix works',     icon: 'technical'  },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm the fix works',     icon: 'management' },
 ];
 
 // -- NETWORK MAP ---------------------------------------------------

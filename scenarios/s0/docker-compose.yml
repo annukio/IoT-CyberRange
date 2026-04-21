@@ -83,7 +83,8 @@ services:
     platform: linux/amd64
     container_name: management_app
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock 
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../management_platform/progress.json:/app/progress.json
     ports:
       - "3000:3000"
     networks:

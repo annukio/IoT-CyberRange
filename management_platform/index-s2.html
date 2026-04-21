@@ -179,7 +179,7 @@
 <div class="topbar">
   <div class="topbar-logo">ICS Cyber Range</div>
   <div class="topbar-divider"></div>
-  <div class="topbar-scenario">Scenario<span>S2 &mdash; Segmented &amp; Hardened</span></div>
+  <div class="topbar-scenario">Scenario<span>S2 -Segmented &amp; Hardened</span></div>
   <div class="topbar-right">
     <div class="topbar-badge">&#10003; Ch.1 Complete</div>
     <div class="topbar-badge">&#10003; Ch.2 Complete</div>
@@ -191,7 +191,7 @@
 <div class="main">
 
   <div class="panel-left">
-    <div class="panel-section-header">Challenge 3 &mdash; IoT API Auth</div>
+    <div class="panel-section-header">Challenge 3 -IoT API Auth</div>
     <div style="padding: 10px 16px 0;">
       <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;" id="progress-label">Progress: 0 / 7</div>
       <div class="progress-bar-wrap">
@@ -231,12 +231,12 @@
     <!-- THEORY -->
     <div class="content-pane" id="pane-theory">
 
-      <div class="section-label">Challenge 3 &mdash; Background Reading</div>
+      <div class="section-label">Challenge 3 -Background Reading</div>
 
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 1 &mdash; IoT API Security</span>
+            <span class="theory-block-label">Section 1 -IoT API Security</span>
             <span class="theory-block-title">What Is the IoT API and Why Is It a Target?</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -262,7 +262,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 2 &mdash; Authentication Concepts</span>
+            <span class="theory-block-label">Section 2 -Authentication Concepts</span>
             <span class="theory-block-title">Token-Based Authentication, API Keys, and JWTs</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -291,7 +291,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 3 &mdash; Testing APIs</span>
+            <span class="theory-block-label">Section 3 -Testing APIs</span>
             <span class="theory-block-title">Using curl to Test API Authentication</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -320,7 +320,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 4 &mdash; Technical Implementation</span>
+            <span class="theory-block-label">Section 4 -Technical Implementation</span>
             <span class="theory-block-title">How the Token Check Works in the Flask App</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -345,7 +345,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 5 &mdash; Residual Risk</span>
+            <span class="theory-block-label">Section 5 -Residual Risk</span>
             <span class="theory-block-title">What Remains After the Fix</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -373,97 +373,148 @@
         </div>
       </details>
 
-      <!-- BIBLIOGRAPHY -->
-      <div class="section-label" style="margin-top:24px;">Bibliography</div>
-      <ul class="bib-list">
-        <li><span class="bib-num">[1]</span><div>Ross, R. et al. (2023). <em>Guide to Industrial Control Systems Security</em> (NIST SP 800-82 Rev 3). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-82r3</span></div></li>
-        <li><span class="bib-num">[2]</span><div>OWASP Foundation. (2023). <em>OWASP API Security Top 10 — 2023</em>.<span class="bib-url">https://owasp.org/API-Security/editions/2023/en/0x00-header/</span></div></li>
-        <li><span class="bib-num">[3]</span><div>Jones, M. and Hardt, D. (2012). <em>Bearer Token Usage</em> (RFC 6750). IETF.<span class="bib-url">https://datatracker.ietf.org/doc/html/rfc6750</span></div></li>
-        <li><span class="bib-num">[4]</span><div>Jones, M., Bradley, J., Sakimura, N. (2015). <em>JSON Web Token</em> (RFC 7519). IETF.<span class="bib-url">https://datatracker.ietf.org/doc/html/rfc7519</span></div></li>
-        <li><span class="bib-num">[5]</span><div>Grassi, P. et al. (2017). <em>Digital Identity Guidelines — Authentication</em> (NIST SP 800-63B). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-63b</span></div></li>
-        <li><span class="bib-num">[6]</span><div>NIST. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST SP 800-30 Rev 1). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-30r1</span></div></li>
-      </ul>
+      <!-- ROLLBACK -->
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Rollback Plan</span>
+            <span class="theory-block-title">How to revert API authentication if something goes wrong</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>When would you roll back?</h4>
+          <p>If enabling authentication causes an unexpected issue - for example, a monitoring tool you forgot to update starts receiving 401 errors and stops working - you can disable authentication immediately without rebuilding or restarting the containers.</p>
+          <h4>Rollback commands - run on IoT API container</h4>
+          <p>Remove the token file (disables auth on the next request cycle):</p>
+          <div class="cmd-block">rm /app/token.txt</div>
+          <p>Restart the API to ensure the change takes effect immediately:</p>
+          <div class="cmd-block">pkill -f app.py; python /app/app.py &</div>
+          <p>Verify auth is disabled:</p>
+          <div class="cmd-block">curl -s http://localhost/health</div>
+          <p>The response should show <code>"auth_enabled": false</code>.</p>
+          <h4>Also roll back the sensor (optional)</h4>
+          <p>If you also need to revert the sensor to unauthenticated requests:</p>
+          <div class="cmd-block">rm /app/token.txt; pkill -f sensor.py; python /app/sensor.py &</div>
+          <h4>Why this matters</h4>
+          <p>Because the token file controls authentication at runtime, rollback takes seconds and does not require any container rebuild. This is why the change management step asks you to document the rollback procedure before applying the fix.</p>
+        </div>
+      </details>
 
     </div><!-- /pane-theory -->
 
     <!-- NETWORK MAP -->
     <div class="content-pane" id="pane-network">
-      <p class="scen-desc" id="sdesc">S2 — Network segmented, Legacy OS hardened. Challenge target: IoT API backend (172.21.0.10) has no authentication — any reachable host can read sensor data.</p>
-      <svg viewBox="0 0 700 400" width="100%" style="max-height:360px;" font-family="'Share Tech Mono',monospace" font-size="11">
+      <p class="scen-desc" id="sdesc">S2 - Network segmented, Legacy OS hardened. Challenge target: IoT API (172.21.0.10) has no authentication - any reachable host can read sensor data without credentials.</p>
 
-        <!-- Zone backgrounds -->
-        <rect x="10"  y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <rect x="250" y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
-        <rect x="490" y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+      <svg width="100%" viewBox="0 0 680 470" style="display:block">
+      <defs>
+        <marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
 
-        <!-- Zone labels -->
-        <text x="110" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">CORPORATE</text>
-        <text x="350" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">IOT ZONE</text>
-        <text x="590" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">OT ZONE</text>
+      <!-- Zone: Corporate -->
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="rgba(24,95,165,0.1)"/>
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="28" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#5ba3d9">CORPORATE</text>
+      <text x="28" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.0/24</text>
 
-        <!-- Firewall (center divider) -->
-        <rect x="210" y="140" width="40" height="100" rx="4" fill="#252932" stroke="#3a4050" stroke-width="1"/>
-        <text x="230" y="186" fill="#a2aaba" font-size="9"  text-anchor="middle">FIRE</text>
-        <text x="230" y="198" fill="#a2aaba" font-size="9"  text-anchor="middle">WALL</text>
-        <text x="230" y="214" fill="#f59e0b" font-size="8"  text-anchor="middle">RULES</text>
-        <text x="230" y="224" fill="#f59e0b" font-size="8"  text-anchor="middle">ACTIVE</text>
+      <!-- Zone: IoT - challenge target -->
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="rgba(239,68,68,0.07)"/>
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="none" stroke="#ef4444" stroke-width="1" stroke-dasharray="6 3"/>
+      <text x="480" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#ef4444">IOT SEGMENT</text>
+      <text x="480" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.0/24</text>
 
-        <!-- Corporate WS -->
-        <rect x="30"  y="130" width="160" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
-        <text x="110" y="156" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">corporate_ws</text>
-        <text x="110" y="171" fill="#a2aaba" font-size="10" text-anchor="middle">172.20.0.10</text>
-        <text x="110" y="183" fill="#a2aaba" font-size="9"  text-anchor="middle">Workstation</text>
+      <!-- Zone: OT - hardened (green) -->
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="rgba(0,229,160,0.05)"/>
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="none" stroke="#00e5a0" stroke-width="1" stroke-dasharray="6 3"/>
+      <text x="218" y="328" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#00e5a0">OT SEGMENT</text>
+      <text x="218" y="342" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.0/24</text>
 
-        <!-- Management App -->
-        <rect x="30"  y="250" width="160" height="55" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
-        <text x="110" y="274" fill="#a2aaba" font-size="11" text-anchor="middle">management_app</text>
-        <text x="110" y="289" fill="#a2aaba" font-size="10" text-anchor="middle">172.20.0.50</text>
-        <text x="110" y="301" fill="#00e5a0" font-size="9"  text-anchor="middle">port 3000</text>
+      <!-- Physical links -->
+      <path d="M 210 130 L 262 171" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 418 171 L 470 130" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
+      <path d="M 340 194 L 340 308" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
 
-        <!-- IoT API — highlighted as challenge target -->
-        <rect x="265" y="80"  width="170" height="70" rx="4" fill="#13161b" stroke="#ef4444" stroke-width="2"/>
-        <text x="350" y="106" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">iot_api</text>
-        <text x="350" y="121" fill="#a2aaba" font-size="10" text-anchor="middle">172.21.0.10</text>
-        <text id="api-st" x="350" y="136" fill="#ef4444" font-size="9"  text-anchor="middle">&#9888; No Auth</text>
+      <!-- Corp to firewall (allowed) -->
+      <path d="M 210 130 L 262 171" class="fo" marker-end="url(#ma)"/>
+      <!-- Firewall to IoT API (allowed but vulnerable - orange) -->
+      <path d="M 418 171 L 470 130" class="fwarn" marker-end="url(#ma)"/>
+      <!-- Firewall to OT (blocked) -->
+      <path id="f3" d="M 340 194 L 340 308" class="fb" marker-end="url(#ma)"/>
 
-        <!-- IoT Sensor -->
-        <rect x="265" y="220" width="170" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
-        <text x="350" y="246" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">iot_sensor</text>
-        <text x="350" y="261" fill="#a2aaba" font-size="10" text-anchor="middle">172.21.0.11</text>
-        <text x="350" y="273" fill="#f59e0b" font-size="9"  text-anchor="middle">No token configured</text>
+      <!-- Block indicator -->
+      <g id="blk">
+        <circle cx="340" cy="251" r="12" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+        <line x1="334" y1="245" x2="346" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+        <line x1="346" y1="245" x2="334" y2="257" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+      </g>
 
-        <!-- Legacy OS — hardened -->
-        <rect x="505" y="80"  width="170" height="70" rx="4" fill="#13161b" stroke="#00e5a0" stroke-width="1"/>
-        <text x="590" y="106" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">legacy_os</text>
-        <text x="590" y="121" fill="#a2aaba" font-size="10" text-anchor="middle">172.22.0.10</text>
-        <text x="590" y="136" fill="#00e5a0" font-size="9"  text-anchor="middle">HARDENED</text>
+      <text x="320" y="148" style="font-family:var(--mono);font-size:9px;fill:#f59e0b;font-style:italic">http only</text>
+      <text x="303" y="195" style="font-family:var(--mono);font-size:9px;fill:#5ba3d9">Defined &#9658;</text>
+      <text x="303" y="207" style="font-family:var(--mono);font-size:9px;fill:#5ba3d9">Defined &#9668;</text>
 
-        <!-- PLC -->
-        <rect x="505" y="220" width="170" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
-        <text x="590" y="246" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">plc</text>
-        <text x="590" y="261" fill="#a2aaba" font-size="10" text-anchor="middle">172.22.0.11</text>
-        <text x="590" y="273" fill="#a2aaba" font-size="9"  text-anchor="middle">port 502</text>
+      <!-- Firewall node -->
+      <rect x="262" y="148" width="156" height="46" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+      <text x="302" y="168" style="font-family:var(--mono);font-size:13px;font-weight:600;fill:#d4dae8">Firewall</text>
+      <text x="302" y="183" style="font-family:var(--mono);font-size:11px;fill:#5ba3d9">Segmented</text>
 
-        <!-- corporate → firewall (allowed) -->
-        <line x1="190" y1="160" x2="210" y2="175" stroke="#2f3540" stroke-width="1.5"/>
+      <!-- Corp WS -->
+      <rect x="36" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#185FA5" stroke-width="0.5"/>
+      <rect x="47" y="103" width="22" height="14" rx="1.5" fill="none" stroke="#5ba3d9" stroke-width="1"/>
+      <line x1="44" y1="118" x2="70" y2="118" stroke="#5ba3d9" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="80" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Corp WS</text>
+      <text x="80" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.10</text>
 
-        <!-- firewall → IoT API (allowed — the vulnerability path) -->
-        <path class="fwarn" d="M250,165 Q258,115 265,115"/>
-        <text x="255" y="145" fill="#f59e0b" font-size="8" text-anchor="middle">allowed</text>
-        <text x="255" y="155" fill="#f59e0b" font-size="8" text-anchor="middle">:80</text>
+      <!-- IoT API - challenge target -->
+      <rect x="488" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="508" y="108" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#d4dae8">&#9888; IoT API</text>
+      <text x="508" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.10</text>
+      <text id="api-st" x="508" y="136" style="font-family:var(--mono);font-size:11px;fill:#ef4444">No auth</text>
 
-        <!-- firewall ↔ OT (blocked) -->
-        <path class="fb" d="M250,185 Q470,240 505,250"/>
-        <text x="390" y="230" fill="#ef4444" font-size="9" font-weight="700">BLOCKED</text>
+      <!-- IoT Sensor -->
+      <rect x="488" y="157" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="527" y="173" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT Sensor</text>
+      <text x="527" y="187" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.11</text>
+      <text x="527" y="199" style="font-family:var(--mono);font-size:11px;fill:#3d4455">5s poll</text>
 
-        <!-- sensor → API -->
-        <line x1="350" y1="220" x2="350" y2="150" stroke="#2f3540" stroke-width="1" stroke-dasharray="4 3"/>
+      <!-- Legacy OS - hardened -->
+      <rect x="226" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#00e5a0" stroke-width="1.5"/>
+      <text x="232" y="372" style="font-family:var(--mono);font-size:14px;fill:#00e5a0">&#10003;</text>
+      <text x="252" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Legacy OS</text>
+      <text x="252" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.10</text>
+      <text x="252" y="398" style="font-family:var(--mono);font-size:11px;fill:#00e5a0">HARDENED</text>
 
-        <!-- OT block label -->
-        <rect x="500" y="175" width="180" height="22" rx="3" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.25)" stroke-width="1"/>
-        <text x="590" y="190" fill="#ef4444" font-size="9" font-weight="700" text-anchor="middle">OT ISOLATED FROM CORP</text>
+      <!-- PLC -->
+      <rect x="348" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <text x="385" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">PLC</text>
+      <text x="385" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.11</text>
+      <text x="385" y="398" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Port 502</text>
+
+      <!-- Intra-OT link -->
+      <path d="M 332 381 L 348 381" fill="none" stroke="#00e5a0" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ma)"/>
 
       </svg>
+
+      <div style="display:flex;gap:20px;font-size:11px;color:#6b7585;margin-top:10px;flex-wrap:wrap;align-items:center;font-family:var(--mono)">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#00e5a0" stroke-width="2" stroke-dasharray="8 5"/></svg>
+          Active traffic
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 5"/></svg>
+          Allowed but vulnerable
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#ef4444" stroke-width="2" stroke-dasharray="5 4"/></svg>
+          Blocked
+        </span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#ef4444" stroke-width="1.5"/></svg>
+          Challenge target
+        </span>
+      </div>
     </div><!-- /pane-network -->
 
   </div><!-- /panel-center -->
@@ -543,13 +594,13 @@ const state = {
 };
 
 const STEPS = [
-  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',        icon: 'management' },
-  { id: 'recon',    title: 'Reconnaissance',       sub: 'Test the unauthenticated API',   icon: 'technical'  },
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',        icon: 'theory'     },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Test the unauthenticated API',   icon: 'management' },
   { id: 'theory',   title: 'Theory',               sub: 'Understand API authentication',  icon: 'theory'     },
   { id: 'risk',     title: 'Risk Assessment',      sub: 'Document the vulnerability',     icon: 'management' },
   { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request',          icon: 'management' },
   { id: 'mitigate', title: 'Apply Fix',            sub: 'Enable token authentication',    icon: 'technical'  },
-  { id: 'validate', title: 'Validation',           sub: 'Confirm 401 enforcement',        icon: 'technical'  },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm 401 enforcement',        icon: 'management' },
 ];
 
 // -- TERMINAL ------------------------------------------------------
@@ -634,7 +685,7 @@ function renderStepContent() {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">&#128203; Task Assignment &mdash; From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment -From: Security Operations</div>
     <h3>IoT API Authentication</h3>
     <p>The IoT backend API currently allows unauthenticated access from any host that can reach port 80 on 172.21.0.10. Following the network segmentation applied in Challenge 1, corporate devices still have an explicit firewall rule permitting access to this API.</p>
     <p style="margin-top:10px;">Any device on the corporate or IoT network can read live telemetry, enumerate API endpoints, and potentially send unauthorised requests — with no credentials required.</p>
@@ -653,10 +704,10 @@ function renderStep0() { return `
   </div>`; }
 
 function renderStep1() { return `
-  <div class="section-label">Step 2 &mdash; Reconnaissance</div>
+  <div class="section-label">Step 2 -Reconnaissance</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
-      <div class="theory-block-label">Before you fix it &mdash; understand the exposure</div>
+      <div class="theory-block-label">Before you fix it -understand the exposure</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Test the unauthenticated API</h4>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab and connect to <span class="highlight">corporate_ws</span>. Run the commands below to confirm the API currently responds without any credentials.</p>
     </div>
@@ -677,11 +728,11 @@ function renderStep1() { return `
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
-  <div class="section-label">Step 3 &mdash; Theory</div>
+  <div class="section-label">Step 3 -Theory</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
-      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">OWASP API2:2023 &mdash; Broken Authentication</h4>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">OWASP API2:2023 -Broken Authentication</h4>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">An API with no authentication treats every request as legitimate regardless of who sent it. This is the second-highest API security risk in the OWASP API Security Top 10 (2023). Any network-reachable device — including a compromised corporate workstation — can read live industrial telemetry with a single <code>curl</code> command.</p>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">The fix in this lab is <strong>token-based authentication</strong>: the server checks for a <code>Authorization: Bearer &lt;token&gt;</code> header on every request. Requests without a valid token receive <strong>HTTP 401 Unauthorized</strong>.</p>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">Read the <strong>Theory</strong> tab for full background on authentication concepts, JWT tokens, and curl testing techniques before continuing.</p>
@@ -693,11 +744,11 @@ function renderStep2() { return `
   </div>`; }
 
 function renderStep3() { return `
-  <div class="section-label">Step 4 &mdash; Risk Assessment</div>
+  <div class="section-label">Step 4 -Risk Assessment</div>
   <div class="risk-grid">
     <div class="risk-cell"><div class="risk-cell-label">Vulnerability Class</div><span class="risk-badge risk-high">API2:2023 Broken Auth</span></div>
-    <div class="risk-cell"><div class="risk-cell-label">Likelihood</div><span class="risk-badge risk-high">HIGH &mdash; single curl command</span></div>
-    <div class="risk-cell"><div class="risk-cell-label">Impact</div><span class="risk-badge risk-high">HIGH &mdash; operational data exposure</span></div>
+    <div class="risk-cell"><div class="risk-cell-label">Likelihood</div><span class="risk-badge risk-high">HIGH -single curl command</span></div>
+    <div class="risk-cell"><div class="risk-cell-label">Impact</div><span class="risk-badge risk-high">HIGH -operational data exposure</span></div>
     <div class="risk-cell"><div class="risk-cell-label">Risk Level (before fix)</div><span class="risk-badge risk-high">CRITICAL</span></div>
   </div>
   <div class="form-group">
@@ -723,7 +774,7 @@ function renderStep3() { return `
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
-  <div class="section-label">Step 5 &mdash; Change Authorization</div>
+  <div class="section-label">Step 5 -Change Authorization</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Change Management</div>
@@ -739,11 +790,11 @@ function renderStep4() { return `
   <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
-  <div class="section-label">Step 6 &mdash; Apply Fix</div>
+  <div class="section-label">Step 6 -Apply Fix</div>
   <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-bottom:16px;">Follow these two phases in order. Phase 1 must be completed and verified before Phase 2.</p>
 
   <div class="phase-block">
-    <div class="phase-label phase-1">&#9312; Phase 1 &mdash; Configure the Sensor Client First</div>
+    <div class="phase-label phase-1">&#9312; Phase 1 -Configure the Sensor Client First</div>
     <div class="phase-title">IoT Sensor (172.21.0.11)</div>
     <p class="phase-body">Open the terminal, select <strong>IoT Sensor</strong>, and run:</p>
     <div class="cmd-label">Write the token file</div>
@@ -756,7 +807,7 @@ function renderStep5() { return `
   </div>
 
   <div class="phase-block">
-    <div class="phase-label phase-2">&#9313; Phase 2 &mdash; Enable Authentication on the API Server</div>
+    <div class="phase-label phase-2">&#9313; Phase 2 -Enable Authentication on the API Server</div>
     <div class="phase-title">IoT API (172.21.0.10)</div>
     <p class="phase-body">Switch to the <strong>IoT API</strong> terminal and run:</p>
     <div class="cmd-label">Write the token file</div>
@@ -776,10 +827,10 @@ function renderStep5() { return `
     <div class="cmd-block">curl -i -H "Authorization: Bearer iot-secret-2024" http://localhost/sensor/data</div>
   </div>
 
-  <button class="btn btn-primary" onclick="completeStep(5)">Authentication Applied &mdash; Continue to Validation &#8594;</button>`; }
+  <button class="btn btn-primary" onclick="completeStep(5)">Authentication Applied -Continue to Validation &#8594;</button>`; }
 
 function renderStep6() { return `
-  <div class="section-label">Step 7 &mdash; Validation</div>
+  <div class="section-label">Step 7 -Validation</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Automated two-part check</div>
@@ -790,7 +841,7 @@ function renderStep6() { return `
     </div>
   </div>
   <div class="form-group" style="margin-top:16px;">
-    <label class="form-label">Evidence &mdash; paste curl output showing 401 and 200 responses</label>
+    <label class="form-label">Evidence -paste curl output showing 401 and 200 responses</label>
     <textarea class="form-textarea" id="evidence-api" placeholder="Paste output of:&#10;curl -i http://172.21.0.10/sensor/data&#10;curl -i -H &quot;Authorization: Bearer iot-secret-2024&quot; http://172.21.0.10/sensor/data"></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">

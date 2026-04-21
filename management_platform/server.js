@@ -168,10 +168,11 @@ app.post('/api/validate/challenge2', (req, res) => {
             const telnetActive = stdout.includes(':23');
             if (!telnetActive) {
                 console.log('[✓] Challenge 2 validated — telnet no longer listening on legacy_os');
-                // Mark scenario as s2 in memory and persist it.
+                // Mark scenario as s2, persist it, and tell all browsers to reload.
                 currentScenario = 's2';
                 const cur2 = loadProgress();
                 saveProgress({ ...cur2, scenario: 's2' });
+                io.emit('scenarioChanged', { scenario: 's2' });
                 res.json({
                     success: true,
                     message: 'Telnet service is disabled. Legacy OS exposure reduced. Challenge 2 complete.',
