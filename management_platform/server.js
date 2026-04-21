@@ -187,8 +187,58 @@ app.post('/api/validate/challenge2', (req, res) => {
     );
 });
 
+// Challenge 3: IoT API Authentication (s2 → s3)
+// Two-part test:
+//   1. Unauthenticated GET /sensor/data must return 401
+//   2. Authenticated GET /sensor/data with known token must return 200
 app.post('/api/validate/challenge3', (req, res) => {
-    res.status(501).json({ message: 'Challenge 3 validation not yet implemented.' });
+    // Test 1 — unauthenticated request should be rejected
+    exec(
+        'docker exec iot_api curl -s -o /dev/null -w "%{http_code}" http://localhost/sensor/data',
+        (err1, stdout1) => {
+            if (err1 && !stdout1) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Could not reach the iot_api container. Is it running?',
+                });
+            }
+            const unauthStatus = stdout1.trim();
+            if (unauthStatus !== '401') {
+                return res.json({
+                    success: false,
+                    message: `Unauthenticated request returned HTTP ${unauthStatus || '(no response)'}. Expected 401. Have you created /app/token.txt and restarted the API?`,
+                });
+            }
+            // Test 2 — authenticated request with the lab token should succeed
+            exec(
+                'docker exec iot_api curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer iot-secret-2024" http://localhost/sensor/data',
+                (err2, stdout2) => {
+                    if (err2 && !stdout2) {
+                        return res.status(500).json({
+                            success: false,
+                            message: 'Could not run the authenticated test. Is the iot_api container running?',
+                        });
+                    }
+                    const authStatus = stdout2.trim();
+                    if (authStatus !== '200') {
+                        return res.json({
+                            success: false,
+                            message: `Authenticated request returned HTTP ${authStatus}. Make sure the token in /app/token.txt is exactly: iot-secret-2024`,
+                        });
+                    }
+                    console.log('[✓] Challenge 3 validated — IoT API requires authentication');
+                    currentScenario = 's3';
+                    const cur3 = loadProgress();
+                    saveProgress({ ...cur3, scenario: 's3' });
+                    res.json({
+                        success: true,
+                        message: 'API authentication confirmed. Unauthenticated requests are rejected (401). Authorized requests succeed (200).',
+                        nextScenario: 's3',
+                    });
+                }
+            );
+        }
+    );
 });
 
 // STATIC ROUTES

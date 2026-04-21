@@ -3,10 +3,10 @@
 # Alias / wrapper around launch.sh for convenience.
 #
 # Usage:
-#   ./switch-scenario.sh s0    # Flat, insecure baseline
-#   ./switch-scenario.sh s1    # Network segmentation applied
-#   ./switch-scenario.sh s2    # Legacy OS hardened (tbd)
-#   ./switch-scenario.sh s3    # IoT API authenticated (tbd)
+#   ./switch-scenario.sh s0    # Flat, insecure baseline (Challenge 1 start)
+#   ./switch-scenario.sh s1    # Network segmentation applied (Challenge 2 start)
+#   ./switch-scenario.sh s2    # Legacy OS hardened (Challenge 3 start)
+#   ./switch-scenario.sh s3    # IoT API authenticated (all challenges complete)
 
 set -e
 
@@ -16,7 +16,7 @@ COMPOSE_FILE="$SCRIPT_DIR/scenarios/$SCENARIO/docker-compose.yml"
 
 if [ -z "$SCENARIO" ]; then
   echo "Usage: $0 <scenario>"
-  echo "Available: s0, s1"
+  echo "Available: s0, s1, s2, s3"
   exit 1
 fi
 

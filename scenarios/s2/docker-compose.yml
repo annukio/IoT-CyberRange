@@ -1,0 +1,125 @@
+version: '3.8'
+# ============================================================
+# SCENARIO 2 (s2) — Legacy OS Hardened, IoT API Unauthenticated
+# - Challenge 1 complete: network segmentation active
+# - Challenge 2 complete: telnet + SMB disabled on Legacy OS
+# - Challenge 3 target: IoT API has no authentication
+# ============================================================
+services:
+
+  firewall:
+    build: ../../firewall
+    platform: linux/amd64
+    container_name: firewall
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.ip_forward=1
+    networks:
+      corporate_net:
+        ipv4_address: 172.20.0.254
+      iot_net:
+        ipv4_address: 172.21.0.254
+      ot_net:
+        ipv4_address: 172.22.0.254
+    command: >
+      sh -c "
+        iptables -P FORWARD DROP &&
+        iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT &&
+        iptables -A FORWARD -s 172.20.0.0/24 -d 172.21.0.10 -p tcp --dport 80 -j ACCEPT &&
+        iptables -A FORWARD -s 172.21.0.0/24 -d 172.22.0.0/24 -j DROP &&
+        iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP &&
+        iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP &&
+        echo 'Segmentation rules applied.' &&
+        tail -f /dev/null
+      "
+
+  corporate_ws:
+    build: ../../corporate_ws
+    platform: linux/amd64
+    container_name: corporate_ws
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      corporate_net:
+        ipv4_address: 172.20.0.10
+    command: bash -c "ip route add 172.21.0.0/24 via 172.20.0.254 && ip route add 172.22.0.0/24 via 172.20.0.254 && sleep infinity"
+
+  iot_api:
+    build: ../../iot_api
+    platform: linux/amd64
+    container_name: iot_api
+    cap_add:
+      - NET_ADMIN
+    networks:
+      iot_net:
+        ipv4_address: 172.21.0.10
+    # s2: Flask API running, no token.txt → auth disabled
+    command: sh -c "ip route add 172.20.0.0/24 via 172.21.0.254 && ip route add 172.22.0.0/24 via 172.21.0.254 && python app.py & tail -f /dev/null"
+
+  iot_sensor:
+    build: ../../iot_sensor
+    platform: linux/amd64
+    container_name: iot_sensor
+    depends_on:
+      - iot_api
+    networks:
+      iot_net:
+        ipv4_address: 172.21.0.11
+    # s2: sensor polls without auth token
+    command: sh -c "sleep 3 && python /app/sensor.py & tail -f /dev/null"
+
+  legacy_os:
+    build: ../../legacy_os
+    platform: linux/amd64
+    container_name: legacy_os
+    cap_add:
+      - NET_ADMIN
+    networks:
+      ot_net:
+        ipv4_address: 172.22.0.10
+    # s2: Challenge 2 complete — inetd (telnet) and SMB both disabled
+    command: sh -c "ip route add 172.20.0.0/24 via 172.22.0.254 && ip route add 172.21.0.0/24 via 172.22.0.254 && tail -f /dev/null"
+
+  plc:
+    build: ../../plc
+    platform: linux/amd64
+    container_name: plc
+    cap_add:
+      - NET_ADMIN
+    networks:
+      ot_net:
+        ipv4_address: 172.22.0.11
+    command: sh -c "ip route add 172.20.0.0/24 via 172.22.0.254 && ip route add 172.21.0.0/24 via 172.22.0.254 && python -m http.server 502"
+
+  management_app:
+    build: ../../management_platform
+    platform: linux/amd64
+    container_name: management_app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "3000:3000"
+    networks:
+      corporate_net:
+        ipv4_address: 172.20.0.50
+    depends_on:
+      - corporate_ws
+    environment:
+      - SCENARIO=s2
+
+networks:
+  corporate_net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  iot_net:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
+  ot_net:
+    ipam:
+      config:
+        - subnet: 172.22.0.0/24

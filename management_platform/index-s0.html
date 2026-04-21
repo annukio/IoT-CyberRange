@@ -92,6 +92,8 @@
     .step.locked { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
     .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 1px; }
     .step.active .step-num { border-color: var(--accent); color: var(--accent); }
+    .step-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.75; margin-top: 2px; }
+    .step.active .step-icon { opacity: 1; }
     .step-info { flex: 1; }
     .step-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
     .step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
@@ -781,13 +783,13 @@ const state = {
 };
 
 const STEPS = [
-  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief'   },
-  { id: 'recon',    title: 'Reconnaissance',       sub: 'Observe the current state' },
-  { id: 'theory',   title: 'Theory',               sub: 'Understand segmentation'   },
-  { id: 'risk',     title: 'Risk Assessment',      sub: 'Document assets & impact'  },
-  { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request'     },
-  { id: 'mitigate', title: 'Apply Fix',            sub: 'Configure the firewall'    },
-  { id: 'validate', title: 'Validation',           sub: 'Confirm the fix works'     },
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',   icon: 'management' },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Observe the current state', icon: 'technical'  },
+  { id: 'theory',   title: 'Theory',               sub: 'Understand segmentation',   icon: 'theory'     },
+  { id: 'risk',     title: 'Risk Assessment',      sub: 'Document assets & impact',  icon: 'management' },
+  { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request',     icon: 'management' },
+  { id: 'mitigate', title: 'Apply Fix',            sub: 'Configure the firewall',    icon: 'technical'  },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm the fix works',     icon: 'technical'  },
 ];
 
 // -- NETWORK MAP ---------------------------------------------------
@@ -860,6 +862,7 @@ function renderSteps() {
     return `
       <div class="step ${cls}" onclick="goToStep(${i})">
         <div class="step-num">${state.completedSteps.has(i) ? '&#10003;' : i+1}</div>
+        <img class="step-icon" src="/img/${s.icon}.png" alt="${s.icon}" />
         <div class="step-info">
           <div class="step-title">${s.title}</div>
           <div class="step-sub">${s.sub}</div>

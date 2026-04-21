@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ICS/IoT Cyber Range</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+  <style>
+    :root {
+      --bg:         #0d0f12;
+      --surface:    #13161b;
+      --surface2:   #1a1e26;
+      --border:     #252932;
+      --border2:    #2f3540;
+      --accent:     #00e5a0;
+      --accent-dim: #00a872;
+      --warn:       #f59e0b;
+      --danger:     #ef4444;
+      --text:       #d4dae8;
+      --text-dim:   #a2aaba;
+      --text-faint: #6b7585;
+      --mono:       'Share Tech Mono', monospace;
+      --sans:       'Barlow', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 0 20px; height: 48px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .topbar-logo { font-family: var(--mono); color: var(--accent); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    .topbar-divider { width: 1px; height: 24px; background: var(--border2); }
+    .topbar-scenario { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .topbar-scenario span { color: var(--accent); margin-left: 6px; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .topbar-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); letter-spacing: 1px; }
+
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    .panel-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--border); overflow: hidden; }
+    .panel-section-header { padding: 12px 16px 10px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); }
+    .workflow-steps { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .workflow-steps::-webkit-scrollbar { width: 4px; }
+    .workflow-steps::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; border-left: 2px solid transparent; }
+    .step:hover { background: var(--surface2); }
+    .step.active { background: var(--surface2); border-left-color: var(--accent); }
+    .step.done .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .step.done .step-title { color: var(--text-dim); text-decoration: line-through; }
+    .step.locked { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--text-dim); flex-shrink: 0; margin-top: 1px; }
+    .step.active .step-num { border-color: var(--accent); color: var(--accent); }
+    .step-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.75; margin-top: 2px; }
+    .step.active .step-icon { opacity: 1; }
+    .step-info { flex: 1; }
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .panel-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .tab-bar { display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; gap: 4px; flex-shrink: 0; }
+    .tab { padding: 10px 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; text-transform: uppercase; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .content-pane { flex: 1; overflow-y: auto; padding: 24px; display: none; }
+    .content-pane.active { display: block; }
+    .content-pane::-webkit-scrollbar { width: 4px; }
+    .content-pane::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .terminal-pane { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+    .terminal-pane.active { display: flex; }
+    .terminal-toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .terminal-toolbar label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+    .terminal-toolbar select { background: var(--bg); color: var(--accent); border: 1px solid var(--border2); font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
+    #terminal-wrap { flex: 1; background: #0d0f12; padding: 8px; overflow: hidden; }
+
+    .task-card { background: var(--surface2); border: 1px solid var(--border2); border-left: 3px solid var(--warn); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+    .task-card-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--warn); text-transform: uppercase; margin-bottom: 8px; }
+    .task-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .task-card p { color: var(--text-dim); line-height: 1.6; font-size: 13px; }
+
+    .theory-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+    .theory-block summary { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; list-style: none; user-select: none; transition: background 0.15s; }
+    .theory-block summary::-webkit-details-marker { display: none; }
+    .theory-block summary:hover { background: rgba(255,255,255,0.03); }
+    .theory-block[open] summary { border-bottom: 1px solid var(--border); }
+    .theory-summary-left { display: flex; flex-direction: column; gap: 3px; }
+    .theory-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+    .theory-block-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .theory-arrow { font-size: 11px; color: var(--text-faint); transition: transform 0.2s ease; flex-shrink: 0; margin-left: 12px; }
+    .theory-block[open] .theory-arrow { transform: rotate(180deg); color: var(--accent); }
+    .theory-body { padding: 16px 18px; }
+    .theory-body h4 { font-size: 13px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+    .theory-body h4:first-child { margin-top: 0; }
+    .theory-body p { color: var(--text-dim); font-size: 13px; line-height: 1.75; margin-bottom: 10px; }
+    .theory-body p:last-child { margin-bottom: 0; }
+    .theory-body ul, .theory-body ol { color: var(--text-dim); font-size: 13px; line-height: 1.75; padding-left: 18px; margin-bottom: 10px; }
+    .theory-body li { margin-bottom: 4px; }
+    .theory-body strong { color: var(--text); font-weight: 600; }
+    .theory-body code { font-family: var(--mono); font-size: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--accent); }
+
+    .cmd-block { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; color: var(--accent); margin: 8px 0; }
+    .cmd-block::before { content: '$'; color: var(--text-faint); margin-right: 8px; }
+    .cmd-label { font-family: var(--mono); font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 4px; }
+    .cmd-label:first-child { margin-top: 0; }
+
+    .phase-block { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 16px 18px; margin-bottom: 14px; }
+    .phase-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .phase-label.phase-1 { color: var(--warn); }
+    .phase-label.phase-2 { color: var(--accent); }
+    .phase-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .phase-body { color: var(--text-dim); font-size: 13px; line-height: 1.7; }
+
+    .theory-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0; }
+    .theory-table th { background: var(--bg); color: var(--text-dim); font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border2); }
+    .theory-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-dim); line-height: 1.5; }
+    .theory-table tr:last-child td { border-bottom: none; }
+    .theory-table td:first-child { font-family: var(--mono); color: var(--warn); font-size: 11px; }
+    .theory-table td:nth-child(2) { color: var(--text); font-weight: 600; font-size: 12px; }
+
+    .cite-ref { font-family: var(--mono); font-size: 10px; color: var(--text-faint); vertical-align: super; margin-left: 1px; }
+    .bib-list { list-style: none; padding: 0; }
+    .bib-list li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    .bib-list li:last-child { border-bottom: none; }
+    .bib-num { font-family: var(--mono); font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 24px; }
+    .bib-url { font-family: var(--mono); font-size: 11px; color: var(--accent-dim); word-break: break-all; display: block; margin-top: 2px; }
+
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .form-input, .form-textarea, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: var(--sans); font-size: 13px; padding: 8px 12px; border-radius: 4px; outline: none; transition: border-color 0.15s; }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .risk-cell { background: var(--bg); border: 1px solid var(--border2); border-radius: 4px; padding: 10px 12px; }
+    .risk-cell-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: var(--mono); font-size: 11px; font-weight: 700; }
+    .risk-high { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+    .risk-med  { background: rgba(245,158,11,0.15); color: var(--warn);   border: 1px solid rgba(245,158,11,0.3); }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background: #00ffb3; }
+    .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .validation-result { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; font-family: var(--mono); font-size: 12px; margin-top: 16px; display: none; }
+    .validation-result.visible { display: block; }
+    .validation-pass { color: var(--accent); }
+    .validation-fail { color: var(--danger); }
+
+    .progress-bar-wrap { background: var(--border); border-radius: 2px; height: 4px; margin-bottom: 20px; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+
+    .highlight { color: var(--accent); font-weight: 700; }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .checklist li::before { content: '○'; font-family: var(--mono); color: var(--text-faint); flex-shrink: 0; }
+
+    .complete-banner { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); border-radius: 6px; padding: 20px 24px; text-align: center; }
+    .complete-banner h2 { color: var(--accent); font-size: 18px; margin-bottom: 8px; }
+    .complete-banner p { color: var(--text-dim); font-size: 13px; line-height: 1.6; }
+
+    @keyframes dk { to { stroke-dashoffset: -48; } }
+    .fo  { stroke-dasharray: 10 6; stroke-width: 2; fill: none; stroke: #00e5a0; animation: dk 1.4s linear infinite; }
+    .fb  { stroke-dasharray: 5 4;  stroke-width: 2; fill: none; stroke: #ef4444; }
+    .fwarn { stroke-dasharray: 8 4; stroke-width: 2; fill: none; stroke: #f59e0b; animation: dk 2s linear infinite; }
+    .scen-desc { font-family: var(--mono); font-size: 11px; color: var(--text-dim); padding: 8px 12px; background: var(--surface2); border-left: 3px solid #5ba3d9; border-radius: 3px; margin: 0 0 16px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">ICS Cyber Range</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-scenario">Scenario<span>S2 &mdash; Segmented &amp; Hardened</span></div>
+  <div class="topbar-right">
+    <div class="topbar-badge">&#10003; Ch.1 Complete</div>
+    <div class="topbar-badge">&#10003; Ch.2 Complete</div>
+    <div class="status-dot"></div>
+    <div class="topbar-status">Lab environment active</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="panel-left">
+    <div class="panel-section-header">Challenge 3 &mdash; IoT API Auth</div>
+    <div style="padding: 10px 16px 0;">
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px;" id="progress-label">Progress: 0 / 7</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="workflow-steps" id="workflow-steps"></div>
+  </div>
+
+  <div class="panel-center">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('guide')">Guide</div>
+      <div class="tab"        onclick="switchTab('terminal')">Terminal</div>
+      <div class="tab"        onclick="switchTab('theory')">Theory</div>
+      <div class="tab"        onclick="switchTab('network')">Network Map</div>
+    </div>
+
+    <!-- GUIDE -->
+    <div class="content-pane active" id="pane-guide">
+      <div id="step-content"></div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal-pane" id="pane-terminal">
+      <div class="terminal-toolbar">
+        <label>Active Shell:</label>
+        <select id="container-select" onchange="switchContainer()">
+          <option value="iot_api">IoT API (172.21.0.10)</option>
+          <option value="iot_sensor">IoT Sensor (172.21.0.11)</option>
+          <option value="corporate_ws">Corporate Workstation (172.20.0.10)</option>
+          <option value="firewall">Firewall (routing node)</option>
+        </select>
+      </div>
+      <div id="terminal-wrap"></div>
+    </div>
+
+    <!-- THEORY -->
+    <div class="content-pane" id="pane-theory">
+
+      <div class="section-label">Challenge 3 &mdash; Background Reading</div>
+
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 1 &mdash; IoT API Security</span>
+            <span class="theory-block-title">What Is the IoT API and Why Is It a Target?</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>What Is This API?</h4>
+          <p>The IoT network (172.21.0.0/24) contains an IoT sensor (172.21.0.11) that produces telemetry every 5 seconds, and an IoT API server (172.21.0.10) that exposes that data over HTTP on port 80. Any device that can reach port 80 gets a valid response — no credentials required.</p>
+          <p>After Challenge 1, the OT zone is isolated from corporate devices. However, the IoT zone remains reachable from the corporate network by design, to allow monitoring. The firewall explicitly permits <code>172.20.0.0/24 → 172.21.0.10:80</code>. The problem is that the API has no authentication: any reachable device gets data simply by sending an HTTP request.</p>
+          <h4>Why Unauthenticated APIs Are Dangerous</h4>
+          <p>OWASP publishes the <strong>API Security Top 10</strong>. The second risk, <strong>API2:2023 — Broken Authentication</strong>, covers APIs that have no mechanism to verify who is making a request.<span class="cite-ref">[2]</span> An API with no authentication at all is a textbook case: any request is treated as legitimate.</p>
+          <p>In an IoT context this is particularly serious because the data is often operational. Sensor readings from a production line reveal schedules, machine states, and operating parameters. In more critical deployments, an unauthenticated API might also accept write requests that change setpoints or trigger actions on physical devices.</p>
+          <p>NIST SP 800-82 Rev 3 identifies unauthorised access to OT monitoring interfaces as a significant attack vector, particularly when IoT devices are connected to systems with physical consequences.<span class="cite-ref">[1]</span></p>
+          <h4>What an Attacker Can Do</h4>
+          <ul>
+            <li><strong>Enumerate the API</strong> — find all endpoints and understand what data is available.</li>
+            <li><strong>Harvest operational data</strong> — continuously poll to build a picture of normal operations for timing an attack.</li>
+            <li><strong>Replay or inject requests</strong> — if the API accepts POST/PATCH, modify sensor data or trigger actions without credentials.</li>
+            <li><strong>Pivot to other systems</strong> — internal hostnames, software versions, or config details may reveal deeper attack paths.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 2 &mdash; Authentication Concepts</span>
+            <span class="theory-block-title">Token-Based Authentication, API Keys, and JWTs</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Authentication vs. Authorization</h4>
+          <p><strong>Authentication</strong> verifies <em>who you are</em>: "Is this request coming from someone with valid credentials?" <strong>Authorization</strong> verifies <em>what you are allowed to do</em>: "Does this authenticated user have permission to access this resource?" This challenge focuses on authentication.</p>
+          <h4>Token-Based Authentication</h4>
+          <p>The principle is simple: (1) The server issues a token to a client that has authenticated. (2) The client includes the token in every subsequent request, typically in the HTTP <code>Authorization</code> header. (3) The server validates the token on each request and only responds if the token is valid.</p>
+          <table class="theory-table">
+            <thead><tr><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>API Key</td><td>A static secret string. Simple to implement. Valid until manually revoked. Used when the client is a machine.</td></tr>
+              <tr><td>JWT</td><td>A structured, signed token encoding claims (user ID, roles, expiry). Server verifies the cryptographic signature without a database lookup.</td></tr>
+              <tr><td>Bearer Token</td><td>Any token sent as <code>Authorization: Bearer &lt;token&gt;</code>. Defined in RFC 6750.<span class="cite-ref">[3]</span></td></tr>
+            </tbody>
+          </table>
+          <p>This lab uses a <strong>static token</strong> (similar to an API key). The token is stored in <code>/app/token.txt</code> on the API server. If the file exists, every request must include it as a Bearer token. If not, the API runs unauthenticated.</p>
+          <h4>JWT Structure</h4>
+          <p>A JWT has three dot-separated Base64 parts: <code>header.payload.signature</code>. The server creates the signature with a secret key. On receipt, it recomputes the signature and rejects any token whose payload was tampered with — this makes JWTs self-contained and tamper-evident.<span class="cite-ref">[4]</span></p>
+          <h4>NIST Guidance</h4>
+          <p>NIST SP 800-63B requires that authentication secrets be generated with at least 112 bits of entropy, transmitted only over encrypted channels (HTTPS in production), and verified on every request.<span class="cite-ref">[5]</span> In this lab we use HTTP for simplicity, but a production deployment would mandate HTTPS.</p>
+        </div>
+      </details>
+
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 3 &mdash; Testing APIs</span>
+            <span class="theory-block-title">Using curl to Test API Authentication</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Basic Unauthenticated GET</h4>
+          <p><code>curl http://172.21.0.10/sensor/data</code></p>
+          <p>Before any fix: returns sensor data (200 OK). After adding authentication: returns 401 Unauthorized.</p>
+          <h4>Sending a Bearer Token</h4>
+          <p><code>curl -H "Authorization: Bearer &lt;token&gt;" http://172.21.0.10/sensor/data</code></p>
+          <p>The <code>-H</code> flag adds a custom HTTP header. Replace <code>&lt;token&gt;</code> with the actual token string.</p>
+          <h4>Checking the HTTP Status Code</h4>
+          <p>Use <code>curl -i</code> to include response headers. The first header line shows the status code:</p>
+          <ul>
+            <li><strong>200 OK</strong> — request succeeded, data returned.</li>
+            <li><strong>401 Unauthorized</strong> — rejected, no valid token provided.</li>
+            <li><strong>403 Forbidden</strong> — token valid but lacks permission.</li>
+          </ul>
+          <p>To see only the status code: <code>curl -s -o /dev/null -w "%{http_code}" http://172.21.0.10/sensor/data</code></p>
+          <h4>Testing a Wrong Token</h4>
+          <p><code>curl -i -H "Authorization: Bearer wrong-token" http://172.21.0.10/sensor/data</code></p>
+          <p>Expected: 401 Unauthorized. A correct implementation rejects wrong tokens, not just missing ones.</p>
+        </div>
+      </details>
+
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 4 &mdash; Technical Implementation</span>
+            <span class="theory-block-title">How the Token Check Works in the Flask App</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>The API Stack</h4>
+          <p>The IoT API (<code>172.21.0.10</code>) is a Python Flask application. Authentication is controlled by the file <code>/app/token.txt</code>. On every request, the app checks if this file exists:</p>
+          <ul>
+            <li>If the file <strong>does not exist</strong> → auth disabled, request proceeds (current state).</li>
+            <li>If the file <strong>exists</strong> → auth enabled; the <code>Authorization: Bearer &lt;token&gt;</code> header is checked against the file contents.</li>
+          </ul>
+          <h4>The Token Check Logic</h4>
+          <p>For every incoming request: read the <code>Authorization</code> header → check it starts with <code>Bearer </code> → extract the token string → compare to the file contents → if it matches, allow; if not, return HTTP 401.</p>
+          <h4>The Sensor Client</h4>
+          <p>The IoT sensor (<code>172.21.0.11</code>) polls the API every 5 seconds using a Python script at <code>/app/sensor.py</code>. It also reads <code>/app/token.txt</code> — if the file exists, it adds the <code>Authorization</code> header to every request.</p>
+          <h4>Critical Order of Operations</h4>
+          <p>Before enabling authentication on the server, you must configure the sensor client to include the token. If you enable auth on the server first, the sensor immediately starts receiving 401 errors. Configure and restart the <strong>sensor first</strong>, verify it is working, then enable auth on the <strong>API second</strong>.</p>
+          <p>This is why the change management process exists: to ensure all dependent clients are ready before the breaking change is applied.</p>
+        </div>
+      </details>
+
+      <details class="theory-block">
+        <summary>
+          <div class="theory-summary-left">
+            <span class="theory-block-label">Section 5 &mdash; Residual Risk</span>
+            <span class="theory-block-title">What Remains After the Fix</span>
+          </div>
+          <span class="theory-arrow">&#9660;</span>
+        </summary>
+        <div class="theory-body">
+          <h4>Residual Risk After Adding Token Auth</h4>
+          <ul>
+            <li><strong>HTTP, not HTTPS</strong> — the token is transmitted in plaintext. A network sniffer on the same segment can capture it. In production, HTTPS would be mandatory.</li>
+            <li><strong>Static token, no expiry</strong> — if leaked, the token remains valid until manually revoked. JWT tokens with an <code>exp</code> field reduce this risk.</li>
+            <li><strong>Token stored on disk</strong> — <code>/app/token.txt</code> on both the API server and sensor containers. If either container is compromised, the token is exposed.</li>
+          </ul>
+          <p>Documenting residual risk is part of a proper risk acceptance decision. The approving authority must understand what risk remains after the fix and explicitly accept it.<span class="cite-ref">[6]</span></p>
+          <h4>Summary of Key Concepts</h4>
+          <table class="theory-table">
+            <thead><tr><th>Concept</th><th>Summary</th></tr></thead>
+            <tbody>
+              <tr><td>REST API</td><td>Communication over HTTP. Endpoints are URLs returning JSON data.</td></tr>
+              <tr><td>API2: Broken Auth</td><td>OWASP classification for APIs lacking authentication. No auth = textbook case.</td></tr>
+              <tr><td>Bearer Token</td><td><code>Authorization: Bearer &lt;token&gt;</code> — RFC 6750 standard format.</td></tr>
+              <tr><td>HTTP 401</td><td>Returned when a request has no valid token. 403 = valid token, insufficient permission.</td></tr>
+              <tr><td>Pre-change step</td><td>Update all clients before enabling server-side auth, or they break immediately.</td></tr>
+              <tr><td>Residual risk</td><td>Token sent over plain HTTP; static token with no expiry; stored in a file.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- BIBLIOGRAPHY -->
+      <div class="section-label" style="margin-top:24px;">Bibliography</div>
+      <ul class="bib-list">
+        <li><span class="bib-num">[1]</span><div>Ross, R. et al. (2023). <em>Guide to Industrial Control Systems Security</em> (NIST SP 800-82 Rev 3). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-82r3</span></div></li>
+        <li><span class="bib-num">[2]</span><div>OWASP Foundation. (2023). <em>OWASP API Security Top 10 — 2023</em>.<span class="bib-url">https://owasp.org/API-Security/editions/2023/en/0x00-header/</span></div></li>
+        <li><span class="bib-num">[3]</span><div>Jones, M. and Hardt, D. (2012). <em>Bearer Token Usage</em> (RFC 6750). IETF.<span class="bib-url">https://datatracker.ietf.org/doc/html/rfc6750</span></div></li>
+        <li><span class="bib-num">[4]</span><div>Jones, M., Bradley, J., Sakimura, N. (2015). <em>JSON Web Token</em> (RFC 7519). IETF.<span class="bib-url">https://datatracker.ietf.org/doc/html/rfc7519</span></div></li>
+        <li><span class="bib-num">[5]</span><div>Grassi, P. et al. (2017). <em>Digital Identity Guidelines — Authentication</em> (NIST SP 800-63B). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-63b</span></div></li>
+        <li><span class="bib-num">[6]</span><div>NIST. (2012). <em>Guide for Conducting Risk Assessments</em> (NIST SP 800-30 Rev 1). NIST.<span class="bib-url">https://doi.org/10.6028/NIST.SP.800-30r1</span></div></li>
+      </ul>
+
+    </div><!-- /pane-theory -->
+
+    <!-- NETWORK MAP -->
+    <div class="content-pane" id="pane-network">
+      <p class="scen-desc" id="sdesc">S2 — Network segmented, Legacy OS hardened. Challenge target: IoT API backend (172.21.0.10) has no authentication — any reachable host can read sensor data.</p>
+      <svg viewBox="0 0 700 400" width="100%" style="max-height:360px;" font-family="'Share Tech Mono',monospace" font-size="11">
+
+        <!-- Zone backgrounds -->
+        <rect x="10"  y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+        <rect x="250" y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+        <rect x="490" y="20"  width="200" height="360" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+
+        <!-- Zone labels -->
+        <text x="110" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">CORPORATE</text>
+        <text x="350" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">IOT ZONE</text>
+        <text x="590" y="40"  fill="#6b7585" font-size="10" text-anchor="middle" letter-spacing="2">OT ZONE</text>
+
+        <!-- Firewall (center divider) -->
+        <rect x="210" y="140" width="40" height="100" rx="4" fill="#252932" stroke="#3a4050" stroke-width="1"/>
+        <text x="230" y="186" fill="#a2aaba" font-size="9"  text-anchor="middle">FIRE</text>
+        <text x="230" y="198" fill="#a2aaba" font-size="9"  text-anchor="middle">WALL</text>
+        <text x="230" y="214" fill="#f59e0b" font-size="8"  text-anchor="middle">RULES</text>
+        <text x="230" y="224" fill="#f59e0b" font-size="8"  text-anchor="middle">ACTIVE</text>
+
+        <!-- Corporate WS -->
+        <rect x="30"  y="130" width="160" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
+        <text x="110" y="156" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">corporate_ws</text>
+        <text x="110" y="171" fill="#a2aaba" font-size="10" text-anchor="middle">172.20.0.10</text>
+        <text x="110" y="183" fill="#a2aaba" font-size="9"  text-anchor="middle">Workstation</text>
+
+        <!-- Management App -->
+        <rect x="30"  y="250" width="160" height="55" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
+        <text x="110" y="274" fill="#a2aaba" font-size="11" text-anchor="middle">management_app</text>
+        <text x="110" y="289" fill="#a2aaba" font-size="10" text-anchor="middle">172.20.0.50</text>
+        <text x="110" y="301" fill="#00e5a0" font-size="9"  text-anchor="middle">port 3000</text>
+
+        <!-- IoT API — highlighted as challenge target -->
+        <rect x="265" y="80"  width="170" height="70" rx="4" fill="#13161b" stroke="#ef4444" stroke-width="2"/>
+        <text x="350" y="106" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">iot_api</text>
+        <text x="350" y="121" fill="#a2aaba" font-size="10" text-anchor="middle">172.21.0.10</text>
+        <text id="api-st" x="350" y="136" fill="#ef4444" font-size="9"  text-anchor="middle">&#9888; No Auth</text>
+
+        <!-- IoT Sensor -->
+        <rect x="265" y="220" width="170" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
+        <text x="350" y="246" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">iot_sensor</text>
+        <text x="350" y="261" fill="#a2aaba" font-size="10" text-anchor="middle">172.21.0.11</text>
+        <text x="350" y="273" fill="#f59e0b" font-size="9"  text-anchor="middle">No token configured</text>
+
+        <!-- Legacy OS — hardened -->
+        <rect x="505" y="80"  width="170" height="70" rx="4" fill="#13161b" stroke="#00e5a0" stroke-width="1"/>
+        <text x="590" y="106" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">legacy_os</text>
+        <text x="590" y="121" fill="#a2aaba" font-size="10" text-anchor="middle">172.22.0.10</text>
+        <text x="590" y="136" fill="#00e5a0" font-size="9"  text-anchor="middle">HARDENED</text>
+
+        <!-- PLC -->
+        <rect x="505" y="220" width="170" height="60" rx="4" fill="#13161b" stroke="#2f3540" stroke-width="1"/>
+        <text x="590" y="246" fill="#d4dae8" font-size="12" text-anchor="middle" font-weight="700">plc</text>
+        <text x="590" y="261" fill="#a2aaba" font-size="10" text-anchor="middle">172.22.0.11</text>
+        <text x="590" y="273" fill="#a2aaba" font-size="9"  text-anchor="middle">port 502</text>
+
+        <!-- corporate → firewall (allowed) -->
+        <line x1="190" y1="160" x2="210" y2="175" stroke="#2f3540" stroke-width="1.5"/>
+
+        <!-- firewall → IoT API (allowed — the vulnerability path) -->
+        <path class="fwarn" d="M250,165 Q258,115 265,115"/>
+        <text x="255" y="145" fill="#f59e0b" font-size="8" text-anchor="middle">allowed</text>
+        <text x="255" y="155" fill="#f59e0b" font-size="8" text-anchor="middle">:80</text>
+
+        <!-- firewall ↔ OT (blocked) -->
+        <path class="fb" d="M250,185 Q470,240 505,250"/>
+        <text x="390" y="230" fill="#ef4444" font-size="9" font-weight="700">BLOCKED</text>
+
+        <!-- sensor → API -->
+        <line x1="350" y1="220" x2="350" y2="150" stroke="#2f3540" stroke-width="1" stroke-dasharray="4 3"/>
+
+        <!-- OT block label -->
+        <rect x="500" y="175" width="180" height="22" rx="3" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.25)" stroke-width="1"/>
+        <text x="590" y="190" fill="#ef4444" font-size="9" font-weight="700" text-anchor="middle">OT ISOLATED FROM CORP</text>
+
+      </svg>
+    </div><!-- /pane-network -->
+
+  </div><!-- /panel-center -->
+</div><!-- /main -->
+
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+
+// -- CONTROL SOCKET ------------------------------------------------
+const ctrlSocket = io({ query: { container: 'control' } });
+ctrlSocket.on('scenarioChanged', () => { window.location.href = '/'; });
+
+// -- PROGRESS PERSISTENCE ------------------------------------------
+const CHALLENGE_KEY = 's2';
+
+async function loadProgressFromServer() {
+  try {
+    const r = await fetch('/api/progress');
+    const data = await r.json();
+    const saved = data[CHALLENGE_KEY];
+    if (!saved) return;
+    state.currentStep = saved.currentStep || 0;
+    state.completedSteps = new Set(saved.completedSteps || []);
+    state.formData = saved.formData || {};
+    state.validationPassed = saved.validationPassed || false;
+  } catch (e) {
+    console.warn('Could not load progress:', e);
+  }
+}
+
+async function saveProgressToServer() {
+  try {
+    const payload = {
+      [CHALLENGE_KEY]: {
+        currentStep: state.currentStep,
+        completedSteps: [...state.completedSteps],
+        formData: state.formData,
+        validationPassed: state.validationPassed,
+      }
+    };
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    console.warn('Could not save progress:', e);
+  }
+}
+
+function restoreCurrentStepFields() {
+  const fd = state.formData;
+  const step = state.currentStep;
+  if (step === 1 && fd.reconNotes) {
+    const el = document.getElementById('recon-notes');
+    if (el) el.value = fd.reconNotes;
+  } else if (step === 3 && fd.risk) {
+    const fields = ['risk-asset','risk-vuln','risk-impact','risk-mitigation','risk-residual'];
+    const keys   = ['asset','vuln','impact','mitigation','residual'];
+    fields.forEach((id, i) => { const el = document.getElementById(id); if (el) el.value = fd.risk[keys[i]] || ''; });
+  } else if (step === 4 && fd.crDesc) {
+    const el = document.getElementById('cr-desc');
+    if (el) el.value = fd.crDesc;
+  } else if (step === 6 && fd.evidence) {
+    const el = document.getElementById('evidence-api');
+    if (el) el.value = fd.evidence;
+  }
+}
+
+// -- STATE ---------------------------------------------------------
+const state = {
+  currentStep: 0,
+  completedSteps: new Set(),
+  formData: {},
+  validationPassed: false,
+};
+
+const STEPS = [
+  { id: 'task',     title: 'Task Assignment',      sub: 'Read the security brief',        icon: 'management' },
+  { id: 'recon',    title: 'Reconnaissance',       sub: 'Test the unauthenticated API',   icon: 'technical'  },
+  { id: 'theory',   title: 'Theory',               sub: 'Understand API authentication',  icon: 'theory'     },
+  { id: 'risk',     title: 'Risk Assessment',      sub: 'Document the vulnerability',     icon: 'management' },
+  { id: 'auth',     title: 'Change Authorization', sub: 'Submit change request',          icon: 'management' },
+  { id: 'mitigate', title: 'Apply Fix',            sub: 'Enable token authentication',    icon: 'technical'  },
+  { id: 'validate', title: 'Validation',           sub: 'Confirm 401 enforcement',        icon: 'technical'  },
+];
+
+// -- TERMINAL ------------------------------------------------------
+let socket;
+const term = new Terminal({
+  cursorBlink: true,
+  fontFamily: "'Share Tech Mono', monospace",
+  fontSize: 13,
+  theme: { background:'#0d0f12', foreground:'#d4dae8', cursor:'#00e5a0', green:'#00e5a0', brightGreen:'#00ffb3' }
+});
+term.open(document.getElementById('terminal-wrap'));
+term.onData(data => { if (socket && socket.connected) socket.emit('input', data); });
+
+function switchContainer() {
+  const name = document.getElementById('container-select').value;
+  if (socket) socket.disconnect();
+  term.clear();
+  term.write(`\r\n\x1b[33m[Connecting to ${name}...]\x1b[0m\r\n`);
+  socket = io({ query: { container: name } });
+  socket.on('output', d => term.write(d));
+  socket.on('connect', () => term.write(`\x1b[32m[Connected]\x1b[0m\r\n\r\n`));
+}
+switchContainer();
+
+// -- TABS ----------------------------------------------------------
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
+  const map = { guide:'pane-guide', terminal:'pane-terminal', theory:'pane-theory', network:'pane-network' };
+  document.getElementById(map[tab]).classList.add('active');
+}
+
+// -- WORKFLOW ------------------------------------------------------
+function renderSteps() {
+  const container = document.getElementById('workflow-steps');
+  container.innerHTML = STEPS.map((s, i) => {
+    let cls = '';
+    if (state.completedSteps.has(i)) cls = 'done';
+    else if (i === state.currentStep) cls = 'active';
+    else if (i > state.currentStep) cls = 'locked';
+    return `
+      <div class="step ${cls}" onclick="goToStep(${i})">
+        <div class="step-num">${state.completedSteps.has(i) ? '&#10003;' : i+1}</div>
+        <img class="step-icon" src="/img/${s.icon}.png" alt="${s.icon}" />
+        <div class="step-info">
+          <div class="step-title">${s.title}</div>
+          <div class="step-sub">${s.sub}</div>
+        </div>
+      </div>`;
+  }).join('');
+  const done = state.completedSteps.size;
+  document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
+  document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
+}
+
+function goToStep(i) {
+  if (i > state.currentStep) return;
+  state.currentStep = i;
+  renderSteps();
+  renderStepContent();
+}
+
+function completeStep(i) {
+  state.completedSteps.add(i);
+  if (i + 1 < STEPS.length) state.currentStep = i + 1;
+  saveProgressToServer();
+  renderSteps();
+  renderStepContent();
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab')[0].classList.add('active');
+  document.querySelectorAll('.content-pane, .terminal-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-guide').classList.add('active');
+}
+
+// -- STEP CONTENT --------------------------------------------------
+function renderStepContent() {
+  const renders = [ renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6 ];
+  document.getElementById('step-content').innerHTML = renders[state.currentStep]();
+  restoreCurrentStepFields();
+}
+
+function renderStep0() { return `
+  <div class="task-card">
+    <div class="task-card-label">&#128203; Task Assignment &mdash; From: Security Operations</div>
+    <h3>IoT API Authentication</h3>
+    <p>The IoT backend API currently allows unauthenticated access from any host that can reach port 80 on 172.21.0.10. Following the network segmentation applied in Challenge 1, corporate devices still have an explicit firewall rule permitting access to this API.</p>
+    <p style="margin-top:10px;">Any device on the corporate or IoT network can read live telemetry, enumerate API endpoints, and potentially send unauthorised requests — with no credentials required.</p>
+    <p style="margin-top:10px;">Your task is to implement token-based authentication on the IoT API and configure the IoT sensor client to use the token, so that only authorised clients can access the API.</p>
+  </div>
+  <div class="section-label">Objectives</div>
+  <ul class="checklist">
+    <li>Verify the API currently responds to unauthenticated requests</li>
+    <li>Configure the IoT sensor to use a Bearer token</li>
+    <li>Enable token authentication on the IoT API server</li>
+    <li>Confirm unauthenticated requests are rejected with HTTP 401</li>
+    <li>Confirm authorised requests still return HTTP 200 with sensor data</li>
+  </ul>
+  <div style="margin-top:24px;">
+    <button class="btn btn-primary" onclick="completeStep(0)">Acknowledge &amp; Start &#8594;</button>
+  </div>`; }
+
+function renderStep1() { return `
+  <div class="section-label">Step 2 &mdash; Reconnaissance</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Before you fix it &mdash; understand the exposure</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Test the unauthenticated API</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab and connect to <span class="highlight">corporate_ws</span>. Run the commands below to confirm the API currently responds without any credentials.</p>
+    </div>
+  </div>
+  <div class="cmd-label">From Corporate Workstation</div>
+  <div class="cmd-block">curl -i http://172.21.0.10/sensor/data</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px;">&#8627; Does it return 200 OK with JSON data? No credentials were provided.</p>
+  <div class="cmd-block">curl -i http://172.21.0.10/health</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px;">&#8627; What does <code>auth_enabled</code> say? It should be <code>false</code>.</p>
+  <div class="cmd-label">From IoT API container (see what the sensor logs show)</div>
+  <div class="cmd-block">cat /dev/null; python -c "import subprocess; print(subprocess.getoutput('ps aux'))"</div>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px;">&#8627; Switch to <strong>IoT API</strong> terminal. Run <code>ls /app/</code> — notice there is no <code>token.txt</code> file.</p>
+  <div class="form-group">
+    <label class="form-label">What did you observe? (API responses, auth_enabled value, token.txt present?)</label>
+    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. GET /sensor/data returned 200 OK with JSON data and no credentials. /health showed auth_enabled: false. No token.txt in /app/."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
+  <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
+
+function renderStep2() { return `
+  <div class="section-label">Step 3 &mdash; Theory</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Why does this matter?</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">OWASP API2:2023 &mdash; Broken Authentication</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">An API with no authentication treats every request as legitimate regardless of who sent it. This is the second-highest API security risk in the OWASP API Security Top 10 (2023). Any network-reachable device — including a compromised corporate workstation — can read live industrial telemetry with a single <code>curl</code> command.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">The fix in this lab is <strong>token-based authentication</strong>: the server checks for a <code>Authorization: Bearer &lt;token&gt;</code> header on every request. Requests without a valid token receive <strong>HTTP 401 Unauthorized</strong>.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">Read the <strong>Theory</strong> tab for full background on authentication concepts, JWT tokens, and curl testing techniques before continuing.</p>
+    </div>
+  </div>
+  <div style="margin-top:20px;">
+    <button class="btn btn-primary" onclick="completeStep(2)">Understood, continue &#8594;</button>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('theory')">Open Theory Tab &#8599;</button>
+  </div>`; }
+
+function renderStep3() { return `
+  <div class="section-label">Step 4 &mdash; Risk Assessment</div>
+  <div class="risk-grid">
+    <div class="risk-cell"><div class="risk-cell-label">Vulnerability Class</div><span class="risk-badge risk-high">API2:2023 Broken Auth</span></div>
+    <div class="risk-cell"><div class="risk-cell-label">Likelihood</div><span class="risk-badge risk-high">HIGH &mdash; single curl command</span></div>
+    <div class="risk-cell"><div class="risk-cell-label">Impact</div><span class="risk-badge risk-high">HIGH &mdash; operational data exposure</span></div>
+    <div class="risk-cell"><div class="risk-cell-label">Risk Level (before fix)</div><span class="risk-badge risk-high">CRITICAL</span></div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Asset</label>
+    <input class="form-input" id="risk-asset" placeholder="e.g. IoT API server (172.21.0.10, port 80)" />
+  </div>
+  <div class="form-group">
+    <label class="form-label">Vulnerability Description</label>
+    <textarea class="form-textarea" id="risk-vuln" placeholder="e.g. No authentication on HTTP endpoints. Any network-reachable host can query the API without credentials."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Business Impact</label>
+    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Unauthorised access to live telemetry. Potential manipulation of sensor data. Operational visibility granted to unauthorised parties."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Proposed Mitigation</label>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Implement Bearer token authentication. Require a valid token on all API requests. Reject requests without a valid token with HTTP 401."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Residual Risk (after fix)</label>
+    <textarea class="form-textarea" id="risk-residual" placeholder="e.g. Token transmitted over plain HTTP (not HTTPS). Static token with no expiry. Token stored on disk in both containers."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
+
+function renderStep4() { return `
+  <div class="section-label">Step 5 &mdash; Change Authorization</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Change Management</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Why a change request is required</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Adding authentication to a live API is a breaking change. The IoT sensor currently calls the API without a token every 5 seconds. If you enable authentication on the server before updating the sensor, the sensor will immediately start receiving 401 errors and telemetry collection will fail.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:6px;"><strong>The correct order:</strong> configure the sensor client first, verify it is working, then enable auth on the server.</p>
+    </div>
+  </div>
+  <div class="form-group" style="margin-top:16px;">
+    <label class="form-label">Change Request Description</label>
+    <textarea class="form-textarea" id="cr-desc" placeholder="Change Type: Application Security&#10;Action: Implement Bearer token authentication on the IoT API (172.21.0.10). Require Authorization: Bearer header on all requests.&#10;Affected systems: IoT API (172.21.0.10), IoT Sensor (172.21.0.11)&#10;Pre-change step: Configure sensor client to include token before enabling server-side auth.&#10;Rollback: Remove /app/token.txt from iot_api and restart the API."></textarea>
+  </div>
+  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
+
+function renderStep5() { return `
+  <div class="section-label">Step 6 &mdash; Apply Fix</div>
+  <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-bottom:16px;">Follow these two phases in order. Phase 1 must be completed and verified before Phase 2.</p>
+
+  <div class="phase-block">
+    <div class="phase-label phase-1">&#9312; Phase 1 &mdash; Configure the Sensor Client First</div>
+    <div class="phase-title">IoT Sensor (172.21.0.11)</div>
+    <p class="phase-body">Open the terminal, select <strong>IoT Sensor</strong>, and run:</p>
+    <div class="cmd-label">Write the token file</div>
+    <div class="cmd-block">echo 'iot-secret-2024' > /app/token.txt</div>
+    <div class="cmd-label">Restart the sensor process</div>
+    <div class="cmd-block">pkill -f sensor.py; python /app/sensor.py &</div>
+    <div class="cmd-label">Verify it is still sending telemetry (wait 10 seconds)</div>
+    <div class="cmd-block">cat /app/token.txt</div>
+    <p class="phase-body" style="margin-top:8px;">You should see <code>iot-secret-2024</code>. The sensor will now include this token in its requests. Since the server has not enabled auth yet, requests still succeed as normal.</p>
+  </div>
+
+  <div class="phase-block">
+    <div class="phase-label phase-2">&#9313; Phase 2 &mdash; Enable Authentication on the API Server</div>
+    <div class="phase-title">IoT API (172.21.0.10)</div>
+    <p class="phase-body">Switch to the <strong>IoT API</strong> terminal and run:</p>
+    <div class="cmd-label">Write the token file</div>
+    <div class="cmd-block">echo 'iot-secret-2024' > /app/token.txt</div>
+    <div class="cmd-label">Restart the Flask app to pick up the new configuration</div>
+    <div class="cmd-block">pkill -f app.py; python /app/app.py &</div>
+    <div class="cmd-label">Verify auth is now enabled</div>
+    <div class="cmd-block">curl -s http://localhost/health</div>
+    <p class="phase-body" style="margin-top:8px;">The <code>/health</code> endpoint should now return <code>"auth_enabled": true</code>. The API is now enforcing authentication.</p>
+  </div>
+
+  <div class="phase-block" style="border-color:var(--border);">
+    <div class="phase-label" style="color:var(--text-dim);">&#9314; Quick Verification</div>
+    <div class="cmd-label">This should return 401 (from IoT API terminal)</div>
+    <div class="cmd-block">curl -i http://localhost/sensor/data</div>
+    <div class="cmd-label">This should return 200 (authenticated)</div>
+    <div class="cmd-block">curl -i -H "Authorization: Bearer iot-secret-2024" http://localhost/sensor/data</div>
+  </div>
+
+  <button class="btn btn-primary" onclick="completeStep(5)">Authentication Applied &mdash; Continue to Validation &#8594;</button>`; }
+
+function renderStep6() { return `
+  <div class="section-label">Step 7 &mdash; Validation</div>
+  <div class="theory-block" style="border-radius:6px;overflow:hidden;">
+    <div style="padding:14px 18px;">
+      <div class="theory-block-label">Automated two-part check</div>
+      <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">What the validator checks</h4>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;"><strong>Test 1 (security):</strong> Unauthenticated <code>GET /sensor/data</code> must return <code>HTTP 401</code>.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;"><strong>Test 2 (functional):</strong> Authenticated request with token <code>iot-secret-2024</code> must return <code>HTTP 200</code> with data.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:6px;">Both tests must pass. If Test 1 fails, auth is not enabled. If Test 2 fails, the token in <code>/app/token.txt</code> does not match <code>iot-secret-2024</code>.</p>
+    </div>
+  </div>
+  <div class="form-group" style="margin-top:16px;">
+    <label class="form-label">Evidence &mdash; paste curl output showing 401 and 200 responses</label>
+    <textarea class="form-textarea" id="evidence-api" placeholder="Paste output of:&#10;curl -i http://172.21.0.10/sensor/data&#10;curl -i -H &quot;Authorization: Bearer iot-secret-2024&quot; http://172.21.0.10/sensor/data"></textarea>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
+    <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
+  </div>
+  <div class="validation-result" id="validation-result"></div>`; }
+
+// -- ACTIONS -------------------------------------------------------
+function saveAndNext(fieldId, stateKey, stepIndex) {
+  const val = document.getElementById(fieldId)?.value?.trim();
+  if (!val) { alert('Please fill in the field before continuing.'); return; }
+  state.formData[stateKey] = val;
+  completeStep(stepIndex);
+}
+
+function saveRiskAndNext() {
+  const asset       = document.getElementById('risk-asset')?.value?.trim();
+  const vuln        = document.getElementById('risk-vuln')?.value?.trim();
+  const impact      = document.getElementById('risk-impact')?.value?.trim();
+  const mitigation  = document.getElementById('risk-mitigation')?.value?.trim();
+  const residual    = document.getElementById('risk-residual')?.value?.trim();
+  if (!asset || !vuln || !impact || !mitigation || !residual) {
+    alert('Please complete all risk assessment fields before continuing.');
+    return;
+  }
+  state.formData.risk = { asset, vuln, impact, mitigation, residual };
+  completeStep(3);
+}
+
+async function runValidation() {
+  const evidenceEl = document.getElementById('evidence-api');
+  if (evidenceEl && evidenceEl.value.trim()) {
+    state.formData.evidence = evidenceEl.value.trim();
+    saveProgressToServer();
+  }
+  const result = document.getElementById('validation-result');
+  result.classList.add('visible');
+  result.innerHTML = `<span style="color:var(--text-dim)">Running authentication checks... (this may take a few seconds)</span>`;
+
+  try {
+    const r = await fetch('/api/validate/challenge3', { method: 'POST' });
+    const data = await r.json();
+    if (data.success) {
+      result.innerHTML = `
+        <div class="validation-pass">
+          &#10003; VALIDATION PASSED<br><br>
+          Unauthenticated requests return HTTP 401.<br>
+          Authenticated requests with the correct token return HTTP 200.<br><br>
+          <span style="color:var(--text-dim)">Challenge 3 complete. The IoT API now requires authentication.</span>
+        </div>`;
+      state.validationPassed = true;
+      const apiSt = document.getElementById('api-st');
+      if (apiSt) { apiSt.textContent = 'Auth: Bearer token'; apiSt.style.fill = '#00e5a0'; }
+      setTimeout(() => completeStep(6), 2000);
+    } else {
+      result.innerHTML = `
+        <div class="validation-fail">
+          &#10007; VALIDATION FAILED<br><br>
+          ${data.message}<br><br>
+          Ensure you created <span style="color:var(--accent)">/app/token.txt</span> with exactly <code>iot-secret-2024</code> and restarted <span style="color:var(--accent)">app.py</span> on the IoT API container.
+        </div>`;
+    }
+  } catch (e) {
+    result.innerHTML = `<div class="validation-fail">&#10007; Could not reach the server. Is the management container running?</div>`;
+  }
+}
+
+// -- INIT ----------------------------------------------------------
+loadProgressFromServer().then(() => {
+  renderSteps();
+  renderStepContent();
+});
+
+</script>
+</body>
+</html>
