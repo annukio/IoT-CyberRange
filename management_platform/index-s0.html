@@ -57,6 +57,10 @@
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .chal-dot { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:1.5px solid var(--border2);color:var(--text-faint);flex-shrink:0; }
+    .chal-done { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+    .chal-active { border-color:var(--accent);color:var(--accent); }
+    .chal-locked { opacity:0.35; }
 
     /* -- MAIN LAYOUT ------------------------------------------- */
     .main { display: flex; flex: 1; overflow: hidden; }
@@ -319,6 +323,151 @@
 </head>
 <body>
 
+<!-- ===== INTRO OVERLAY ============================================ -->
+<div id="intro-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto;">
+  <div style="max-width:960px;margin:0 auto;padding:48px 32px 72px;">
+
+    <!-- Top strip -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:40px;">
+      <span style="font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">Veltran Industries // Internal</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Security Operations -- Day 1</span>
+    </div>
+
+    <!-- Email card -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;margin-bottom:32px;overflow:hidden;">
+      <div style="padding:16px 24px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:64px 1fr;row-gap:6px;column-gap:12px;font-size:12px;">
+        <span style="color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;font-size:10px;letter-spacing:0.5px;line-height:1.9;">From</span>
+        <span style="color:var(--text);">M. Torres, IT Manager &lt;m.torres@veltran.int&gt;</span>
+        <span style="color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;font-size:10px;letter-spacing:0.5px;line-height:1.9;">To</span>
+        <span style="color:var(--text);">New Analyst &lt;analyst@veltran.int&gt;</span>
+        <span style="color:var(--text-faint);font-family:var(--mono);text-transform:uppercase;font-size:10px;letter-spacing:0.5px;line-height:1.9;">Subject</span>
+        <span style="color:var(--text);font-weight:600;">Network security review: please advise</span>
+      </div>
+      <div style="padding:24px 28px;color:var(--text-dim);font-size:14px;line-height:1.85;">
+        <p>Welcome aboard. Glad to have you on the team.</p>
+        <p style="margin-top:14px;">You have just joined as a junior cybersecurity analyst at Veltran Industries, a small manufacturing company that produces industrial automation components. The company recently modernised its production floor under an Industry 4.0 initiative: connecting its operational technology to the corporate network to enable remote monitoring and data analytics.</p>
+        <p style="margin-top:14px;">This is your first week on the job. The IT manager stops by your desk and hands you a network diagram:</p>
+        <blockquote style="margin:20px 0;padding:14px 20px;border-left:2px solid var(--accent);background:rgba(0,229,160,0.04);border-radius:0 4px 4px 0;font-size:14px;color:var(--text);font-style:italic;">"We connected everything six months ago and haven't touched the security since. Have a look and tell me what worries you."</blockquote>
+        <p>The current network diagram is attached below.</p>
+      </div>
+    </div>
+
+    <!-- Network diagram -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:24px;margin-bottom:32px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:20px;">Attachment: network_diagram_current.svg</div>
+
+      <svg width="100%" viewBox="0 0 680 470" style="display:block">
+      <defs>
+        <marker id="ima" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="rgba(24,95,165,0.1)"/>
+      <rect x="18" y="44" width="192" height="172" rx="10" fill="none" stroke="#185FA5" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="28" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#5ba3d9">CORPORATE</text>
+      <text x="28" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.0/24</text>
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="rgba(29,158,117,0.1)"/>
+      <rect x="470" y="44" width="192" height="172" rx="10" fill="none" stroke="#1D9E75" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="480" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#1D9E75">IOT NETWORK</text>
+      <text x="480" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.0/24</text>
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="rgba(239,68,68,0.06)"/>
+      <rect x="208" y="308" width="264" height="142" rx="10" fill="none" stroke="#c98020" stroke-width="0.5" stroke-dasharray="6 3"/>
+      <text x="218" y="328" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#f59e0b">OT NETWORK</text>
+      <text x="218" y="342" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.0/24</text>
+      <path d="M 210 130 L 262 171" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ima)"/>
+      <path d="M 418 171 L 470 130" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ima)"/>
+      <path d="M 340 194 L 340 308" fill="none" stroke="#252932" stroke-dasharray="4 3" stroke-width="1" marker-end="url(#ima)"/>
+      <path d="M 210 130 L 262 171" class="fo" marker-end="url(#ima)"/>
+      <path d="M 418 171 L 470 130" class="fo" marker-end="url(#ima)"/>
+      <path d="M 340 194 L 340 308" class="fo" marker-end="url(#ima)"/>
+      <rect x="262" y="148" width="156" height="46" rx="6" fill="#1a1e26" stroke="#2f3540" stroke-width="1"/>
+      <path d="M 282 161 L 292 156 L 292 164 Q 292 172 282 176 Q 272 172 272 164 L 272 156 Z" fill="none" stroke="#6b7585" stroke-width="1" opacity="0.6"/>
+      <text x="302" y="168" style="font-family:var(--mono);font-size:13px;font-weight:600;fill:#d4dae8">Firewall</text>
+      <text x="302" y="183" style="font-family:var(--mono);font-size:11px;fill:#6b7585">.{20,21,22}.254</text>
+      <rect x="36" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#185FA5" stroke-width="0.5"/>
+      <rect x="47" y="103" width="22" height="14" rx="1.5" fill="none" stroke="#5ba3d9" stroke-width="1"/>
+      <line x1="44" y1="118" x2="70" y2="118" stroke="#5ba3d9" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="80" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Corp WS</text>
+      <text x="80" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.20.0.10</text>
+      <text x="80" y="134" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Kali Linux</text>
+      <rect x="488" y="92" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <rect x="499" y="101" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.8"/>
+      <rect x="499" y="108" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.55"/>
+      <rect x="499" y="115" width="18" height="4" rx="0.5" fill="#1D9E75" opacity="0.3"/>
+      <text x="527" y="108" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT API</text>
+      <text x="527" y="122" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.10</text>
+      <text x="527" y="134" style="font-family:var(--mono);font-size:11px;fill:#f59e0b">No auth</text>
+      <rect x="488" y="157" width="156" height="50" rx="6" fill="#1a1e26" stroke="#1D9E75" stroke-width="0.5"/>
+      <circle cx="504" cy="183" r="4" fill="#1D9E75" opacity="0.8"/>
+      <path d="M 497 176 Q 494 183 497 190" fill="none" stroke="#1D9E75" stroke-width="1.2" opacity="0.5"/>
+      <path d="M 511 176 Q 514 183 511 190" fill="none" stroke="#1D9E75" stroke-width="1.2" opacity="0.5"/>
+      <text x="527" y="173" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">IoT Sensor</text>
+      <text x="527" y="187" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.11</text>
+      <text x="527" y="199" style="font-family:var(--mono);font-size:11px;fill:#3d4455">5s poll</text>
+      <rect x="226" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <rect x="234" y="365" width="18" height="13" rx="1" fill="none" stroke="#f59e0b" stroke-width="1"/>
+      <rect x="240" y="378" width="6" height="3" rx="0.5" fill="#f59e0b" opacity="0.5"/>
+      <rect x="237" y="381" width="12" height="2" rx="1" fill="#f59e0b" opacity="0.4"/>
+      <text x="263" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">Legacy OS</text>
+      <text x="263" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.10</text>
+      <text x="263" y="398" style="font-family:var(--mono);font-size:11px;fill:#f59e0b">EOL 2023</text>
+      <rect x="348" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#c98020" stroke-width="0.5"/>
+      <rect x="356" y="365" width="18" height="16" rx="2" fill="none" stroke="#f59e0b" stroke-width="1"/>
+      <circle cx="361" cy="370" r="2" fill="#f59e0b" opacity="0.7"/>
+      <circle cx="367" cy="370" r="2" fill="#f59e0b" opacity="0.7"/>
+      <rect x="358" y="375" width="14" height="3" rx="1" fill="#f59e0b" opacity="0.4"/>
+      <text x="385" y="370" style="font-family:var(--mono);font-size:12px;font-weight:600;fill:#d4dae8">PLC</text>
+      <text x="385" y="384" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.22.0.11</text>
+      <text x="385" y="398" style="font-family:var(--mono);font-size:11px;fill:#3d4455">Port 502</text>
+      </svg>
+
+      <div style="display:flex;gap:20px;font-size:11px;color:var(--text-faint);margin-top:14px;font-family:var(--mono);flex-wrap:wrap;align-items:center;">
+        <span style="display:flex;align-items:center;gap:6px;"><svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#00e5a0" stroke-width="2" stroke-dasharray="8 5"/></svg>Active traffic (all zones)</span>
+        <span style="display:flex;align-items:center;gap:6px;"><svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#252932" stroke-width="1" stroke-dasharray="4 3"/></svg>Network link</span>
+      </div>
+    </div>
+
+    <!-- Findings -->
+    <div style="margin-bottom:32px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;">Initial Findings<span style="flex:1;height:1px;background:var(--border);display:block;"></span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--danger);border-radius:6px;padding:16px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--danger);letter-spacing:1px;margin-bottom:8px;opacity:0.75;">FINDING 01</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3;">Flat Network: No Segmentation</div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.65;">The corporate workstation, the IoT API, and the PLC share the same logical network. No firewall rules restrict cross-zone traffic. A compromised machine can reach the PLC on port 502 without any barrier.</div>
+        </div>
+
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--danger);border-radius:6px;padding:16px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--danger);letter-spacing:1px;margin-bottom:8px;opacity:0.75;">FINDING 02</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3;">End-of-Life System Exposed</div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.65;">The Legacy OS in the OT segment runs Ubuntu 18.04, which reached end of life in April 2023. It exposes Telnet on port 23, an unencrypted protocol, with no host-based firewall and no patches applied in over a year.</div>
+        </div>
+
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--danger);border-radius:6px;padding:16px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--danger);letter-spacing:1px;margin-bottom:8px;opacity:0.75;">FINDING 03</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3;">Unauthenticated API</div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.65;">The IoT API accepts requests from any source without a token, key, or credential check. Any device on the network, including the corporate workstation, can query or manipulate sensor data directly.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Closing -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px 24px;margin-bottom:32px;font-size:14px;line-height:1.85;">
+      <p style="color:var(--text-dim);">These are the three issues you will be working through, in order. Each follows a real security workflow: assess the risk, request authorization, apply the technical fix, and validate it. Take your time. In real OT environments, a misconfigured firewall rule can take down a production line.</p>
+      <p style="margin-top:12px;color:var(--text);">Your workstation is ready. Let's start.</p>
+    </div>
+
+    <!-- Enter button -->
+    <div>
+      <button class="btn btn-primary" onclick="enterLab()" style="font-size:13px;padding:10px 24px;letter-spacing:1px;">Enter the lab &#8594;</button>
+    </div>
+
+  </div>
+</div>
+<!-- ===== /INTRO OVERLAY =========================================== -->
+
 <!---- TOP BAR ----------------------------------------------------- -->
 <div class="topbar">
   <div class="topbar-logo">ICS Cyber Range</div>
@@ -327,6 +476,15 @@
   <div class="topbar-right">
     <div class="status-dot"></div>
     <div class="topbar-status" id="topbar-status">Lab environment active</div>
+    <div class="topbar-divider"></div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
+      <div class="chal-dot chal-active" title="Challenge 1 -- Network Segmentation">1</div>
+      <div class="chal-dot chal-locked" title="Challenge 2 -- Legacy OS Hardening">2</div>
+      <div class="chal-dot chal-locked" title="Challenge 3 -- IoT API Authentication">3</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
   </div>
 </div>
 
@@ -384,7 +542,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 1 &mdash; IT/OT Convergence</span>
+            <span class="theory-block-label">Section 1 -- IT/OT Convergence</span>
             <span class="theory-block-title">IT/OT Convergence and the Flat Network Problem</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -414,7 +572,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 2 &mdash; NIST SP 800-82 / IEC 62443</span>
+            <span class="theory-block-label">Section 2 -- NIST SP 800-82 / IEC 62443</span>
             <span class="theory-block-title">Network Segmentation: Concepts and Models</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -452,7 +610,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 3 &mdash; MITRE ATT&CK for ICS</span>
+            <span class="theory-block-label">Section 3 -- MITRE ATT&CK for ICS</span>
             <span class="theory-block-title">Threat Landscape: How Attackers Move from IT to OT</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -477,7 +635,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 4 &mdash; Technical Reference</span>
+            <span class="theory-block-label">Section 4 -- Technical Reference</span>
             <span class="theory-block-title">Firewall Configuration: iptables on Linux</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -518,7 +676,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 5 &mdash; NIST SP 800-30</span>
+            <span class="theory-block-label">Section 5 -- NIST SP 800-30</span>
             <span class="theory-block-title">Risk Assessment in an OT Context</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -543,7 +701,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 6 &mdash; Validation</span>
+            <span class="theory-block-label">Section 6 -- Validation</span>
             <span class="theory-block-title">Confirming the Fix Works</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -732,6 +890,7 @@ async function loadProgressFromServer() {
     state.completedSteps = new Set(saved.completedSteps || []);
     state.formData = saved.formData || {};
     state.validationPassed = saved.validationPassed || false;
+    state.introSeen = saved.introSeen || false;
   } catch (e) {
     console.warn('Could not load progress:', e);
   }
@@ -746,6 +905,7 @@ async function saveProgressToServer() {
         completedSteps: [...state.completedSteps],
         formData: state.formData,
         validationPassed: state.validationPassed,
+        introSeen: state.introSeen,
       }
     };
     await fetch('/api/progress', {
@@ -786,6 +946,7 @@ const state = {
   completedSteps: new Set(),
   formData: {},
   validationPassed: false,
+  introSeen: false,
 };
 
 const STEPS = [
@@ -800,10 +961,10 @@ const STEPS = [
 
 // -- NETWORK MAP ---------------------------------------------------
 const SC = {
-  s0: { desc: 'S0 — Flat network: all devices communicate freely across zones. No firewall rules applied.',           ot:'open',    hard:false, auth:false, col:'#00e5a0', label:'S0 - Baseline'  },
-  s1: { desc: 'S1 — Segmentation applied: the firewall blocks all corporate traffic to the OT network.',             ot:'blocked', hard:false, auth:false, col:'#5ba3d9', label:'S1 - Segmented' },
-  s2: { desc: 'S2 — Legacy OS hardened: insecure services disabled, host-level firewall rules applied.',             ot:'blocked', hard:true,  auth:false, col:'#f59e0b', label:'S2 - Hardened'  },
-  s3: { desc: 'S3 — IoT API secured: token-based authentication required for all API requests.',                     ot:'blocked', hard:true,  auth:true,  col:'#a78bfa', label:'S3 - Secured'   },
+  s0: { desc: 'S0 -- Flat network: all devices communicate freely across zones. No firewall rules applied.',           ot:'open',    hard:false, auth:false, col:'#00e5a0', label:'S0 - Baseline'  },
+  s1: { desc: 'S1 -- Segmentation applied: the firewall blocks all corporate traffic to the OT network.',             ot:'blocked', hard:false, auth:false, col:'#5ba3d9', label:'S1 - Segmented' },
+  s2: { desc: 'S2 -- Legacy OS hardened: insecure services disabled, host-level firewall rules applied.',             ot:'blocked', hard:true,  auth:false, col:'#f59e0b', label:'S2 - Hardened'  },
+  s3: { desc: 'S3 -- IoT API secured: token-based authentication required for all API requests.',                     ot:'blocked', hard:true,  auth:true,  col:'#a78bfa', label:'S3 - Secured'   },
 };
 
 function ss(s) {
@@ -878,6 +1039,8 @@ function renderSteps() {
   const done = state.completedSteps.size;
   document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
   document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
+  const tdEl = document.getElementById('topbar-done');
+  if (tdEl) tdEl.textContent = done;
 }
 
 function goToStep(i) {
@@ -908,7 +1071,7 @@ function renderStepContent() {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">&#128203; Task Assignment — From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment -- From: Security Operations</div>
     <h3>Network Segmentation Audit</h3>
     <p>Our OT network was recently connected to the corporate infrastructure to enable remote monitoring of the production line. A routine audit has flagged that <strong>no segmentation controls</strong> are in place between the corporate zone and the OT/IoT zones.</p>
     <p style="margin-top:10px;">Your task is to assess the exposure and apply appropriate firewall rules to isolate the OT environment from direct corporate access.</p>
@@ -924,10 +1087,10 @@ function renderStep0() { return `
   </div>`; }
 
 function renderStep1() { return `
-  <div class="section-label">Step 2 — Reconnaissance</div>
+  <div class="section-label">Step 2 -- Reconnaissance</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
-      <div class="theory-block-label">Before you fix it — understand the exposure</div>
+      <div class="theory-block-label">Before you fix it: understand the exposure</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Verify the current (insecure) state</h4>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab, select the <span class="highlight">Corporate Workstation</span>, and run these commands. Document what you observe.</p>
     </div>
@@ -947,7 +1110,7 @@ function renderStep1() { return `
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
-  <div class="section-label">Step 3 — Theory</div>
+  <div class="section-label">Step 3 -- Theory</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
@@ -964,7 +1127,7 @@ function renderStep2() { return `
     <div style="padding:14px 18px;">
       <div class="theory-block-label">The Fix: iptables FORWARD Chain</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">How the firewall will stop this</h4>
-      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">The firewall container has <code>ip_forward=1</code> enabled — it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">The firewall container has <code>ip_forward=1</code> enabled: it routes packets between the three subnets. By default, it has <strong>no rules</strong>. We will add FORWARD chain rules to drop cross-zone traffic.</p>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:6px;">Full theory is available in the <strong>Theory</strong> tab. The <strong>Network Map</strong> tab shows the current architecture state.</p>
     </div>
   </div>
@@ -974,7 +1137,7 @@ function renderStep2() { return `
   </div>`; }
 
 function renderStep3() { return `
-  <div class="section-label">Step 4 — Risk Assessment</div>
+  <div class="section-label">Step 4 -- Risk Assessment</div>
   <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Before making any changes, document the risk. This mirrors real-world change management where impact must be understood and signed off.</p>
   <div class="risk-grid">
     <div class="risk-cell">
@@ -1011,7 +1174,7 @@ function renderStep3() { return `
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
-  <div class="section-label">Step 5 — Change Authorization</div>
+  <div class="section-label">Step 5 -- Change Authorization</div>
   <div class="task-card" style="border-left-color:var(--accent)">
     <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
     <h3>Firewall Rule Implementation</h3>
@@ -1043,10 +1206,10 @@ function renderStep4() { return `
     <label class="form-label">Rollback plan</label>
     <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Run 'iptables -F FORWARD' to flush all rules and restore open state..."></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
+  <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
-  <div class="section-label">Step 6 — Apply the Fix</div>
+  <div class="section-label">Step 6 -- Apply the Fix</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Technical Mitigation</div>
@@ -1064,12 +1227,12 @@ function renderStep5() { return `
   <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">4. Verify your rules</div>
   <div class="cmd-block">iptables -L FORWARD -v --line-numbers</div>
   <div style="margin-top:20px;">
-    <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied — Continue to Validation &#8594;</button>
+    <button class="btn btn-primary" onclick="completeStep(5)">Rules Applied. Continue to Validation &#8594;</button>
     <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>`; }
 
 function renderStep6() { return `
-  <div class="section-label">Step 7 — Validation</div>
+  <div class="section-label">Step 7 -- Validation</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Automated connectivity check</div>
@@ -1078,7 +1241,7 @@ function renderStep6() { return `
     </div>
   </div>
   <div class="form-group" style="margin-top:16px;">
-    <label class="form-label">Evidence — paste iptables output here</label>
+    <label class="form-label">Evidence: paste iptables output here</label>
     <textarea class="form-textarea" id="evidence-rules" placeholder="Paste the output of: iptables -L FORWARD -v --line-numbers"></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
@@ -1093,6 +1256,64 @@ function saveAndNext(fieldId, stateKey, stepIndex) {
   if (!val) { alert('Please fill in the field before continuing.'); return; }
   state.formData[stateKey] = val;
   completeStep(stepIndex);
+}
+
+function submitChangeRequest() {
+  const val = document.getElementById('cr-desc')?.value?.trim();
+  if (!val) { alert('Please fill in the change description before submitting.'); return; }
+  state.formData.crDesc = val;
+  saveProgressToServer();
+
+  const risk = document.getElementById('cr-risk')?.value || 'medium';
+  const ticketId = 'CR-' + (Date.now() % 10000).toString().padStart(4, '0');
+  const ts = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  document.getElementById('step-content').innerHTML = `
+    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:4px;">Change Request</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);">${ticketId}</div>
+        </div>
+        <div id="ticket-badge" style="background:rgba(245,158,11,0.15);color:var(--warn);border:1px solid rgba(245,158,11,0.3);padding:4px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;">UNDER REVIEW</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Submitted</span>${ts}</div>
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Risk Level</span>${risk.charAt(0).toUpperCase() + risk.slice(1)}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Description</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${safeVal}</div>
+      </div>
+    </div>
+    <div id="ticket-result" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;">
+      <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--warn);border-radius:50%;animation:cr-spin 0.8s linear infinite;flex-shrink:0;"></span>
+      Submitting to change management system...
+    </div>
+    <div id="ticket-continue" style="display:none;margin-top:16px;">
+      <button class="btn btn-primary" onclick="completeStep(4)">Proceed to Implementation &#8594;</button>
+    </div>
+    <style>@keyframes cr-spin { to { transform: rotate(360deg); } }</style>
+  `;
+
+  setTimeout(() => {
+    const badge = document.getElementById('ticket-badge');
+    const result = document.getElementById('ticket-result');
+    const cont = document.getElementById('ticket-continue');
+    if (badge) {
+      badge.textContent = 'APPROVED';
+      badge.style.background = 'rgba(0,229,160,0.1)';
+      badge.style.color = 'var(--accent)';
+      badge.style.borderColor = 'rgba(0,229,160,0.3)';
+    }
+    if (result) {
+      result.style.borderColor = 'rgba(0,229,160,0.2)';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+    }
+    if (cont) cont.style.display = 'block';
+  }, 1500);
 }
 
 function saveRiskAndNext() {
@@ -1123,7 +1344,7 @@ async function runValidation() {
           &#10003; VALIDATION PASSED<br><br>
           The Corporate WS cannot reach the PLC (172.22.0.11).<br>
           Network segmentation confirmed.<br><br>
-          <span style="color:var(--text-dim)">Challenge 2 — Legacy OT System Protection is now unlocked. Reloading...</span>
+          <span style="color:var(--text-dim)">Challenge 2 -- Legacy OT System Protection is now unlocked. Reloading...</span>
         </div>`;
       state.validationPassed = true;
       ss('s1');
@@ -1141,8 +1362,15 @@ async function runValidation() {
   }
 }
 
+function enterLab() {
+  state.introSeen = true;
+  saveProgressToServer();
+  document.getElementById('intro-overlay').style.display = 'none';
+}
+
 // -- INIT ----------------------------------------------------------
 loadProgressFromServer().then(() => {
+  if (!state.introSeen) document.getElementById('intro-overlay').style.display = 'flex';
   renderSteps();
   renderStepContent();
 });

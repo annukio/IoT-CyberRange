@@ -35,6 +35,10 @@
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .chal-dot { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:1.5px solid var(--border2);color:var(--text-faint);flex-shrink:0; }
+    .chal-done { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+    .chal-active { border-color:var(--accent);color:var(--accent); }
+    .chal-locked { opacity:0.35; }
     .topbar-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); letter-spacing: 1px; }
 
     .main { display: flex; flex: 1; overflow: hidden; }
@@ -177,9 +181,17 @@
   <div class="topbar-divider"></div>
   <div class="topbar-scenario">Scenario<span id="scenario-label">S1 - Segmented</span></div>
   <div class="topbar-right">
-    <div class="topbar-badge">&#10003; Challenge 1 Complete</div>
     <div class="status-dot"></div>
     <div class="topbar-status">Lab environment active</div>
+    <div class="topbar-divider"></div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
+      <div class="chal-dot chal-done" title="Challenge 1 -- complete">&#10003;</div>
+      <div class="chal-dot chal-active" title="Challenge 2 -- Legacy OS Hardening">2</div>
+      <div class="chal-dot chal-locked" title="Challenge 3 -- IoT API Authentication">3</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
   </div>
 </div>
 
@@ -234,7 +246,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 1 &mdash; EOL Systems</span>
+            <span class="theory-block-label">Section 1 -- EOL Systems</span>
             <span class="theory-block-title">End-of-Life Operating Systems in OT Environments</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -270,7 +282,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 2 &mdash; CVE-2017-0144 / SMBv1</span>
+            <span class="theory-block-label">Section 2 -- CVE-2017-0144 / SMBv1</span>
             <span class="theory-block-title">SMBv1 and the EternalBlue Vulnerability</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -279,13 +291,13 @@
           <h4>What Is SMBv1?</h4>
           <p>Server Message Block version 1 (SMBv1) is a network file-sharing protocol first implemented in 1983. It was designed for small, isolated networks and lacks modern security features: no message signing by default, no encryption, and several design-level weaknesses. All modern operating systems have deprecated or removed SMBv1, but legacy systems may still enable it.<span class="cite-ref">[2]</span></p>
 
-          <h4>CVE-2017-0144 — EternalBlue</h4>
+          <h4>CVE-2017-0144 - EternalBlue</h4>
           <p>CVE-2017-0144, known as <strong>EternalBlue</strong>, is a critical remote code execution vulnerability in the SMBv1 implementation. It was originally developed by the NSA, leaked by the Shadow Brokers group in April 2017, and subsequently weaponized in two of the most damaging cyberattacks in history:<span class="cite-ref">[2][3]</span></p>
           <ul>
-            <li><strong>WannaCry (May 2017):</strong> A ransomware worm that used EternalBlue to spread autonomously across networks, infecting over 200,000 systems in 150 countries. It caused an estimated $4–8 billion in damages and severely impacted the UK National Health Service.</li>
+            <li><strong>WannaCry (May 2017):</strong> A ransomware worm that used EternalBlue to spread autonomously across networks, infecting over 200,000 systems in 150 countries. It caused an estimated $4-8 billion in damages and severely impacted the UK National Health Service.</li>
             <li><strong>NotPetya (June 2017):</strong> A destructive wiper disguised as ransomware that used EternalBlue for lateral movement. It caused over $10 billion in damages and is considered one of the most costly cyberattacks ever recorded.</li>
           </ul>
-          <p>Both attacks demonstrated that a single unpatched SMBv1 system on a network can allow an attacker (or automated worm) to compromise every other vulnerable system on the same segment — classic lateral movement with no authentication required.</p>
+          <p>Both attacks demonstrated that a single unpatched SMBv1 system on a network can allow an attacker (or automated worm) to compromise every other vulnerable system on the same segment, classic lateral movement with no authentication required.</p>
 
           <h4>Mitigation</h4>
           <p>Disabling SMBv1 eliminates exposure to EternalBlue and related exploits. In Samba on Linux, this is achieved by setting a minimum protocol version:</p>
@@ -298,14 +310,14 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 3 &mdash; Insecure Protocols</span>
+            <span class="theory-block-label">Section 3 -- Insecure Protocols</span>
             <span class="theory-block-title">Why Telnet Is Dangerous in an OT Environment</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
         </summary>
         <div class="theory-body">
           <h4>Telnet and Cleartext Transmission</h4>
-          <p>Telnet (TCP port 23) is a protocol from 1969 that provides a remote command-line interface. Every character typed in a telnet session — including usernames, passwords, and commands — is transmitted as <strong>unencrypted plaintext</strong> across the network. Any device on the same network segment that can capture traffic (via a network tap, port mirroring, or ARP spoofing) can read all telnet credentials and commands in real time.<span class="cite-ref">[4]</span></p>
+          <p>Telnet (TCP port 23) is a protocol from 1969 that provides a remote command-line interface. Every character typed in a telnet session (including usernames, passwords, and commands) is transmitted as <strong>unencrypted plaintext</strong> across the network. Any device on the same network segment that can capture traffic (via a network tap, port mirroring, or ARP spoofing) can read all telnet credentials and commands in real time.<span class="cite-ref">[4]</span></p>
           <p>In MITRE ATT&amp;CK for ICS, this maps to technique <strong>T1040 (Network Sniffing)</strong>: adversaries capture network traffic to obtain credentials or observe control commands sent between systems.<span class="cite-ref">[3]</span></p>
 
           <h4>Why This Is Especially Risky in OT</h4>
@@ -315,7 +327,7 @@
             <li>Issue commands that change process parameters or stop running services.</li>
             <li>Create persistence by adding new accounts or modifying startup configurations.</li>
           </ul>
-          <p>The secure replacement for telnet is <strong>SSH (Secure Shell)</strong>, which encrypts the entire session including credentials. However, for legacy OT systems that cannot run SSH, the only compensating control is to ensure telnet is not exposed at all — by disabling the service and enforcing strict network access controls.</p>
+          <p>The secure replacement for telnet is <strong>SSH (Secure Shell)</strong>, which encrypts the entire session including credentials. However, for legacy OT systems that cannot run SSH, the only compensating control is to ensure telnet is not exposed at all, by disabling the service and enforcing strict network access controls.</p>
 
           <h4>Disabling Telnet</h4>
           <p>Telnet on Ubuntu 18.04 is managed by <code>openbsd-inetd</code>, the internet super-server daemon:</p>
@@ -330,7 +342,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 4 &mdash; Technical Reference</span>
+            <span class="theory-block-label">Section 4 -- Technical Reference</span>
             <span class="theory-block-title">Host-Based Firewalling: iptables INPUT Chain</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -352,7 +364,7 @@
           <div class="cmd-block">iptables -P INPUT DROP</div>
 
           <h4>Important: Rule Order</h4>
-          <p>The ACCEPT rules must be added <em>before</em> setting the default policy to DROP — otherwise the iptables command that adds the ACCEPT rules itself may be blocked. Always verify the final state:</p>
+          <p>The ACCEPT rules must be added <em>before</em> setting the default policy to DROP, otherwise the iptables command that adds the ACCEPT rules itself may be blocked. Always verify the final state:</p>
           <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
 
           <h4>Verifying the Effect</h4>
@@ -364,7 +376,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 5 &mdash; NIST SP 800-82</span>
+            <span class="theory-block-label">Section 5 -- NIST SP 800-82</span>
             <span class="theory-block-title">Compensating Controls Framework</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -384,11 +396,11 @@
           <table class="theory-table">
             <thead><tr><th>Field</th><th>Value</th></tr></thead>
             <tbody>
-              <tr><td>Asset</td><td>Legacy OS (172.22.0.10) — Ubuntu 18.04 EoL</td></tr>
+              <tr><td>Asset</td><td>Legacy OS (172.22.0.10) - Ubuntu 18.04 EoL</td></tr>
               <tr><td>Issue</td><td>End-of-life OS, running telnet (port 23) and Samba with SMBv1</td></tr>
               <tr><td>CVE</td><td>CVE-2017-0144 (EternalBlue / SMBv1)</td></tr>
               <tr><td>Impact</td><td>Remote code execution, lateral movement within OT zone</td></tr>
-              <tr><td>Likelihood</td><td>High — public exploit code available</td></tr>
+              <tr><td>Likelihood</td><td>High - public exploit code available</td></tr>
               <tr><td>Mitigation</td><td>Disable telnet, enforce SMB2 minimum, apply host-based firewall</td></tr>
             </tbody>
           </table>
@@ -399,7 +411,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 6 &mdash; Validation</span>
+            <span class="theory-block-label">Section 6 -- Validation</span>
             <span class="theory-block-title">Confirming the Hardening Worked</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -512,7 +524,7 @@
       <text x="480" y="64" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#1D9E75">IOT SEGMENT</text>
       <text x="480" y="78" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.0/24</text>
 
-      <!-- Zone: OT — highlighted, this is the focus of challenge 2 -->
+      <!-- Zone: OT - highlighted, this is the focus of challenge 2 -->
       <rect x="208" y="308" width="264" height="142" rx="10" fill="rgba(239,68,68,0.09)"/>
       <rect x="208" y="308" width="264" height="142" rx="10" fill="none" stroke="#ef4444" stroke-width="1" stroke-dasharray="6 3"/>
       <text x="218" y="328" style="font-family:var(--mono);font-size:11px;font-weight:600;fill:#f59e0b">OT SEGMENT</text>
@@ -570,7 +582,7 @@
       <text x="527" y="187" style="font-family:var(--mono);font-size:11px;fill:#6b7585">172.21.0.11</text>
       <text x="527" y="199" style="font-family:var(--mono);font-size:11px;fill:#3d4455">5s poll</text>
 
-      <!-- Legacy OS — highlighted as the challenge target -->
+      <!-- Legacy OS - highlighted as the challenge target -->
       <rect x="226" y="355" width="106" height="52" rx="6" fill="#1a1e26" stroke="#ef4444" stroke-width="1.5"/>
       <!-- Warning icon -->
       <text x="232" y="372" style="font-family:var(--mono);font-size:14px;fill:#ef4444">&#9888;</text>
@@ -697,10 +709,10 @@ const STEPS = [
 ];
 
 // -- NETWORK MAP ---------------------------------------------------
-// s1 state is shown statically — OT is blocked from corporate.
+// s1 state is shown statically - OT is blocked from corporate.
 const sdesc = document.getElementById('sdesc');
 if (sdesc) {
-  sdesc.textContent = 'S1 — Network segmentation active. OT zone is isolated from Corporate. Challenge: harden the Legacy OS inside the OT segment.';
+  sdesc.textContent = 'S1 -- Network segmentation active. OT zone is isolated from Corporate. Challenge: harden the Legacy OS inside the OT segment.';
   sdesc.style.borderLeftColor = '#5ba3d9';
 }
 
@@ -756,6 +768,8 @@ function renderSteps() {
   const done = state.completedSteps.size;
   document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
   document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
+  const tdEl = document.getElementById('topbar-done');
+  if (tdEl) tdEl.textContent = done;
 }
 
 function goToStep(i) {
@@ -785,15 +799,15 @@ function completeStep(i) {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">&#128203; Task Assignment — From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment -- From: Security Operations</div>
     <h3>Legacy OT System Hardening</h3>
-    <p>Network segmentation is now in place. However, a follow-up audit has identified a high-risk asset inside the OT zone: the <strong>Legacy OS</strong> (172.22.0.10) is running Ubuntu 18.04 — an end-of-life system that has not received security patches since April 2023.</p>
+    <p>Network segmentation is now in place. However, a follow-up audit has identified a high-risk asset inside the OT zone: the <strong>Legacy OS</strong> (172.22.0.10) is running Ubuntu 18.04, an end-of-life system that has not received security patches since April 2023.</p>
     <p style="margin-top:10px;">The system is currently running <strong>telnet</strong> (port 23) and <strong>Samba with SMBv1 enabled</strong>. Both services are known to carry critical vulnerabilities (CVE-2017-0144). Since patching is not possible, implement compensating controls to reduce the attack surface.</p>
   </div>
   <div class="section-label">Expected Outcomes</div>
   <ul class="checklist">
     <li>Telnet service (port 23) disabled</li>
-    <li>SMBv1 disabled — minimum protocol set to SMB2</li>
+    <li>SMBv1 disabled: minimum protocol set to SMB2</li>
     <li>Host-based iptables INPUT rules applied on legacy_os</li>
     <li>PLC can still communicate with Legacy OS (intra-OT traffic unaffected)</li>
   </ul>
@@ -802,10 +816,10 @@ function renderStep0() { return `
   </div>`; }
 
 function renderStep1() { return `
-  <div class="section-label">Step 2 — Reconnaissance</div>
+  <div class="section-label">Step 2 -- Reconnaissance</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
-      <div class="theory-block-label">Before you fix it — map the attack surface</div>
+      <div class="theory-block-label">Before you fix it map the attack surface</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">Enumerate running services on Legacy OS</h4>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Switch to the <strong>Terminal</strong> tab, select <span class="highlight">Legacy OS</span>, and run these commands.</p>
     </div>
@@ -819,21 +833,21 @@ function renderStep1() { return `
   <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">&#8627; Is SMBv1 already restricted in the Samba configuration?</p>
   <div class="form-group">
     <label class="form-label">What services are running? What is the current exposure?</label>
-    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Port 23 (telnet) is open — openbsd-inetd is running. Port 445 shows Samba. smb.conf has no min protocol setting, so SMBv1 is enabled by default..."></textarea>
+    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Port 23 (telnet) is open, openbsd-inetd is running. Port 445 shows Samba. smb.conf has no min protocol setting, so SMBv1 is enabled by default..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
-  <div class="section-label">Step 3 — Theory</div>
+  <div class="section-label">Step 3 -- Theory</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">EoL Systems, SMBv1 and Cleartext Protocols</h4>
-      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Ubuntu 18.04 reached end of life in April 2023 — it no longer receives security patches. The running services compound the risk:</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">Ubuntu 18.04 reached end of life in April 2023. Now it no longer receives security patches. The running services compound the risk:</p>
       <ul style="color:var(--text-dim);font-size:13px;line-height:1.7;padding-left:18px;margin-top:6px;">
-        <li><strong>Telnet (port 23)</strong> — transmits credentials and commands in cleartext. Any device on the network can capture them.</li>
-        <li><strong>SMBv1</strong> — vulnerable to CVE-2017-0144 (EternalBlue), which enabled WannaCry and NotPetya. Public exploit code is available.</li>
+        <li><strong>Telnet (port 23)</strong> transmits credentials and commands in cleartext. Any device on the network can capture them.</li>
+        <li><strong>SMBv1</strong> vulnerable to CVE-2017-0144 (EternalBlue), which enabled WannaCry and NotPetya. Public exploit code is available.</li>
       </ul>
     </div>
   </div>
@@ -851,7 +865,7 @@ function renderStep2() { return `
   </div>`; }
 
 function renderStep3() { return `
-  <div class="section-label">Step 4 — Risk Assessment</div>
+  <div class="section-label">Step 4 -- Risk Assessment</div>
   <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Document the specific risk posed by the legacy OS before making any changes. Identify the CVEs, assess the impact, and record your proposed mitigations.</p>
   <div class="risk-grid">
     <div class="risk-cell">
@@ -866,7 +880,7 @@ function renderStep3() { return `
     <div class="risk-cell">
       <div class="risk-cell-label">Known CVE</div>
       <strong>CVE-2017-0144</strong><br>
-      <span style="font-size:11px;color:var(--text-dim)">EternalBlue — SMBv1 RCE</span>
+      <span style="font-size:11px;color:var(--text-dim)">EternalBlue - SMBv1 RCE</span>
     </div>
     <div class="risk-cell">
       <div class="risk-cell-label">CVSS Score</div>
@@ -888,10 +902,10 @@ function renderStep3() { return `
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
-  <div class="section-label">Step 5 — Change Authorization</div>
+  <div class="section-label">Step 5 -- Change Authorization</div>
   <div class="task-card" style="border-left-color:var(--accent)">
     <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
-    <h3>Security Hardening — Legacy OS</h3>
+    <h3>Security Hardening - Legacy OS</h3>
     <p>All changes to OT systems require a formal authorization ticket. Document what you will do, the expected impact on operations, and your rollback plan.</p>
   </div>
   <div class="form-group">
@@ -902,7 +916,7 @@ function renderStep4() { return `
     <div class="form-group">
       <label class="form-label">Expected impact on operations</label>
       <select class="form-select" id="cr-downtime">
-        <option value="none">None — PLC communication unaffected</option>
+        <option value="none">None - PLC communication unaffected</option>
         <option value="brief">Brief service disruption (&lt;5 min)</option>
         <option value="planned">Requires planned maintenance window</option>
       </select>
@@ -920,10 +934,10 @@ function renderStep4() { return `
     <label class="form-label">Rollback plan</label>
     <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Re-enable inetd: 'service openbsd-inetd start'. Remove SMB min protocol line from smb.conf and restart smbd. Flush iptables: 'iptables -F INPUT && iptables -P INPUT ACCEPT'"></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
+  <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
-  <div class="section-label">Step 6 — Apply the Fix</div>
+  <div class="section-label">Step 6 -- Apply the Fix</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Technical Mitigation</div>
@@ -934,7 +948,7 @@ function renderStep5() { return `
 
   <div style="margin:16px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">1. Disable the telnet service</div>
   <div class="cmd-block">service openbsd-inetd stop</div>
-  <div style="margin:4px 0 12px;font-size:12px;color:var(--text-dim)">&#8627; Verify: <code style="font-family:var(--mono);font-size:12px;color:var(--accent)">ss -tlnp | grep :23</code> — should return nothing.</div>
+  <div style="margin:4px 0 12px;font-size:12px;color:var(--text-dim)">&#8627; Verify: <code style="font-family:var(--mono);font-size:12px;color:var(--accent)">ss -tlnp | grep :23</code> should return nothing.</div>
 
   <div style="margin:12px 0 6px;font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">2. Disable SMBv1 in Samba</div>
   <div class="cmd-block">echo "min protocol = SMB2" &gt;&gt; /etc/samba/smb.conf</div>
@@ -951,12 +965,12 @@ function renderStep5() { return `
   <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
 
   <div style="margin-top:20px;">
-    <button class="btn btn-primary" onclick="completeStep(5)">Changes Applied — Continue to Validation &#8594;</button>
+    <button class="btn btn-primary" onclick="completeStep(5)">Changes Applied -- Continue to Validation &#8594;</button>
     <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>`; }
 
 function renderStep6() { return `
-  <div class="section-label">Step 7 — Validation</div>
+  <div class="section-label">Step 7 -- Validation</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Automated service check</div>
@@ -965,7 +979,7 @@ function renderStep6() { return `
     </div>
   </div>
   <div class="form-group" style="margin-top:16px;">
-    <label class="form-label">Evidence — paste output of ss -tlnp from Legacy OS</label>
+    <label class="form-label">Evidence: paste output of ss -tlnp from Legacy OS</label>
     <textarea class="form-textarea" id="evidence-services" placeholder="Paste the output of: ss -tlnp&#10;Expected: port 23 should NOT appear."></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
@@ -980,6 +994,64 @@ function saveAndNext(fieldId, stateKey, stepIndex) {
   if (!val) { alert('Please fill in the field before continuing.'); return; }
   state.formData[stateKey] = val;
   completeStep(stepIndex);
+}
+
+function submitChangeRequest() {
+  const val = document.getElementById('cr-desc')?.value?.trim();
+  if (!val) { alert('Please fill in the change description before submitting.'); return; }
+  state.formData.crDesc = val;
+  saveProgressToServer();
+
+  const risk = document.getElementById('cr-risk')?.value || 'medium';
+  const ticketId = 'CR-' + (Date.now() % 10000).toString().padStart(4, '0');
+  const ts = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  document.getElementById('step-content').innerHTML = `
+    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:4px;">Change Request</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);">${ticketId}</div>
+        </div>
+        <div id="ticket-badge" style="background:rgba(245,158,11,0.15);color:var(--warn);border:1px solid rgba(245,158,11,0.3);padding:4px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;">UNDER REVIEW</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Submitted</span>${ts}</div>
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Risk Level</span>${risk.charAt(0).toUpperCase() + risk.slice(1)}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Description</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${safeVal}</div>
+      </div>
+    </div>
+    <div id="ticket-result" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;">
+      <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--warn);border-radius:50%;animation:cr-spin 0.8s linear infinite;flex-shrink:0;"></span>
+      Submitting to change management system...
+    </div>
+    <div id="ticket-continue" style="display:none;margin-top:16px;">
+      <button class="btn btn-primary" onclick="completeStep(4)">Proceed to Implementation &#8594;</button>
+    </div>
+    <style>@keyframes cr-spin { to { transform: rotate(360deg); } }</style>
+  `;
+
+  setTimeout(() => {
+    const badge = document.getElementById('ticket-badge');
+    const result = document.getElementById('ticket-result');
+    const cont = document.getElementById('ticket-continue');
+    if (badge) {
+      badge.textContent = 'APPROVED';
+      badge.style.background = 'rgba(0,229,160,0.1)';
+      badge.style.color = 'var(--accent)';
+      badge.style.borderColor = 'rgba(0,229,160,0.3)';
+    }
+    if (result) {
+      result.style.borderColor = 'rgba(0,229,160,0.2)';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+    }
+    if (cont) cont.style.display = 'block';
+  }, 1500);
 }
 
 function saveRiskAndNext() {

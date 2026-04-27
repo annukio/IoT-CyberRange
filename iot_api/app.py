@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import random
 import datetime
+import logging
 
 app = Flask(__name__)
 
@@ -49,6 +50,7 @@ def health():
 
 
 if __name__ == '__main__':
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
     token = get_token()
     if token:
         print(f'[*] IoT API starting — auth ENABLED (token: {token})')

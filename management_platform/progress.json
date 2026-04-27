@@ -1,1 +1,57 @@
-{}
+{
+  "scenario": "s0",
+  "s0": {
+    "currentStep": 6,
+    "completedSteps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "formData": {
+      "reconNotes": "a",
+      "risk": {
+        "threat": "b",
+        "impact": "c",
+        "mitigation": "d"
+      },
+      "crDesc": "f",
+      "evidence": "validation"
+    },
+    "validationPassed": true,
+    "introSeen": true
+  },
+  "s1": {
+    "currentStep": 1,
+    "completedSteps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "formData": {},
+    "validationPassed": true,
+    "introSeen": true
+  },
+  "s2": {
+    "currentStep": 6,
+    "completedSteps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "formData": {},
+    "validationPassed": true,
+    "introSeen": true
+  }
+}

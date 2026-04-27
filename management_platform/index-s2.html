@@ -35,6 +35,10 @@
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .topbar-status { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .chal-dot { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;border:1.5px solid var(--border2);color:var(--text-faint);flex-shrink:0; }
+    .chal-done { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+    .chal-active { border-color:var(--accent);color:var(--accent); }
+    .chal-locked { opacity:0.35; }
     .topbar-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); letter-spacing: 1px; }
 
     .main { display: flex; flex: 1; overflow: hidden; }
@@ -181,10 +185,17 @@
   <div class="topbar-divider"></div>
   <div class="topbar-scenario">Scenario<span>S2 -Segmented &amp; Hardened</span></div>
   <div class="topbar-right">
-    <div class="topbar-badge">&#10003; Ch.1 Complete</div>
-    <div class="topbar-badge">&#10003; Ch.2 Complete</div>
     <div class="status-dot"></div>
     <div class="topbar-status">Lab environment active</div>
+    <div class="topbar-divider"></div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
+      <div class="chal-dot chal-done" title="Challenge 1 -- complete">&#10003;</div>
+      <div class="chal-dot chal-done" title="Challenge 2 -- complete">&#10003;</div>
+      <div class="chal-dot chal-active" title="Challenge 3 -- IoT API Authentication">3</div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
   </div>
 </div>
 
@@ -243,18 +254,18 @@
         </summary>
         <div class="theory-body">
           <h4>What Is This API?</h4>
-          <p>The IoT network (172.21.0.0/24) contains an IoT sensor (172.21.0.11) that produces telemetry every 5 seconds, and an IoT API server (172.21.0.10) that exposes that data over HTTP on port 80. Any device that can reach port 80 gets a valid response — no credentials required.</p>
+          <p>The IoT network (172.21.0.0/24) contains an IoT sensor (172.21.0.11) that produces telemetry every 5 seconds, and an IoT API server (172.21.0.10) that exposes that data over HTTP on port 80. Any device that can reach port 80 gets a valid response - no credentials required.</p>
           <p>After Challenge 1, the OT zone is isolated from corporate devices. However, the IoT zone remains reachable from the corporate network by design, to allow monitoring. The firewall explicitly permits <code>172.20.0.0/24 → 172.21.0.10:80</code>. The problem is that the API has no authentication: any reachable device gets data simply by sending an HTTP request.</p>
           <h4>Why Unauthenticated APIs Are Dangerous</h4>
-          <p>OWASP publishes the <strong>API Security Top 10</strong>. The second risk, <strong>API2:2023 — Broken Authentication</strong>, covers APIs that have no mechanism to verify who is making a request.<span class="cite-ref">[2]</span> An API with no authentication at all is a textbook case: any request is treated as legitimate.</p>
+          <p>OWASP publishes the <strong>API Security Top 10</strong>. The second risk, <strong>API2:2023 - Broken Authentication</strong>, covers APIs that have no mechanism to verify who is making a request.<span class="cite-ref">[2]</span> An API with no authentication at all is a textbook case: any request is treated as legitimate.</p>
           <p>In an IoT context this is particularly serious because the data is often operational. Sensor readings from a production line reveal schedules, machine states, and operating parameters. In more critical deployments, an unauthenticated API might also accept write requests that change setpoints or trigger actions on physical devices.</p>
           <p>NIST SP 800-82 Rev 3 identifies unauthorised access to OT monitoring interfaces as a significant attack vector, particularly when IoT devices are connected to systems with physical consequences.<span class="cite-ref">[1]</span></p>
           <h4>What an Attacker Can Do</h4>
           <ul>
-            <li><strong>Enumerate the API</strong> — find all endpoints and understand what data is available.</li>
-            <li><strong>Harvest operational data</strong> — continuously poll to build a picture of normal operations for timing an attack.</li>
-            <li><strong>Replay or inject requests</strong> — if the API accepts POST/PATCH, modify sensor data or trigger actions without credentials.</li>
-            <li><strong>Pivot to other systems</strong> — internal hostnames, software versions, or config details may reveal deeper attack paths.</li>
+            <li><strong>Enumerate the API</strong>. Find all endpoints and understand what data is available.</li>
+            <li><strong>Harvest operational data</strong>. Continuously poll to build a picture of normal operations for timing an attack.</li>
+            <li><strong>Replay or inject requests</strong>. If the API accepts POST/PATCH, modify sensor data or trigger actions without credentials.</li>
+            <li><strong>Pivot to other systems</strong>. Internal hostnames, software versions, or config details may reveal deeper attack paths.</li>
           </ul>
         </div>
       </details>
@@ -282,7 +293,7 @@
           </table>
           <p>This lab uses a <strong>static token</strong> (similar to an API key). The token is stored in <code>/app/token.txt</code> on the API server. If the file exists, every request must include it as a Bearer token. If not, the API runs unauthenticated.</p>
           <h4>JWT Structure</h4>
-          <p>A JWT has three dot-separated Base64 parts: <code>header.payload.signature</code>. The server creates the signature with a secret key. On receipt, it recomputes the signature and rejects any token whose payload was tampered with — this makes JWTs self-contained and tamper-evident.<span class="cite-ref">[4]</span></p>
+          <p>A JWT has three dot-separated Base64 parts: <code>header.payload.signature</code>. The server creates the signature with a secret key. On receipt, it recomputes the signature and rejects any token whose payload was tampered with. This makes JWTs self-contained and tamper-evident.<span class="cite-ref">[4]</span></p>
           <h4>NIST Guidance</h4>
           <p>NIST SP 800-63B requires that authentication secrets be generated with at least 112 bits of entropy, transmitted only over encrypted channels (HTTPS in production), and verified on every request.<span class="cite-ref">[5]</span> In this lab we use HTTP for simplicity, but a production deployment would mandate HTTPS.</p>
         </div>
@@ -306,9 +317,9 @@
           <h4>Checking the HTTP Status Code</h4>
           <p>Use <code>curl -i</code> to include response headers. The first header line shows the status code:</p>
           <ul>
-            <li><strong>200 OK</strong> — request succeeded, data returned.</li>
-            <li><strong>401 Unauthorized</strong> — rejected, no valid token provided.</li>
-            <li><strong>403 Forbidden</strong> — token valid but lacks permission.</li>
+            <li><strong>200 OK</strong>: request succeeded, data returned.</li>
+            <li><strong>401 Unauthorized</strong>: rejected, no valid token provided.</li>
+            <li><strong>403 Forbidden</strong>: token valid but lacks permission.</li>
           </ul>
           <p>To see only the status code: <code>curl -s -o /dev/null -w "%{http_code}" http://172.21.0.10/sensor/data</code></p>
           <h4>Testing a Wrong Token</h4>
@@ -335,7 +346,7 @@
           <h4>The Token Check Logic</h4>
           <p>For every incoming request: read the <code>Authorization</code> header → check it starts with <code>Bearer </code> → extract the token string → compare to the file contents → if it matches, allow; if not, return HTTP 401.</p>
           <h4>The Sensor Client</h4>
-          <p>The IoT sensor (<code>172.21.0.11</code>) polls the API every 5 seconds using a Python script at <code>/app/sensor.py</code>. It also reads <code>/app/token.txt</code> — if the file exists, it adds the <code>Authorization</code> header to every request.</p>
+          <p>The IoT sensor (<code>172.21.0.11</code>) polls the API every 5 seconds using a Python script at <code>/app/sensor.py</code>. It also reads <code>/app/token.txt</code> and if the file exists, it adds the <code>Authorization</code> header to every request.</p>
           <h4>Critical Order of Operations</h4>
           <p>Before enabling authentication on the server, you must configure the sensor client to include the token. If you enable auth on the server first, the sensor immediately starts receiving 401 errors. Configure and restart the <strong>sensor first</strong>, verify it is working, then enable auth on the <strong>API second</strong>.</p>
           <p>This is why the change management process exists: to ensure all dependent clients are ready before the breaking change is applied.</p>
@@ -353,9 +364,9 @@
         <div class="theory-body">
           <h4>Residual Risk After Adding Token Auth</h4>
           <ul>
-            <li><strong>HTTP, not HTTPS</strong> — the token is transmitted in plaintext. A network sniffer on the same segment can capture it. In production, HTTPS would be mandatory.</li>
-            <li><strong>Static token, no expiry</strong> — if leaked, the token remains valid until manually revoked. JWT tokens with an <code>exp</code> field reduce this risk.</li>
-            <li><strong>Token stored on disk</strong> — <code>/app/token.txt</code> on both the API server and sensor containers. If either container is compromised, the token is exposed.</li>
+            <li><strong>HTTP, not HTTPS</strong>: the token is transmitted in plaintext. A network sniffer on the same segment can capture it. In production, HTTPS would be mandatory.</li>
+            <li><strong>Static token, no expiry</strong>: if leaked, the token remains valid until manually revoked. JWT tokens with an <code>exp</code> field reduce this risk.</li>
+            <li><strong>Token stored on disk</strong> - <code>/app/token.txt</code> on both the API server and sensor containers. If either container is compromised, the token is exposed.</li>
           </ul>
           <p>Documenting residual risk is part of a proper risk acceptance decision. The approving authority must understand what risk remains after the fix and explicitly accept it.<span class="cite-ref">[6]</span></p>
           <h4>Summary of Key Concepts</h4>
@@ -364,7 +375,7 @@
             <tbody>
               <tr><td>REST API</td><td>Communication over HTTP. Endpoints are URLs returning JSON data.</td></tr>
               <tr><td>API2: Broken Auth</td><td>OWASP classification for APIs lacking authentication. No auth = textbook case.</td></tr>
-              <tr><td>Bearer Token</td><td><code>Authorization: Bearer &lt;token&gt;</code> — RFC 6750 standard format.</td></tr>
+              <tr><td>Bearer Token</td><td><code>Authorization: Bearer &lt;token&gt;</code> -  RFC 6750 standard format.</td></tr>
               <tr><td>HTTP 401</td><td>Returned when a request has no valid token. 403 = valid token, insufficient permission.</td></tr>
               <tr><td>Pre-change step</td><td>Update all clients before enabling server-side auth, or they break immediately.</td></tr>
               <tr><td>Residual risk</td><td>Token sent over plain HTTP; static token with no expiry; stored in a file.</td></tr>
@@ -655,6 +666,8 @@ function renderSteps() {
   const done = state.completedSteps.size;
   document.getElementById('progress-label').textContent = `Progress: ${done} / ${STEPS.length}`;
   document.getElementById('progress-bar').style.width = `${(done/STEPS.length)*100}%`;
+  const tdEl = document.getElementById('topbar-done');
+  if (tdEl) tdEl.textContent = done;
 }
 
 function goToStep(i) {
@@ -688,7 +701,7 @@ function renderStep0() { return `
     <div class="task-card-label">&#128203; Task Assignment -From: Security Operations</div>
     <h3>IoT API Authentication</h3>
     <p>The IoT backend API currently allows unauthenticated access from any host that can reach port 80 on 172.21.0.10. Following the network segmentation applied in Challenge 1, corporate devices still have an explicit firewall rule permitting access to this API.</p>
-    <p style="margin-top:10px;">Any device on the corporate or IoT network can read live telemetry, enumerate API endpoints, and potentially send unauthorised requests — with no credentials required.</p>
+    <p style="margin-top:10px;">Any device on the corporate or IoT network can read live telemetry, enumerate API endpoints, and potentially send unauthorised requests, with no credentials required.</p>
     <p style="margin-top:10px;">Your task is to implement token-based authentication on the IoT API and configure the IoT sensor client to use the token, so that only authorised clients can access the API.</p>
   </div>
   <div class="section-label">Objectives</div>
@@ -719,7 +732,7 @@ function renderStep1() { return `
   <p style="font-size:12px;color:var(--text-dim);margin:4px 0 12px;">&#8627; What does <code>auth_enabled</code> say? It should be <code>false</code>.</p>
   <div class="cmd-label">From IoT API container (see what the sensor logs show)</div>
   <div class="cmd-block">cat /dev/null; python -c "import subprocess; print(subprocess.getoutput('ps aux'))"</div>
-  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px;">&#8627; Switch to <strong>IoT API</strong> terminal. Run <code>ls /app/</code> — notice there is no <code>token.txt</code> file.</p>
+  <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px;">&#8627; Switch to <strong>IoT API</strong> terminal. Run <code>ls /app/</code> and notice there is no <code>token.txt</code> file.</p>
   <div class="form-group">
     <label class="form-label">What did you observe? (API responses, auth_enabled value, token.txt present?)</label>
     <textarea class="form-textarea" id="recon-notes" placeholder="e.g. GET /sensor/data returned 200 OK with JSON data and no credentials. /health showed auth_enabled: false. No token.txt in /app/."></textarea>
@@ -733,7 +746,7 @@ function renderStep2() { return `
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text);margin:8px 0 6px;">OWASP API2:2023 -Broken Authentication</h4>
-      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">An API with no authentication treats every request as legitimate regardless of who sent it. This is the second-highest API security risk in the OWASP API Security Top 10 (2023). Any network-reachable device — including a compromised corporate workstation — can read live industrial telemetry with a single <code>curl</code> command.</p>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.7;">An API with no authentication treats every request as legitimate regardless of who sent it. This is the second-highest API security risk in the OWASP API Security Top 10 (2023). Any network-reachable device (including a compromised corporate workstation) can read live industrial telemetry with a single <code>curl</code> command.</p>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">The fix in this lab is <strong>token-based authentication</strong>: the server checks for a <code>Authorization: Bearer &lt;token&gt;</code> header on every request. Requests without a valid token receive <strong>HTTP 401 Unauthorized</strong>.</p>
       <p style="color:var(--text-dim);font-size:13px;line-height:1.7;margin-top:8px;">Read the <strong>Theory</strong> tab for full background on authentication concepts, JWT tokens, and curl testing techniques before continuing.</p>
     </div>
@@ -787,7 +800,7 @@ function renderStep4() { return `
     <label class="form-label">Change Request Description</label>
     <textarea class="form-textarea" id="cr-desc" placeholder="Change Type: Application Security&#10;Action: Implement Bearer token authentication on the IoT API (172.21.0.10). Require Authorization: Bearer header on all requests.&#10;Affected systems: IoT API (172.21.0.10), IoT Sensor (172.21.0.11)&#10;Pre-change step: Configure sensor client to include token before enabling server-side auth.&#10;Rollback: Remove /app/token.txt from iot_api and restart the API."></textarea>
   </div>
-  <button class="btn btn-primary" onclick="saveAndNext('cr-desc','crDesc',4)">Submit for Approval &#8594;</button>`; }
+  <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
   <div class="section-label">Step 6 -Apply Fix</div>
@@ -856,6 +869,64 @@ function saveAndNext(fieldId, stateKey, stepIndex) {
   if (!val) { alert('Please fill in the field before continuing.'); return; }
   state.formData[stateKey] = val;
   completeStep(stepIndex);
+}
+
+function submitChangeRequest() {
+  const val = document.getElementById('cr-desc')?.value?.trim();
+  if (!val) { alert('Please fill in the change description before submitting.'); return; }
+  state.formData.crDesc = val;
+  saveProgressToServer();
+
+  const risk = document.getElementById('cr-risk')?.value || 'medium';
+  const ticketId = 'CR-' + (Date.now() % 10000).toString().padStart(4, '0');
+  const ts = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  document.getElementById('step-content').innerHTML = `
+    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin-bottom:4px;">Change Request</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);">${ticketId}</div>
+        </div>
+        <div id="ticket-badge" style="background:rgba(245,158,11,0.15);color:var(--warn);border:1px solid rgba(245,158,11,0.3);padding:4px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;">UNDER REVIEW</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Submitted</span>${ts}</div>
+        <div><span style="color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;font-size:10px;display:block;margin-bottom:2px;">Risk Level</span>${risk.charAt(0).toUpperCase() + risk.slice(1)}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Description</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${safeVal}</div>
+      </div>
+    </div>
+    <div id="ticket-result" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;">
+      <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--warn);border-radius:50%;animation:cr-spin 0.8s linear infinite;flex-shrink:0;"></span>
+      Submitting to change management system...
+    </div>
+    <div id="ticket-continue" style="display:none;margin-top:16px;">
+      <button class="btn btn-primary" onclick="completeStep(4)">Proceed to Implementation &#8594;</button>
+    </div>
+    <style>@keyframes cr-spin { to { transform: rotate(360deg); } }</style>
+  `;
+
+  setTimeout(() => {
+    const badge = document.getElementById('ticket-badge');
+    const result = document.getElementById('ticket-result');
+    const cont = document.getElementById('ticket-continue');
+    if (badge) {
+      badge.textContent = 'APPROVED';
+      badge.style.background = 'rgba(0,229,160,0.1)';
+      badge.style.color = 'var(--accent)';
+      badge.style.borderColor = 'rgba(0,229,160,0.3)';
+    }
+    if (result) {
+      result.style.borderColor = 'rgba(0,229,160,0.2)';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+    }
+    if (cont) cont.style.display = 'block';
+  }, 1500);
 }
 
 function saveRiskAndNext() {
