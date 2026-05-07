@@ -190,12 +190,14 @@
     <div class="topbar-divider"></div>
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
-      <div class="chal-dot chal-done" title="Challenge 1 -- complete">&#10003;</div>
-      <div class="chal-dot chal-done" title="Challenge 2 -- complete">&#10003;</div>
-      <div class="chal-dot chal-active" title="Challenge 3 -- IoT API Authentication">3</div>
+      <div class="chal-dot chal-done" title="Challenge 1: complete">&#10003;</div>
+      <div class="chal-dot chal-done" title="Challenge 2: complete">&#10003;</div>
+      <div class="chal-dot chal-active" title="Challenge 3: IoT API Authentication">3</div>
     </div>
     <div class="topbar-divider"></div>
     <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
+    <div class="topbar-divider"></div>
+    <a href="/report" target="_blank" style="font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border:1px solid var(--border2);padding:4px 10px;border-radius:3px;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border2)'">&#128196; Report</a>
   </div>
 </div>
 
@@ -735,7 +737,7 @@ function renderStep1() { return `
   <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px;">&#8627; Switch to <strong>IoT API</strong> terminal. Run <code>ls /app/</code> and notice there is no <code>token.txt</code> file.</p>
   <div class="form-group">
     <label class="form-label">What did you observe? (API responses, auth_enabled value, token.txt present?)</label>
-    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. GET /sensor/data returned 200 OK with JSON data and no credentials. /health showed auth_enabled: false. No token.txt in /app/."></textarea>
+    <textarea class="form-textarea" id="recon-notes" placeholder="Describe what you observed..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
@@ -766,23 +768,23 @@ function renderStep3() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Asset</label>
-    <input class="form-input" id="risk-asset" placeholder="e.g. IoT API server (172.21.0.10, port 80)" />
+    <input class="form-input" id="risk-asset" placeholder="Identify the asset..." />
   </div>
   <div class="form-group">
     <label class="form-label">Vulnerability Description</label>
-    <textarea class="form-textarea" id="risk-vuln" placeholder="e.g. No authentication on HTTP endpoints. Any network-reachable host can query the API without credentials."></textarea>
+    <textarea class="form-textarea" id="risk-vuln" placeholder="Describe the vulnerability..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Business Impact</label>
-    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Unauthorised access to live telemetry. Potential manipulation of sensor data. Operational visibility granted to unauthorised parties."></textarea>
+    <textarea class="form-textarea" id="risk-impact" placeholder="Describe the potential business impact..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Proposed Mitigation</label>
-    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Implement Bearer token authentication. Require a valid token on all API requests. Reject requests without a valid token with HTTP 401."></textarea>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="Describe your proposed mitigation..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Residual Risk (after fix)</label>
-    <textarea class="form-textarea" id="risk-residual" placeholder="e.g. Token transmitted over plain HTTP (not HTTPS). Static token with no expiry. Token stored on disk in both containers."></textarea>
+    <textarea class="form-textarea" id="risk-residual" placeholder="Describe residual risks after the fix..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
@@ -798,7 +800,7 @@ function renderStep4() { return `
   </div>
   <div class="form-group" style="margin-top:16px;">
     <label class="form-label">Change Request Description</label>
-    <textarea class="form-textarea" id="cr-desc" placeholder="Change Type: Application Security&#10;Action: Implement Bearer token authentication on the IoT API (172.21.0.10). Require Authorization: Bearer header on all requests.&#10;Affected systems: IoT API (172.21.0.10), IoT Sensor (172.21.0.11)&#10;Pre-change step: Configure sensor client to include token before enabling server-side auth.&#10;Rollback: Remove /app/token.txt from iot_api and restart the API."></textarea>
+    <textarea class="form-textarea" id="cr-desc" placeholder="Describe the change..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
@@ -855,13 +857,38 @@ function renderStep6() { return `
   </div>
   <div class="form-group" style="margin-top:16px;">
     <label class="form-label">Evidence -paste curl output showing 401 and 200 responses</label>
-    <textarea class="form-textarea" id="evidence-api" placeholder="Paste output of:&#10;curl -i http://172.21.0.10/sensor/data&#10;curl -i -H &quot;Authorization: Bearer iot-secret-2024&quot; http://172.21.0.10/sensor/data"></textarea>
+    <textarea class="form-textarea" id="evidence-api" placeholder="Paste your curl output here..."></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
     <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
     <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>
-  <div class="validation-result" id="validation-result"></div>`; }
+  <div class="validation-result" id="validation-result"></div>
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+    <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text-faint);font-size:11px;" onclick="toggleSkipForm()">Skip validation (technical issue)</button>
+    <div id="skip-form" style="display:none;margin-top:14px;">
+      <label class="form-label" style="color:var(--warn);">Reason for skipping</label>
+      <textarea class="form-textarea" id="skip-reason" placeholder="Describe the technical issue you encountered..."></textarea>
+      <button class="btn" style="margin-top:8px;background:var(--warn);color:#000;font-weight:700;" onclick="submitSkip(3)">Submit and continue &#8594;</button>
+    </div>
+  </div>`; }
+
+function toggleSkipForm() {
+  const f = document.getElementById('skip-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitSkip(challenge) {
+  const reason = document.getElementById('skip-reason')?.value?.trim();
+  if (!reason) { alert('Please describe the issue before skipping.'); return; }
+  const r = await fetch('/api/skip/challenge' + challenge, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason })
+  });
+  const data = await r.json();
+  if (!data.success) alert('Could not skip: ' + (data.message || 'unknown error'));
+}
 
 // -- ACTIONS -------------------------------------------------------
 function saveAndNext(fieldId, stateKey, stepIndex) {
@@ -883,7 +910,7 @@ function submitChangeRequest() {
   const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   document.getElementById('step-content').innerHTML = `
-    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div class="section-label">Change Authorization: Ticket Submitted</div>
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div>
@@ -923,7 +950,7 @@ function submitChangeRequest() {
     }
     if (result) {
       result.style.borderColor = 'rgba(0,229,160,0.2)';
-      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved: permissions updated. You are authorized to proceed with the implementation.';
     }
     if (cont) cont.style.display = 'block';
   }, 1500);

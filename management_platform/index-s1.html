@@ -186,12 +186,14 @@
     <div class="topbar-divider"></div>
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
-      <div class="chal-dot chal-done" title="Challenge 1 -- complete">&#10003;</div>
-      <div class="chal-dot chal-active" title="Challenge 2 -- Legacy OS Hardening">2</div>
-      <div class="chal-dot chal-locked" title="Challenge 3 -- IoT API Authentication">3</div>
+      <div class="chal-dot chal-done" title="Challenge 1: complete">&#10003;</div>
+      <div class="chal-dot chal-active" title="Challenge 2: Legacy OS Hardening">2</div>
+      <div class="chal-dot chal-locked" title="Challenge 3: IoT API Authentication">3</div>
     </div>
     <div class="topbar-divider"></div>
     <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
+    <div class="topbar-divider"></div>
+    <a href="/report" target="_blank" style="font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border:1px solid var(--border2);padding:4px 10px;border-radius:3px;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border2)'">&#128196; Report</a>
   </div>
 </div>
 
@@ -246,7 +248,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 1 -- EOL Systems</span>
+            <span class="theory-block-label">Section 1: EOL Systems</span>
             <span class="theory-block-title">End-of-Life Operating Systems in OT Environments</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -282,7 +284,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 2 -- CVE-2017-0144 / SMBv1</span>
+            <span class="theory-block-label">Section 2: CVE-2017-0144 / SMBv1</span>
             <span class="theory-block-title">SMBv1 and the EternalBlue Vulnerability</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -310,7 +312,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 3 -- Insecure Protocols</span>
+            <span class="theory-block-label">Section 3: Insecure Protocols</span>
             <span class="theory-block-title">Why Telnet Is Dangerous in an OT Environment</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -342,7 +344,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 4 -- Technical Reference</span>
+            <span class="theory-block-label">Section 4: Technical Reference</span>
             <span class="theory-block-title">Host-Based Firewalling: iptables INPUT Chain</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -376,7 +378,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 5 -- NIST SP 800-82</span>
+            <span class="theory-block-label">Section 5: NIST SP 800-82</span>
             <span class="theory-block-title">Compensating Controls Framework</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -411,7 +413,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 6 -- Validation</span>
+            <span class="theory-block-label">Section 6: Validation</span>
             <span class="theory-block-title">Confirming the Hardening Worked</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -684,6 +686,8 @@ function restoreCurrentStepFields() {
   } else if (step === 4 && fd.crDesc) {
     const el = document.getElementById('cr-desc');
     if (el) el.value = fd.crDesc;
+    const rb = document.getElementById('cr-rollback');
+    if (rb && fd.crRollback) rb.value = fd.crRollback;
   } else if (step === 6 && fd.evidence) {
     const el = document.getElementById('evidence-services');
     if (el) el.value = fd.evidence;
@@ -712,7 +716,7 @@ const STEPS = [
 // s1 state is shown statically - OT is blocked from corporate.
 const sdesc = document.getElementById('sdesc');
 if (sdesc) {
-  sdesc.textContent = 'S1 -- Network segmentation active. OT zone is isolated from Corporate. Challenge: harden the Legacy OS inside the OT segment.';
+  sdesc.textContent = 'S1: Network segmentation active. OT zone is isolated from Corporate. Challenge: harden the Legacy OS inside the OT segment.';
   sdesc.style.borderLeftColor = '#5ba3d9';
 }
 
@@ -799,7 +803,7 @@ function completeStep(i) {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">&#128203; Task Assignment -- From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment: From: Security Operations</div>
     <h3>Legacy OT System Hardening</h3>
     <p>Network segmentation is now in place. However, a follow-up audit has identified a high-risk asset inside the OT zone: the <strong>Legacy OS</strong> (172.22.0.10) is running Ubuntu 18.04, an end-of-life system that has not received security patches since April 2023.</p>
     <p style="margin-top:10px;">The system is currently running <strong>telnet</strong> (port 23) and <strong>Samba with SMBv1 enabled</strong>. Both services are known to carry critical vulnerabilities (CVE-2017-0144). Since patching is not possible, implement compensating controls to reduce the attack surface.</p>
@@ -816,7 +820,7 @@ function renderStep0() { return `
   </div>`; }
 
 function renderStep1() { return `
-  <div class="section-label">Step 2 -- Reconnaissance</div>
+  <div class="section-label">Step 2: Reconnaissance</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Before you fix it map the attack surface</div>
@@ -833,13 +837,13 @@ function renderStep1() { return `
   <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">&#8627; Is SMBv1 already restricted in the Samba configuration?</p>
   <div class="form-group">
     <label class="form-label">What services are running? What is the current exposure?</label>
-    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Port 23 (telnet) is open, openbsd-inetd is running. Port 445 shows Samba. smb.conf has no min protocol setting, so SMBv1 is enabled by default..."></textarea>
+    <textarea class="form-textarea" id="recon-notes" placeholder="Describe what you observed..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
-  <div class="section-label">Step 3 -- Theory</div>
+  <div class="section-label">Step 3: Theory</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
@@ -865,7 +869,7 @@ function renderStep2() { return `
   </div>`; }
 
 function renderStep3() { return `
-  <div class="section-label">Step 4 -- Risk Assessment</div>
+  <div class="section-label">Step 4: Risk Assessment</div>
   <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Document the specific risk posed by the legacy OS before making any changes. Identify the CVEs, assess the impact, and record your proposed mitigations.</p>
   <div class="risk-grid">
     <div class="risk-cell">
@@ -889,20 +893,20 @@ function renderStep3() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Describe the threat scenario</label>
-    <textarea class="form-textarea" id="risk-threat" placeholder="e.g. An attacker already inside the OT zone (or pivoting via a misconfigured conduit) could exploit EternalBlue on the legacy OS, gain remote code execution, and move laterally to the PLC..."></textarea>
+    <textarea class="form-textarea" id="risk-threat" placeholder="Describe the threat scenario..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Business impact if exploited</label>
-    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Compromise of the legacy OS could give an attacker a persistent foothold in the OT zone, from which they could issue commands to the PLC, disrupt production, or cause equipment damage..."></textarea>
+    <textarea class="form-textarea" id="risk-impact" placeholder="Describe the potential business impact..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Proposed mitigations</label>
-    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. 1) Disable telnet (stop openbsd-inetd). 2) Set min protocol = SMB2 in smb.conf to disable SMBv1. 3) Apply iptables INPUT rules to restrict inbound connections to OT zone only..."></textarea>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="Describe your proposed mitigation..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
-  <div class="section-label">Step 5 -- Change Authorization</div>
+  <div class="section-label">Step 5: Change Authorization</div>
   <div class="task-card" style="border-left-color:var(--accent)">
     <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
     <h3>Security Hardening - Legacy OS</h3>
@@ -910,7 +914,7 @@ function renderStep4() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Change Description</label>
-    <textarea class="form-textarea" id="cr-desc" placeholder="e.g. Disable telnet service (openbsd-inetd), set Samba minimum protocol to SMB2, apply iptables INPUT DROP policy on legacy_os..."></textarea>
+    <textarea class="form-textarea" id="cr-desc" placeholder="Describe the change..."></textarea>
   </div>
   <div class="risk-grid">
     <div class="form-group">
@@ -932,12 +936,12 @@ function renderStep4() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Rollback plan</label>
-    <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Re-enable inetd: 'service openbsd-inetd start'. Remove SMB min protocol line from smb.conf and restart smbd. Flush iptables: 'iptables -F INPUT && iptables -P INPUT ACCEPT'"></textarea>
+    <textarea class="form-textarea" id="cr-rollback" placeholder="Describe the rollback procedure..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
-  <div class="section-label">Step 6 -- Apply the Fix</div>
+  <div class="section-label">Step 6: Apply the Fix</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Technical Mitigation</div>
@@ -965,12 +969,12 @@ function renderStep5() { return `
   <div class="cmd-block">iptables -L INPUT -v --line-numbers</div>
 
   <div style="margin-top:20px;">
-    <button class="btn btn-primary" onclick="completeStep(5)">Changes Applied -- Continue to Validation &#8594;</button>
+    <button class="btn btn-primary" onclick="completeStep(5)">Changes Applied: Continue to Validation &#8594;</button>
     <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>`; }
 
 function renderStep6() { return `
-  <div class="section-label">Step 7 -- Validation</div>
+  <div class="section-label">Step 7: Validation</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Automated service check</div>
@@ -980,13 +984,38 @@ function renderStep6() { return `
   </div>
   <div class="form-group" style="margin-top:16px;">
     <label class="form-label">Evidence: paste output of ss -tlnp from Legacy OS</label>
-    <textarea class="form-textarea" id="evidence-services" placeholder="Paste the output of: ss -tlnp&#10;Expected: port 23 should NOT appear."></textarea>
+    <textarea class="form-textarea" id="evidence-services" placeholder="Paste the output of ss -tlnp..."></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
     <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
     <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>
-  <div class="validation-result" id="validation-result"></div>`; }
+  <div class="validation-result" id="validation-result"></div>
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+    <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text-faint);font-size:11px;" onclick="toggleSkipForm()">Skip validation (technical issue)</button>
+    <div id="skip-form" style="display:none;margin-top:14px;">
+      <label class="form-label" style="color:var(--warn);">Reason for skipping</label>
+      <textarea class="form-textarea" id="skip-reason" placeholder="Describe the technical issue you encountered..."></textarea>
+      <button class="btn" style="margin-top:8px;background:var(--warn);color:#000;font-weight:700;" onclick="submitSkip(2)">Submit and continue &#8594;</button>
+    </div>
+  </div>`; }
+
+function toggleSkipForm() {
+  const f = document.getElementById('skip-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitSkip(challenge) {
+  const reason = document.getElementById('skip-reason')?.value?.trim();
+  if (!reason) { alert('Please describe the issue before skipping.'); return; }
+  const r = await fetch('/api/skip/challenge' + challenge, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason })
+  });
+  const data = await r.json();
+  if (!data.success) alert('Could not skip: ' + (data.message || 'unknown error'));
+}
 
 // -- ACTIONS -------------------------------------------------------
 function saveAndNext(fieldId, stateKey, stepIndex) {
@@ -1000,15 +1029,17 @@ function submitChangeRequest() {
   const val = document.getElementById('cr-desc')?.value?.trim();
   if (!val) { alert('Please fill in the change description before submitting.'); return; }
   state.formData.crDesc = val;
+  state.formData.crRollback = document.getElementById('cr-rollback')?.value?.trim() || '';
   saveProgressToServer();
 
+  const rollback = state.formData.crRollback;
   const risk = document.getElementById('cr-risk')?.value || 'medium';
   const ticketId = 'CR-' + (Date.now() % 10000).toString().padStart(4, '0');
   const ts = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
   const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   document.getElementById('step-content').innerHTML = `
-    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div class="section-label">Change Authorization: Ticket Submitted</div>
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div>
@@ -1025,6 +1056,10 @@ function submitChangeRequest() {
         <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Description</div>
         <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${safeVal}</div>
       </div>
+      ${rollback ? `<div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;">
+        <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rollback Plan</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${rollback.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>` : ''}
     </div>
     <div id="ticket-result" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;">
       <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--warn);border-radius:50%;animation:cr-spin 0.8s linear infinite;flex-shrink:0;"></span>
@@ -1048,7 +1083,7 @@ function submitChangeRequest() {
     }
     if (result) {
       result.style.borderColor = 'rgba(0,229,160,0.2)';
-      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved: permissions updated. You are authorized to proceed with the implementation.';
     }
     if (cont) cont.style.display = 'block';
   }, 1500);

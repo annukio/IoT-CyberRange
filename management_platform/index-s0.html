@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
   <style>
-    /* -- DESIGN SYSTEM --------------------------------------- */
+    /*: DESIGN SYSTEM --------------------------------------- */
     :root {
       --bg:         #0d0f12;
       --surface:    #13161b;
@@ -38,7 +38,7 @@
       overflow: hidden;
     }
 
-    /* -- TOP BAR ---------------------------------------------- */
+    /*: TOP BAR ---------------------------------------------- */
     .topbar {
       display: flex;
       align-items: center;
@@ -62,10 +62,10 @@
     .chal-active { border-color:var(--accent);color:var(--accent); }
     .chal-locked { opacity:0.35; }
 
-    /* -- MAIN LAYOUT ------------------------------------------- */
+    /*: MAIN LAYOUT ------------------------------------------- */
     .main { display: flex; flex: 1; overflow: hidden; }
 
-    /* -- LEFT PANEL -------------------------------------------- */
+    /*: LEFT PANEL -------------------------------------------- */
     .panel-left {
       width: 300px;
       flex-shrink: 0;
@@ -102,7 +102,7 @@
     .step-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
     .step-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
-    /* -- CENTER PANEL ------------------------------------------ */
+    /*: CENTER PANEL ------------------------------------------ */
     .panel-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     .tab-bar { display: flex; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; gap: 4px; flex-shrink: 0; }
@@ -122,13 +122,13 @@
     .terminal-toolbar select { background: var(--bg); color: var(--accent); border: 1px solid var(--border2); font-family: var(--mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
     #terminal-wrap { flex: 1; background: #0d0f12; padding: 8px; overflow: hidden; }
 
-    /* -- CONTENT COMPONENTS ------------------------------------ */
+    /*: CONTENT COMPONENTS ------------------------------------ */
     .task-card { background: var(--surface2); border: 1px solid var(--border2); border-left: 3px solid var(--warn); border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
     .task-card-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--warn); text-transform: uppercase; margin-bottom: 8px; }
     .task-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
     .task-card p { color: var(--text-dim); line-height: 1.6; font-size: 13px; }
 
-    /* -- COLLAPSIBLE THEORY BLOCKS ----------------------------- */
+    /*: COLLAPSIBLE THEORY BLOCKS ----------------------------- */
     .theory-block {
       background: var(--surface2);
       border: 1px solid var(--border2);
@@ -275,7 +275,7 @@
       margin-top: 2px;
     }
 
-    /* -- GUIDE COMPONENTS -------------------------------------- */
+    /*: GUIDE COMPONENTS -------------------------------------- */
     .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
@@ -313,7 +313,7 @@
     .checklist li::before { content: '○'; font-family: var(--mono); color: var(--text-faint); flex-shrink: 0; }
     .checklist li.done::before { content: '✓'; color: var(--accent); }
 
-    /* -- NETWORK MAP TAB -------------------------------------- */
+    /*: NETWORK MAP TAB -------------------------------------- */
     @keyframes dk { to { stroke-dashoffset: -48; } }
     .fo { stroke-dasharray: 10 6; stroke-width: 2; fill: none; stroke: #00e5a0; animation: dk 1.4s linear infinite; }
     .fb { stroke-dasharray: 5 4;  stroke-width: 2; fill: none; stroke: #ef4444; }
@@ -329,8 +329,8 @@
 
     <!-- Top strip -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:40px;">
-      <span style="font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">Veltran Industries // Internal</span>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Security Operations -- Day 1</span>
+      <span style="font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">Caldera Tech // Internal</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-faint);">Security Operations: Day 1</span>
     </div>
 
     <!-- Email card -->
@@ -345,7 +345,7 @@
       </div>
       <div style="padding:24px 28px;color:var(--text-dim);font-size:14px;line-height:1.85;">
         <p>Welcome aboard. Glad to have you on the team.</p>
-        <p style="margin-top:14px;">You have just joined as a junior cybersecurity analyst at Veltran Industries, a small manufacturing company that produces industrial automation components. The company recently modernised its production floor under an Industry 4.0 initiative: connecting its operational technology to the corporate network to enable remote monitoring and data analytics.</p>
+        <p style="margin-top:14px;">You have just joined as a junior cybersecurity analyst at Caldera Tech, a small manufacturing company that produces industrial automation components. The company recently modernised its production floor under an Industry 4.0 initiative: connecting its operational technology to the corporate network to enable remote monitoring and data analytics.</p>
         <p style="margin-top:14px;">This is your first week on the job. The IT manager stops by your desk and hands you a network diagram:</p>
         <blockquote style="margin:20px 0;padding:14px 20px;border-left:2px solid var(--accent);background:rgba(0,229,160,0.04);border-radius:0 4px 4px 0;font-size:14px;color:var(--text);font-style:italic;">"We connected everything six months ago and haven't touched the security since. Have a look and tell me what worries you."</blockquote>
         <p>The current network diagram is attached below.</p>
@@ -479,12 +479,14 @@
     <div class="topbar-divider"></div>
     <div style="display:flex;align-items:center;gap:5px;">
       <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">CH</span>
-      <div class="chal-dot chal-active" title="Challenge 1 -- Network Segmentation">1</div>
-      <div class="chal-dot chal-locked" title="Challenge 2 -- Legacy OS Hardening">2</div>
-      <div class="chal-dot chal-locked" title="Challenge 3 -- IoT API Authentication">3</div>
+      <div class="chal-dot chal-active" title="Challenge 1: Network Segmentation">1</div>
+      <div class="chal-dot chal-locked" title="Challenge 2: Legacy OS Hardening">2</div>
+      <div class="chal-dot chal-locked" title="Challenge 3: IoT API Authentication">3</div>
     </div>
     <div class="topbar-divider"></div>
     <div style="font-family:var(--mono);font-size:11px;"><span id="topbar-done" style="color:var(--accent);">0</span><span style="color:var(--text-faint);">/7 steps</span></div>
+    <div class="topbar-divider"></div>
+    <a href="/report" target="_blank" style="font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border:1px solid var(--border2);padding:4px 10px;border-radius:3px;transition:color 0.15s,border-color 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border2)'">&#128196; Report</a>
   </div>
 </div>
 
@@ -542,7 +544,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 1 -- IT/OT Convergence</span>
+            <span class="theory-block-label">Section 1: IT/OT Convergence</span>
             <span class="theory-block-title">IT/OT Convergence and the Flat Network Problem</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -572,7 +574,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 2 -- NIST SP 800-82 / IEC 62443</span>
+            <span class="theory-block-label">Section 2: NIST SP 800-82 / IEC 62443</span>
             <span class="theory-block-title">Network Segmentation: Concepts and Models</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -610,7 +612,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 3 -- MITRE ATT&CK for ICS</span>
+            <span class="theory-block-label">Section 3: MITRE ATT&CK for ICS</span>
             <span class="theory-block-title">Threat Landscape: How Attackers Move from IT to OT</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -635,7 +637,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 4 -- Technical Reference</span>
+            <span class="theory-block-label">Section 4: Technical Reference</span>
             <span class="theory-block-title">Firewall Configuration: iptables on Linux</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -676,7 +678,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 5 -- NIST SP 800-30</span>
+            <span class="theory-block-label">Section 5: NIST SP 800-30</span>
             <span class="theory-block-title">Risk Assessment in an OT Context</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -701,7 +703,7 @@
       <details class="theory-block">
         <summary>
           <div class="theory-summary-left">
-            <span class="theory-block-label">Section 6 -- Validation</span>
+            <span class="theory-block-label">Section 6: Validation</span>
             <span class="theory-block-title">Confirming the Fix Works</span>
           </div>
           <span class="theory-arrow">&#9660;</span>
@@ -934,6 +936,8 @@ function restoreCurrentStepFields() {
   } else if (step === 4 && fd.crDesc) {
     const el = document.getElementById('cr-desc');
     if (el) el.value = fd.crDesc;
+    const rb = document.getElementById('cr-rollback');
+    if (rb && fd.crRollback) rb.value = fd.crRollback;
   } else if (step === 6 && fd.evidence) {
     const el = document.getElementById('evidence-rules');
     if (el) el.value = fd.evidence;
@@ -961,10 +965,10 @@ const STEPS = [
 
 // -- NETWORK MAP ---------------------------------------------------
 const SC = {
-  s0: { desc: 'S0 -- Flat network: all devices communicate freely across zones. No firewall rules applied.',           ot:'open',    hard:false, auth:false, col:'#00e5a0', label:'S0 - Baseline'  },
-  s1: { desc: 'S1 -- Segmentation applied: the firewall blocks all corporate traffic to the OT network.',             ot:'blocked', hard:false, auth:false, col:'#5ba3d9', label:'S1 - Segmented' },
-  s2: { desc: 'S2 -- Legacy OS hardened: insecure services disabled, host-level firewall rules applied.',             ot:'blocked', hard:true,  auth:false, col:'#f59e0b', label:'S2 - Hardened'  },
-  s3: { desc: 'S3 -- IoT API secured: token-based authentication required for all API requests.',                     ot:'blocked', hard:true,  auth:true,  col:'#a78bfa', label:'S3 - Secured'   },
+  s0: { desc: 'S0: Flat network: all devices communicate freely across zones. No firewall rules applied.',           ot:'open',    hard:false, auth:false, col:'#00e5a0', label:'S0 - Baseline'  },
+  s1: { desc: 'S1: Segmentation applied: the firewall blocks all corporate traffic to the OT network.',             ot:'blocked', hard:false, auth:false, col:'#5ba3d9', label:'S1 - Segmented' },
+  s2: { desc: 'S2: Legacy OS hardened: insecure services disabled, host-level firewall rules applied.',             ot:'blocked', hard:true,  auth:false, col:'#f59e0b', label:'S2 - Hardened'  },
+  s3: { desc: 'S3: IoT API secured: token-based authentication required for all API requests.',                     ot:'blocked', hard:true,  auth:true,  col:'#a78bfa', label:'S3 - Secured'   },
 };
 
 function ss(s) {
@@ -1071,7 +1075,7 @@ function renderStepContent() {
 
 function renderStep0() { return `
   <div class="task-card">
-    <div class="task-card-label">&#128203; Task Assignment -- From: Security Operations</div>
+    <div class="task-card-label">&#128203; Task Assignment: From: Security Operations</div>
     <h3>Network Segmentation Audit</h3>
     <p>Our OT network was recently connected to the corporate infrastructure to enable remote monitoring of the production line. A routine audit has flagged that <strong>no segmentation controls</strong> are in place between the corporate zone and the OT/IoT zones.</p>
     <p style="margin-top:10px;">Your task is to assess the exposure and apply appropriate firewall rules to isolate the OT environment from direct corporate access.</p>
@@ -1087,7 +1091,7 @@ function renderStep0() { return `
   </div>`; }
 
 function renderStep1() { return `
-  <div class="section-label">Step 2 -- Reconnaissance</div>
+  <div class="section-label">Step 2: Reconnaissance</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Before you fix it: understand the exposure</div>
@@ -1104,13 +1108,13 @@ function renderStep1() { return `
   <p style="font-size:12px;color:var(--text-dim);margin:4px 0 20px">&#8627; Try to reach the IoT API. Do you get a response?</p>
   <div class="form-group">
     <label class="form-label">What did you observe?</label>
-    <textarea class="form-textarea" id="recon-notes" placeholder="e.g. Ping to PLC succeeded with 0% packet loss. Legacy OS responded on port 23 (telnet)..."></textarea>
+    <textarea class="form-textarea" id="recon-notes" placeholder="Describe what you observed..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveAndNext('recon-notes','reconNotes',1)">Save Observations &#8594;</button>
   <button class="btn btn-outline" style="margin-left:8px" onclick="switchTab('terminal')">Open Terminal &#8599;</button>`; }
 
 function renderStep2() { return `
-  <div class="section-label">Step 3 -- Theory</div>
+  <div class="section-label">Step 3: Theory</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Why does this matter?</div>
@@ -1137,7 +1141,7 @@ function renderStep2() { return `
   </div>`; }
 
 function renderStep3() { return `
-  <div class="section-label">Step 4 -- Risk Assessment</div>
+  <div class="section-label">Step 4: Risk Assessment</div>
   <p style="color:var(--text-dim);font-size:13px;margin-bottom:20px;">Before making any changes, document the risk. This mirrors real-world change management where impact must be understood and signed off.</p>
   <div class="risk-grid">
     <div class="risk-cell">
@@ -1161,20 +1165,20 @@ function renderStep3() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Describe the threat scenario</label>
-    <textarea class="form-textarea" id="risk-threat" placeholder="e.g. A compromised corporate workstation could pivot directly to the PLC, send unauthorized Modbus commands..."></textarea>
+    <textarea class="form-textarea" id="risk-threat" placeholder="Describe the threat scenario..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">What is the potential business impact?</label>
-    <textarea class="form-textarea" id="risk-impact" placeholder="e.g. Production line shutdown, physical equipment damage, safety incident..."></textarea>
+    <textarea class="form-textarea" id="risk-impact" placeholder="Describe the potential business impact..."></textarea>
   </div>
   <div class="form-group">
     <label class="form-label">Proposed mitigation</label>
-    <textarea class="form-textarea" id="risk-mitigation" placeholder="e.g. Apply iptables FORWARD DROP rules on the firewall to block all traffic from 172.20.0.0/24 to 172.22.0.0/24..."></textarea>
+    <textarea class="form-textarea" id="risk-mitigation" placeholder="Describe your proposed mitigation..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="saveRiskAndNext()">Submit Risk Assessment &#8594;</button>`; }
 
 function renderStep4() { return `
-  <div class="section-label">Step 5 -- Change Authorization</div>
+  <div class="section-label">Step 5: Change Authorization</div>
   <div class="task-card" style="border-left-color:var(--accent)">
     <div class="task-card-label" style="color:var(--accent)">&#128221; Change Request</div>
     <h3>Firewall Rule Implementation</h3>
@@ -1182,7 +1186,7 @@ function renderStep4() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Change Description</label>
-    <textarea class="form-textarea" id="cr-desc" placeholder="What rules will you apply and on which device?"></textarea>
+    <textarea class="form-textarea" id="cr-desc" placeholder="Describe the change..."></textarea>
   </div>
   <div class="risk-grid">
     <div class="form-group">
@@ -1204,12 +1208,12 @@ function renderStep4() { return `
   </div>
   <div class="form-group">
     <label class="form-label">Rollback plan</label>
-    <textarea class="form-textarea" id="cr-rollback" placeholder="e.g. Run 'iptables -F FORWARD' to flush all rules and restore open state..."></textarea>
+    <textarea class="form-textarea" id="cr-rollback" placeholder="Describe the rollback procedure..."></textarea>
   </div>
   <button class="btn btn-primary" onclick="submitChangeRequest()">Submit for Approval &#8594;</button>`; }
 
 function renderStep5() { return `
-  <div class="section-label">Step 6 -- Apply the Fix</div>
+  <div class="section-label">Step 6: Apply the Fix</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Technical Mitigation</div>
@@ -1232,7 +1236,7 @@ function renderStep5() { return `
   </div>`; }
 
 function renderStep6() { return `
-  <div class="section-label">Step 7 -- Validation</div>
+  <div class="section-label">Step 7: Validation</div>
   <div class="theory-block" style="border-radius:6px;overflow:hidden;">
     <div style="padding:14px 18px;">
       <div class="theory-block-label">Automated connectivity check</div>
@@ -1242,13 +1246,38 @@ function renderStep6() { return `
   </div>
   <div class="form-group" style="margin-top:16px;">
     <label class="form-label">Evidence: paste iptables output here</label>
-    <textarea class="form-textarea" id="evidence-rules" placeholder="Paste the output of: iptables -L FORWARD -v --line-numbers"></textarea>
+    <textarea class="form-textarea" id="evidence-rules" placeholder="Paste your iptables output here..."></textarea>
   </div>
   <div style="display:flex;gap:10px;margin-top:4px;">
     <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
     <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>
-  <div class="validation-result" id="validation-result"></div>`; }
+  <div class="validation-result" id="validation-result"></div>
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+    <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text-faint);font-size:11px;" onclick="toggleSkipForm()">Skip validation (technical issue)</button>
+    <div id="skip-form" style="display:none;margin-top:14px;">
+      <label class="form-label" style="color:var(--warn);">Reason for skipping</label>
+      <textarea class="form-textarea" id="skip-reason" placeholder="Describe the technical issue you encountered..."></textarea>
+      <button class="btn" style="margin-top:8px;background:var(--warn);color:#000;font-weight:700;" onclick="submitSkip(1)">Submit and continue &#8594;</button>
+    </div>
+  </div>`; }
+
+function toggleSkipForm() {
+  const f = document.getElementById('skip-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function submitSkip(challenge) {
+  const reason = document.getElementById('skip-reason')?.value?.trim();
+  if (!reason) { alert('Please describe the issue before skipping.'); return; }
+  const r = await fetch('/api/skip/challenge' + challenge, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason })
+  });
+  const data = await r.json();
+  if (!data.success) alert('Could not skip: ' + (data.message || 'unknown error'));
+}
 
 // -- ACTIONS -------------------------------------------------------
 function saveAndNext(fieldId, stateKey, stepIndex) {
@@ -1262,15 +1291,17 @@ function submitChangeRequest() {
   const val = document.getElementById('cr-desc')?.value?.trim();
   if (!val) { alert('Please fill in the change description before submitting.'); return; }
   state.formData.crDesc = val;
+  state.formData.crRollback = document.getElementById('cr-rollback')?.value?.trim() || '';
   saveProgressToServer();
 
+  const rollback = state.formData.crRollback;
   const risk = document.getElementById('cr-risk')?.value || 'medium';
   const ticketId = 'CR-' + (Date.now() % 10000).toString().padStart(4, '0');
   const ts = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
   const safeVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   document.getElementById('step-content').innerHTML = `
-    <div class="section-label">Change Authorization -- Ticket Submitted</div>
+    <div class="section-label">Change Authorization: Ticket Submitted</div>
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:20px;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div>
@@ -1287,6 +1318,10 @@ function submitChangeRequest() {
         <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Description</div>
         <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${safeVal}</div>
       </div>
+      ${rollback ? `<div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;">
+        <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rollback Plan</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap;">${rollback.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      </div>` : ''}
     </div>
     <div id="ticket-result" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;">
       <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--warn);border-radius:50%;animation:cr-spin 0.8s linear infinite;flex-shrink:0;"></span>
@@ -1310,7 +1345,7 @@ function submitChangeRequest() {
     }
     if (result) {
       result.style.borderColor = 'rgba(0,229,160,0.2)';
-      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved -- permissions updated. You are authorized to proceed with the implementation.';
+      result.innerHTML = '<span style="color:var(--accent);font-size:16px;flex-shrink:0;">&#10003;</span>&nbsp;&nbsp;Request approved: permissions updated. You are authorized to proceed with the implementation.';
     }
     if (cont) cont.style.display = 'block';
   }, 1500);
@@ -1344,7 +1379,7 @@ async function runValidation() {
           &#10003; VALIDATION PASSED<br><br>
           The Corporate WS cannot reach the PLC (172.22.0.11).<br>
           Network segmentation confirmed.<br><br>
-          <span style="color:var(--text-dim)">Challenge 2 -- Legacy OT System Protection is now unlocked. Reloading...</span>
+          <span style="color:var(--text-dim)">Challenge 2: Legacy OT System Protection is now unlocked. Reloading...</span>
         </div>`;
       state.validationPassed = true;
       ss('s1');

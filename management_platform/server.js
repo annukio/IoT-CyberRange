@@ -242,6 +242,199 @@ app.post('/api/validate/challenge3', (req, res) => {
     );
 });
 
+// SKIP VALIDATION
+// Lets a student bypass the automated check and advance the scenario with a written reason.
+app.post('/api/skip/challenge:num', (req, res) => {
+    const num = parseInt(req.params.num);
+    const scenarioKey  = { 1: 's0', 2: 's1', 3: 's2' }[num];
+    const nextScenario = { 1: 's1', 2: 's2', 3: 's3' }[num];
+    if (!scenarioKey) return res.status(400).json({ success: false, message: 'Invalid challenge number' });
+
+    const reason = (req.body.reason || '').trim();
+    if (!reason) return res.status(400).json({ success: false, message: 'A skip reason is required' });
+
+    const current = loadProgress();
+    const sData = current[scenarioKey] || {};
+    sData.formData = { ...(sData.formData || {}), skipReason: reason };
+    sData.validationPassed = true;
+    sData.skipped = true;
+    current[scenarioKey] = sData;
+    current.scenario = nextScenario;
+    saveProgress(current);
+
+    currentScenario = nextScenario;
+    io.emit('scenarioChanged', { scenario: nextScenario });
+    console.log(`[SKIP] Challenge ${num} skipped. Reason: ${reason}`);
+    res.json({ success: true, nextScenario });
+});
+
+// TEACHER REPORT
+// Accessible at /report — generates a printable HTML summary of all student answers.
+app.get('/report', (req, res) => {
+    const progress = loadProgress();
+
+    const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    const val = (v) => v ? `<span class="answer">${esc(v)}</span>` : `<span class="empty">(not answered)</span>`;
+    const check = (d) => {
+        if (d.skipped)         return '<span class="badge skip">&#9888; Skipped</span>';
+        if (d.validationPassed) return '<span class="badge pass">&#10003; Pass</span>';
+        return '<span class="badge fail">&#10007; Not completed</span>';
+    };
+    const stepCount = (s) => {
+        const d = progress[s];
+        if (!d) return '0 / 7';
+        return `${(d.completedSteps||[]).length} / 7`;
+    };
+
+    const challengeBlock = (key, title, subtitle, fields) => {
+        const d = progress[key] || {};
+        const fd = d.formData || {};
+        const allFields = d.skipped
+            ? [...fields, ['Skip reason', fd => fd.skipReason]]
+            : fields;
+        const rows = allFields.map(([label, getter]) => `
+            <tr${label === 'Skip reason' ? ' class="skip-row"' : ''}>
+                <td class="field-label">${label}</td>
+                <td>${val(getter(fd))}</td>
+            </tr>`).join('');
+        return `
+        <section>
+            <div class="challenge-header">
+                <div>
+                    <h2>${title}</h2>
+                    <p class="subtitle">${subtitle}</p>
+                </div>
+                <div class="meta">
+                    <div>Steps completed: <strong>${stepCount(key)}</strong></div>
+                    <div>Validation: ${check(d)}</div>
+                </div>
+            </div>
+            <table>
+                <colgroup><col style="width:200px"><col></colgroup>
+                ${rows}
+            </table>
+        </section>`;
+    };
+
+    const s0Block = challengeBlock('s0',
+        'Challenge 1: Network Segmentation',
+        'Isolate the OT zone from the Corporate network using iptables FORWARD rules on the firewall.',
+        [
+            ['Reconnaissance observations',   fd => fd.reconNotes],
+            ['Threat scenario',               fd => fd.risk && fd.risk.threat],
+            ['Business impact',               fd => fd.risk && fd.risk.impact],
+            ['Proposed mitigation',           fd => fd.risk && fd.risk.mitigation],
+            ['Change request description',    fd => fd.crDesc],
+            ['Rollback plan',                 fd => fd.crRollback],
+            ['Evidence (iptables output)',    fd => fd.evidence],
+        ]
+    );
+
+    const s1Block = challengeBlock('s1',
+        'Challenge 2: Legacy OS Hardening',
+        'Disable insecure services (telnet, SMBv1) on the end-of-life Ubuntu 18.04 system.',
+        [
+            ['Reconnaissance observations',   fd => fd.reconNotes],
+            ['Threat scenario',               fd => fd.risk && fd.risk.threat],
+            ['Business impact',               fd => fd.risk && fd.risk.impact],
+            ['Proposed mitigation',           fd => fd.risk && fd.risk.mitigation],
+            ['Change request description',    fd => fd.crDesc],
+            ['Rollback plan',                 fd => fd.crRollback],
+            ['Evidence (ss -tlnp output)',    fd => fd.evidence],
+        ]
+    );
+
+    const s2Block = challengeBlock('s2',
+        'Challenge 3: IoT API Authentication',
+        'Implement Bearer token authentication on the IoT API so unauthenticated requests return HTTP 401.',
+        [
+            ['Reconnaissance observations',   fd => fd.reconNotes],
+            ['Asset',                         fd => fd.risk && fd.risk.asset],
+            ['Vulnerability description',     fd => fd.risk && fd.risk.vuln],
+            ['Business impact',               fd => fd.risk && fd.risk.impact],
+            ['Proposed mitigation',           fd => fd.risk && fd.risk.mitigation],
+            ['Residual risk (after fix)',      fd => fd.risk && fd.risk.residual],
+            ['Change request description',    fd => fd.crDesc],
+            ['Evidence (curl output)',         fd => fd.evidence],
+        ]
+    );
+
+    const allDone = ['s0','s1','s2'].every(k => progress[k] && progress[k].validationPassed);
+    const generated = new Date().toLocaleString('en-GB', { timeZone: 'Europe/Madrid', dateStyle: 'full', timeStyle: 'short' });
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ICS/IoT Cyber Range - Lab Report</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #1a1a2e; background: #f4f6f9; padding: 32px; }
+    .page { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+    header { background: #0d0f12; color: #d4dae8; padding: 28px 36px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+    header h1 span { color: #00e5a0; }
+    .header-meta { text-align: right; font-size: 12px; color: #a2aaba; line-height: 1.8; }
+    .summary-bar { display: flex; gap: 0; border-bottom: 1px solid #e2e8f0; }
+    .summary-cell { flex: 1; padding: 16px 24px; border-right: 1px solid #e2e8f0; }
+    .summary-cell:last-child { border-right: none; }
+    .summary-cell .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #718096; margin-bottom: 4px; }
+    .summary-cell .value { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+    .overall { background: ${allDone ? '#f0fff8' : '#fff8f0'}; border-bottom: 2px solid ${allDone ? '#00c87d' : '#f59e0b'}; padding: 12px 36px; font-size: 13px; font-weight: 600; color: ${allDone ? '#00875a' : '#b7791f'}; }
+    section { padding: 28px 36px; border-bottom: 1px solid #e2e8f0; }
+    section:last-child { border-bottom: none; }
+    .challenge-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px; }
+    .challenge-header h2 { font-size: 16px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
+    .subtitle { font-size: 12px; color: #718096; line-height: 1.5; max-width: 500px; }
+    .meta { text-align: right; font-size: 12px; color: #4a5568; line-height: 2; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; }
+    tr { border-top: 1px solid #edf2f7; }
+    tr:first-child { border-top: none; }
+    td { padding: 10px 12px; vertical-align: top; }
+    .field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; white-space: nowrap; padding-top: 12px; }
+    .answer { display: block; font-size: 13px; color: #2d3748; line-height: 1.6; white-space: pre-wrap; font-family: inherit; }
+    .empty { display: block; font-size: 12px; color: #a0aec0; font-style: italic; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+    .badge.pass { background: #c6f6d5; color: #22543d; }
+    .badge.fail { background: #fed7d7; color: #742a2a; }
+    .badge.skip { background: #fefcbf; color: #744210; }
+    tr.skip-row td { background: #fffff0; }
+    tr.skip-row .field-label { color: #b7791f; }
+    footer { background: #f7fafc; padding: 16px 36px; font-size: 11px; color: #a0aec0; text-align: center; }
+    @media print {
+      body { background: white; padding: 0; }
+      .page { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>ICS/IoT Cyber Range - <span>Lab Report</span></h1>
+    <div class="header-meta">
+      <div>Generated: ${generated}</div>
+      <div>Scenario reached: ${(progress.scenario || 's0').toUpperCase()}</div>
+    </div>
+  </header>
+  <div class="summary-bar">
+    <div class="summary-cell"><div class="label">Challenge 1</div><div class="value">${check(progress.s0||{})}</div></div>
+    <div class="summary-cell"><div class="label">Challenge 2</div><div class="value">${check(progress.s1||{})}</div></div>
+    <div class="summary-cell"><div class="label">Challenge 3</div><div class="value">${check(progress.s2||{})}</div></div>
+    <div class="summary-cell"><div class="label">Lab status</div><div class="value">${allDone ? '<span style="color:#00875a">Complete</span>' : '<span style="color:#b7791f">In progress</span>'}</div></div>
+  </div>
+  <div class="overall">${allDone ? '&#10003; All three challenges completed and validated.' : '&#9888; Lab is not yet fully complete. Some challenges are still in progress.'}</div>
+  ${s0Block}
+  ${s1Block}
+  ${s2Block}
+  <footer>ICS/IoT Cyber Range &nbsp;&bull;&nbsp; Printed ${generated}</footer>
+</div>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+});
+
 // STATIC ROUTES
 // Serve scenario-specific HTML so the UI matches the active challenge.
 app.get('/', (req, res) => {
