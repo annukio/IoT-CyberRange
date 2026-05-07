@@ -19,3 +19,10 @@ To stop running the containers use:
  ```bash
       ./launch down
   ```
+
+  To change a scenario use:
+
+```bash
+      ./switch-scenario.sh [scenario]
+  ```
+Also, you can skip the validation step.
