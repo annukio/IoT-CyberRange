@@ -401,14 +401,25 @@ app.get('/report', (req, res) => {
     tr.skip-row td { background: #fffff0; }
     tr.skip-row .field-label { color: #b7791f; }
     footer { background: #f7fafc; padding: 16px 36px; font-size: 11px; color: #a0aec0; text-align: center; }
+    .download-bar { display: flex; justify-content: flex-end; padding: 12px 36px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; }
+    .btn-pdf { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; background: #0d0f12; color: #00e5a0; border: 1px solid #00e5a0; border-radius: 4px; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; }
+    .btn-pdf:hover { background: #00e5a0; color: #0d0f12; }
     @media print {
       body { background: white; padding: 0; }
-      .page { box-shadow: none; border-radius: 0; }
+      .page { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .download-bar { display: none; }
+      header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .badge, .overall, .summary-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      section { page-break-inside: avoid; }
+      tr { page-break-inside: avoid; }
     }
   </style>
 </head>
 <body>
 <div class="page">
+  <div class="download-bar">
+    <button class="btn-pdf" onclick="window.print()" title="Save as PDF using your browser's print dialog">&#8659; Download as PDF</button>
+  </div>
   <header>
     <h1>ICS/IoT Cyber Range - <span>Lab Report</span></h1>
     <div class="header-meta">
