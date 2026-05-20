@@ -10,6 +10,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// When SLOT_PREFIX is set (e.g. "slot1"), container names are prefixed with "slot1_".
+// When unset the behaviour is identical to the single-instance default.
+const SLOT = process.env.SLOT_PREFIX || '';
+const cname = s => SLOT ? `${SLOT}_${s}` : s;
+
+// When SLOT_OCTET is set (1/2/3), all 172.x.0.y addresses use that octet instead of 0,
+// giving each slot its own non-overlapping subnets. Fallback 0 = local single-instance.
+const OCTET = process.env.SLOT_OCTET || '0';
+
 app.use(express.json());
 
 // PROGRESS PERSISTENCE
@@ -79,12 +88,12 @@ function advanceScenario(targetScenario, callback) {
     if (targetScenario === 's1') {
         // Apply network-segmentation firewall rules on the existing firewall container.
         cmds = [
-            'docker exec firewall iptables -P FORWARD DROP',
-            'docker exec firewall iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT',
-            'docker exec firewall iptables -A FORWARD -s 172.20.0.0/24 -d 172.21.0.10 -p tcp --dport 80 -j ACCEPT',
-            'docker exec firewall iptables -A FORWARD -s 172.21.0.0/24 -d 172.22.0.0/24 -j DROP',
-            'docker exec firewall iptables -A FORWARD -s 172.20.0.0/24 -d 172.22.0.0/24 -j DROP',
-            'docker exec firewall iptables -A FORWARD -s 172.22.0.0/24 -d 172.20.0.0/24 -j DROP',
+            `docker exec ${cname('firewall')} iptables -P FORWARD DROP`,
+            `docker exec ${cname('firewall')} iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`,
+            `docker exec ${cname('firewall')} iptables -A FORWARD -s 172.20.${OCTET}.0/24 -d 172.21.${OCTET}.10 -p tcp --dport 80 -j ACCEPT`,
+            `docker exec ${cname('firewall')} iptables -A FORWARD -s 172.21.${OCTET}.0/24 -d 172.22.${OCTET}.0/24 -j DROP`,
+            `docker exec ${cname('firewall')} iptables -A FORWARD -s 172.20.${OCTET}.0/24 -d 172.22.${OCTET}.0/24 -j DROP`,
+            `docker exec ${cname('firewall')} iptables -A FORWARD -s 172.22.${OCTET}.0/24 -d 172.20.${OCTET}.0/24 -j DROP`,
         ];
     } else if (targetScenario === 's2') {
         // s2 hardening is applied manually by the student; nothing to auto-apply here.
@@ -125,7 +134,7 @@ app.get('/api/scenario', (req, res) => {
 // Verifies that the Corporate WS cannot reach the PLC.
 app.post('/api/validate/challenge1', (req, res) => {
     exec(
-        'docker exec corporate_ws ping -c 3 -W 1 172.22.0.11',
+        `docker exec ${cname('corporate_ws')} ping -c 3 -W 1 172.22.${OCTET}.11`,
         (error) => {
             const blocked = error !== null;
             if (blocked) {
@@ -157,7 +166,7 @@ app.post('/api/validate/challenge1', (req, res) => {
 // Verifies that telnet (port 23) is no longer listening on the Legacy OS.
 app.post('/api/validate/challenge2', (req, res) => {
     exec(
-        'docker exec legacy_os ss -tlnp',
+        `docker exec ${cname('legacy_os')} ss -tlnp`,
         (error, stdout) => {
             if (error) {
                 return res.status(500).json({
@@ -195,7 +204,7 @@ app.post('/api/validate/challenge2', (req, res) => {
 app.post('/api/validate/challenge3', (req, res) => {
     // Test 1 — unauthenticated request should be rejected
     exec(
-        'docker exec iot_api curl -s -o /dev/null -w "%{http_code}" http://localhost/sensor/data',
+        `docker exec ${cname('iot_api')} curl -s -o /dev/null -w "%{http_code}" http://localhost/sensor/data`,
         (err1, stdout1) => {
             if (err1 && !stdout1) {
                 return res.status(500).json({
@@ -212,7 +221,7 @@ app.post('/api/validate/challenge3', (req, res) => {
             }
             // Test 2 — authenticated request with the lab token should succeed
             exec(
-                'docker exec iot_api curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer iot-secret-2024" http://localhost/sensor/data',
+                `docker exec ${cname('iot_api')} curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer iot-secret-2024" http://localhost/sensor/data`,
                 (err2, stdout2) => {
                     if (err2 && !stdout2) {
                         return res.status(500).json({
@@ -478,7 +487,7 @@ io.on('connection', (socket) => {
     console.log(`[DEBUG] Attempting to connect to: ${target}`);
     let shell;
     try {
-        shell = pty.spawn('docker', ['exec', '-it', target, 'bash'], {
+        shell = pty.spawn('docker', ['exec', '-it', cname(target), 'bash'], {
             name: 'xterm-color',
             cols: 80,
             rows: 24,

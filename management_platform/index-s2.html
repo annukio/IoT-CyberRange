@@ -863,15 +863,7 @@ function renderStep6() { return `
     <button class="btn btn-primary" onclick="runValidation()">&#9654; Run Validation Check</button>
     <button class="btn btn-outline" onclick="switchTab('terminal')">Open Terminal &#8599;</button>
   </div>
-  <div class="validation-result" id="validation-result"></div>
-  <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
-    <button class="btn" style="background:transparent;border:1px solid var(--border2);color:var(--text-faint);font-size:11px;" onclick="toggleSkipForm()">Skip validation (technical issue)</button>
-    <div id="skip-form" style="display:none;margin-top:14px;">
-      <label class="form-label" style="color:var(--warn);">Reason for skipping</label>
-      <textarea class="form-textarea" id="skip-reason" placeholder="Describe the technical issue you encountered..."></textarea>
-      <button class="btn" style="margin-top:8px;background:var(--warn);color:#000;font-weight:700;" onclick="submitSkip(3)">Submit and continue &#8594;</button>
-    </div>
-  </div>`; }
+  <div class="validation-result" id="validation-result"></div>`; }
 
 function toggleSkipForm() {
   const f = document.getElementById('skip-form');
@@ -989,12 +981,14 @@ async function runValidation() {
           &#10003; VALIDATION PASSED<br><br>
           Unauthenticated requests return HTTP 401.<br>
           Authenticated requests with the correct token return HTTP 200.<br><br>
-          <span style="color:var(--text-dim)">Challenge 3 complete. The IoT API now requires authentication.</span>
+          <span style="color:var(--text-dim)">Lab complete! Redirecting to your report so you can download it...</span>
         </div>`;
       state.validationPassed = true;
+      state.completedSteps.add(6);
+      saveProgressToServer();
       const apiSt = document.getElementById('api-st');
       if (apiSt) { apiSt.textContent = 'Auth: Bearer token'; apiSt.style.fill = '#00e5a0'; }
-      setTimeout(() => completeStep(6), 2000);
+      setTimeout(() => { window.location.href = '/report'; }, 3000);
     } else {
       result.innerHTML = `
         <div class="validation-fail">
